@@ -15,4 +15,4 @@ This mod adds a WHOLE lot of atmosphere to your Terraria world.
 - Snow Winds
 - Footsteps for each unique kind of block, such as snow, grass, sand, stone, and wood.
 - Dungeon Bone Rattles
-- Rain Redone (COMING SOON!)
+- New Rain, water, and lava sounds!
