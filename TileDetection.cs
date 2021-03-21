@@ -11,10 +11,8 @@ namespace TerrariaAmbience
 {
     public class TileDetection : GlobalTile
     {
-        public override void FloorVisuals(int type, Player player)
+        public static List<int> grassTiles = new List<int>
         {
-            var grassTiles = new[]
-            {
                 TileID.Grass,
                 TileID.Dirt,
                 TileID.BlueMoss,
@@ -39,15 +37,9 @@ namespace TerrariaAmbience
                 TileID.HoneyBlock,
                 TileID.CrispyHoneyBlock,
                 TileID.PumpkinBlock,
-            };
-
-            if (grassTiles.Any(x => x == type))
-                player.GetModPlayer<AmbiencePlayer>().isOnGrassyTile = true;
-            else
-                player.GetModPlayer<AmbiencePlayer>().isOnGrassyTile = false;
-
-            var stoneBlocks = new[]
-            {
+        };
+        public static List<int> stoneBlocks = new List<int>
+        {
                 TileID.Stone,
                 TileID.StoneSlab,
                 TileID.ActiveStoneBlock,
@@ -139,10 +131,9 @@ namespace TerrariaAmbience
                 TileID.PlatinumBrick,
                 TileID.Hellstone,
                 TileID.HellstoneBrick
-            };
-
-            var sandBlocks = new[]
-            {
+        };
+        public static List<int> sandBlocks = new List<int>
+        {
                 TileID.Sand,
                 TileID.Ebonsand,
                 TileID.Crimsand,
@@ -150,15 +141,22 @@ namespace TerrariaAmbience
                 TileID.Silt,
                 TileID.Ash,
                 TileID.Glass
-            };
+        };
 
-            var snowyblocks = new[]
-            {
+        public static List<int> snowyblocks = new List<int>
+        {
                 TileID.SnowBlock,
                 TileID.SnowCloud,
                 TileID.RainCloud,
                 TileID.Cloud
-            };
+        };
+        public override void FloorVisuals(int type, Player player)
+        {
+
+            if (grassTiles.Any(x => x == type))
+                player.GetModPlayer<AmbiencePlayer>().isOnGrassyTile = true;
+            else
+                player.GetModPlayer<AmbiencePlayer>().isOnGrassyTile = false;
 
             if (snowyblocks.Any(x => x == type))
                 player.GetModPlayer<AmbiencePlayer>().isOnSnowyTile = true;

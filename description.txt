@@ -15,7 +15,13 @@ Developers:
 
 Upcoming Features:
 
-- Terraria's ambient sounds re-made (Around 50% Done and in the mod!)
+Nothing for now!
+
+Most Recent Update:
+
+[BUG] Made footsteps track properly, before they weren't making sound based on a good system.
+[FEATURE?] Added Disord Server link for homepage.
+[BUG][FEATURE] Now a both-sided mod.
 
 
 

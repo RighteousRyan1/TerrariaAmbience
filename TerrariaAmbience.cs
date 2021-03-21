@@ -3,6 +3,9 @@ using Terraria;
 using Microsoft.Xna.Framework;
 using Terraria.ID;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
+using System.IO;
+using System.Collections.Generic;
 
 namespace TerrariaAmbience
 {
@@ -12,6 +15,8 @@ namespace TerrariaAmbience
         {
             Ambience.Initialize();
             On.Terraria.Main.DoUpdate += Main_DoUpdate;
+
+            SoundInstancing.InitializeAll();
         }
 
         public override void Unload()
@@ -20,6 +25,8 @@ namespace TerrariaAmbience
         }
 
         public static float decOrIncRate = 0.01f;
+        // SoundInstancing soundInstancer = new SoundInstancing(ModContent.GetInstance<TerrariaAmbience>(), "Sounds/Custom/ambient/animals/rattling_bones", "Bones Do Be Rattling", true, true);
+
         private void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
         {
             orig(self, gameTime);
@@ -48,7 +55,8 @@ namespace TerrariaAmbience
             }
             if (Main.gameMenu) return;
             Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbiencePlayer>().player;
-
+            // soundInstancer.Condition = player.ZoneSkyHeight;
+            Main.NewText(SoundInstancing.allSounds.Count);
             if (Main.hasFocus)
             {
                 if ((player.ZoneForest() || player.ZoneHoly) && (Main.dayTime && Main.time > 14400) && (Main.dayTime && Main.time < 46800))
@@ -185,6 +193,10 @@ namespace TerrariaAmbience
                     aLoader.hellRumbleVolume -= decOrIncRate;
                 }
 
+                foreach (Rain rain in Main.rain)
+                {
+                    rain.rotation = rain.velocity.ToRotation() + MathHelper.PiOver2;
+                }
                 if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight))
                 {
                     aLoader.rainVolume += decOrIncRate;
@@ -222,17 +234,34 @@ namespace TerrariaAmbience
         public bool isOnGrassyTile;
         public bool isOnSandyTile;
         public bool isOnSnowyTile;
-        public override void OnEnterWorld(Player player)
-        {
-            Ambience.PlayAllAmbience();
-        }
 
         public bool isNearCampfire;
 
-        public int stepTimerToPlaySoundOnce;
+        public SoundEffectInstance soundInstanceWoodStep;
+        public SoundEffectInstance soundInstanceSandStep;
+        public SoundEffectInstance soundInstanceStoneStep;
+        public SoundEffectInstance soundInstanceSnowStep;
+        public SoundEffectInstance soundInstanceGrassStep;
 
+        public override void OnEnterWorld(Player player)
+        {
+            Ambience.PlayAllAmbience();
+
+            soundInstanceGrassStep = Main.soundInstanceRun;
+            soundInstanceWoodStep = Main.soundInstanceRun;
+            soundInstanceSandStep = Main.soundInstanceRun;
+            soundInstanceSnowStep = Main.soundInstanceRun;
+            soundInstanceStoneStep = Main.soundInstanceRun;
+        }
+
+        private int legFrameSnapShotNew;
+        private int legFrameSnapShotOld;
         public override void PreUpdate()
         {
+            legFrameSnapShotNew = player.legFrame.Y / 20;
+
+            // Good Values -> 25 (first), 44 (second), 14 = midair
+
             int randWood = Main.rand.Next(1, 8);
             int randSand = Main.rand.Next(1, 4);
             int randStone = Main.rand.Next(1, 9);
@@ -244,83 +273,92 @@ namespace TerrariaAmbience
             string pathStone = $"Sounds/Custom/steps/stone/step{randStone}";
             string pathGrass = $"Sounds/Custom/steps/grass/step{randGrass}";
             string pathSnow = $"Sounds/Custom/steps/snow/step{randSnow}";
+            // Main.NewText($"{legFrameSnapShotNew}, {legFrameSnapShotOld}, {player.legFrame.Y == player.legFrame.Height * 16 }");
 
             if (ModContent.GetInstance<AmbientConfig>().footsteps)
             {
-                if (!player.wet)
+                if (Main.soundVolume != 0f)
                 {
-                    if (Main.soundVolume != 0f)
+                    if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSandyTile)
                     {
-                        if ((player.legFrame.Y == player.legFrame.Height * 9 || player.legFrame.Y == player.legFrame.Height * 16) && player.GetModPlayer<AmbiencePlayer>().isOnSandyTile)
-                        {
-                            Main.soundInstanceRun.Volume = Main.soundVolume * 0.75f;
-                            Main.soundRun = ModContent.GetInstance<TerrariaAmbience>().GetSound($"Sounds/Custom/steps/sand/step{randSand}");
-                            if (stepTimerToPlaySoundOnce == 1)
-                            {
-                                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathSand), player.Bottom).Volume = Main.soundVolume * 0.75f;
-                            }
-                        }
-                        if ((player.legFrame.Y == player.legFrame.Height * 9 || player.legFrame.Y == player.legFrame.Height * 16) && player.GetModPlayer<AmbiencePlayer>().isOnGrassyTile)
-                        {
-                            Main.soundInstanceRun.Volume = Main.soundVolume / 2;
-                            Main.soundRun = ModContent.GetInstance<TerrariaAmbience>().GetSound($"Sounds/Custom/steps/grass/step{randGrass}");
-                            if (stepTimerToPlaySoundOnce == 1)
-                            {
-                                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom).Volume = Main.soundVolume / 2;
-                            }
-                        }
-                        if ((player.legFrame.Y == player.legFrame.Height * 9 || player.legFrame.Y == player.legFrame.Height * 16) && player.GetModPlayer<AmbiencePlayer>().isOnStoneTile)
-                        {
-                            Main.soundInstanceRun.Volume = Main.soundVolume / 8;
-                            Main.soundRun = ModContent.GetInstance<TerrariaAmbience>().GetSound($"Sounds/Custom/steps/stone/step{randStone}");
-                            if (stepTimerToPlaySoundOnce == 1)
-                            {
-                                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathStone), player.Bottom).Volume = Main.soundVolume / 8;
-                            }
-                        }
-                        if ((player.legFrame.Y == player.legFrame.Height * 9 || player.legFrame.Y == player.legFrame.Height * 16) && player.GetModPlayer<AmbiencePlayer>().isOnWoodTile)
-                        {
-                            Main.soundInstanceRun.Volume = Main.soundVolume / 8;
-                            Main.soundRun = ModContent.GetInstance<TerrariaAmbience>().GetSound($"Sounds/Custom/steps/wood/step{randWood}");
-                            if (stepTimerToPlaySoundOnce == 1)
-                            {
-                                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom).Volume = Main.soundVolume / 8;
-                            }
-                        }
-                        if ((player.legFrame.Y == player.legFrame.Height * 9 || player.legFrame.Y == player.legFrame.Height * 16) && player.GetModPlayer<AmbiencePlayer>().isOnSnowyTile)
-                        {
-                            Main.soundInstanceRun.Volume = Main.soundVolume / 4;
-                            Main.soundRun = ModContent.GetInstance<TerrariaAmbience>().GetSound($"Sounds/Custom/steps/snow/step{randSnow}");
-                            if (stepTimerToPlaySoundOnce == 1)
-                            {
-                                var x = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathSnow), player.Bottom);
-                                x.Volume = Main.soundVolume / 4;
-                                x.Pitch = 0.3f;
-                            }
-                        }
-                        if (player.legFrame.Y == player.legFrame.Height * 9 || player.legFrame.Y == player.legFrame.Height * 16)
-                        {
-                            stepTimerToPlaySoundOnce++;
-                        }
-                        else
-                        {
-                            stepTimerToPlaySoundOnce = 0;
-                        }
+                        soundInstanceSandStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathSand), player.Bottom);
+                        soundInstanceSandStep.Volume = player.wet ? Main.soundVolume * 0.6f : Main.soundVolume * 0.9f;
+                        soundInstanceSandStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnGrassyTile)
+                    {
+                        soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom);
+                        soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume * 0.45f : Main.soundVolume * 0.65f;
+                        soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnStoneTile)
+                    {
+                        soundInstanceStoneStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathStone), player.Bottom);
+                        soundInstanceStoneStep.Volume = player.wet ? Main.soundVolume / 8 : Main.soundVolume / 4;
+                        soundInstanceStoneStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSnowyTile)
+                    {
+                        soundInstanceSnowStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathSnow), player.Bottom);
+                        soundInstanceSnowStep.Volume = player.wet ? Main.soundVolume / 6 : Main.soundVolume / 2;
+                        soundInstanceSnowStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnWoodTile)
+                    {
+                        soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom);
+                        soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
+                        soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+
+                    // Top: landing sounds
+                    // Bottom: walking sounds
+
+                    if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnSandyTile)
+                    {
+                        soundInstanceSandStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathSand), player.Bottom);
+                        soundInstanceSandStep.Volume = player.wet ? Main.soundVolume * 0.25f : Main.soundVolume * 0.75f;
+                        soundInstanceSandStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnGrassyTile)
+                    {
+                        soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom);
+                        soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume / 5 : Main.soundVolume / 2;
+                        soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnStoneTile)
+                    {
+                        soundInstanceStoneStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathStone), player.Bottom);
+                        soundInstanceStoneStep.Volume = player.wet ? Main.soundVolume / 12 : Main.soundVolume / 8;
+                        soundInstanceStoneStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnWoodTile)
+                    {
+                        soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom);
+                        soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 12 : Main.soundVolume / 8;
+                        soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
+                    }
+                    if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnSnowyTile)
+                    {
+                        soundInstanceSnowStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathSnow), player.Bottom);
+                        soundInstanceSnowStep.Volume = player.wet ? Main.soundVolume / 8 : Main.soundVolume / 4;
+                        soundInstanceSnowStep.Pitch = player.wet ? -0.2f : 0.3f;
                     }
                 }
             }
+            legFrameSnapShotOld = legFrameSnapShotNew;
         }
         public override void PostUpdate()
         {
-            // chatter.Volume = 0 + player.townNPCs / 10
+
+
             if (!Main.dayTime)
             {
                 int rand = Main.rand.Next(1, 3);
                 string pathToHoot = $"Sounds/Custom/ambient/animals/hoot{rand}";
                 string pathToHowl = $"Sounds/Custom/ambient/animals/howl";
 
-                int randX = Main.rand.Next(0, 1750);
-                int randY = Main.rand.Next(0, 1750);
+                int randX = Main.rand.Next(-1750, 1750);
+                int randY = Main.rand.Next(-1750, 1750);
                 int chance1 = Main.rand.Next(750);
                 int chance2 = Main.rand.Next(1500);
 
@@ -348,8 +386,8 @@ namespace TerrariaAmbience
             if (player.ZoneDungeon)
             {
                 int possibleChance = Main.rand.Next(1000);
-                int randX = Main.rand.Next(0, 2250);
-                int randY = Main.rand.Next(0, 2250);
+                int randX = Main.rand.Next(-2250, 2250);
+                int randY = Main.rand.Next(-2250, 2250);
 
                 if (possibleChance == 0)
                 {
@@ -421,8 +459,107 @@ namespace TerrariaAmbience
                 player.GetModPlayer<AmbiencePlayer>().isNearCampfire = false;
             }
         }
-        public override void PostDraw(int i, int j, int type, SpriteBatch spriteBatch)
+    }
+    public class SoundInstancing
+    {
+        public SoundEffect soundEffect;
+        public SoundEffectInstance soundEffectInstance;
+        public bool Condition
         {
+            get;
+            set;
+        }
+        public string Name
+        {
+            get;
+            private set;
+        }
+        public string Path
+        {
+            get;
+            private set;
+        }
+        public bool IsLooped
+        {
+            get;
+            private set;
+        }
+
+        public float Volume
+        {
+            get;
+            private set;
+        }
+        private Mod Mod
+        {
+            get;
+            set;
+        }
+
+        private SoundInstancing validSound;
+
+        private static int count;
+
+        // Change back to private
+        public static List<SoundInstancing> allSounds = new List<SoundInstancing> { };
+        /// <summary>
+        /// Creates a completely new ambience sound. This will do all of the work for you.
+        /// </summary>
+        /// <param name="mod">The mod to default a path from.</param>
+        /// <param name="pathForSound">The path to the ambient after your mod's direcotry.</param>
+        /// <param name="name">The name for the ambience effect created.</param>
+        /// <param name="conditionToPlayUnder">When or when to not play this ambience.</param>
+        /// <param name="isLooped">Whether or not to loop the ambient.</param>
+        public SoundInstancing(Mod mod, string pathForSound, string name, bool conditionToPlayUnder, bool isLooped = true)
+        {
+
+            validSound = this;
+            allSounds.Add(this);
+
+            Name = name;
+
+            Path = pathForSound;
+
+            IsLooped = isLooped;
+
+            Mod = mod;
+            soundEffect = mod.GetSound(pathForSound);
+            soundEffectInstance = soundEffect.CreateInstance();
+
+            soundEffect.Name = name;
+            Condition = conditionToPlayUnder;
+
+            Volume = soundEffectInstance.Volume;
+
+            if (isLooped)
+            {
+                soundEffectInstance.IsLooped = true;
+            }
+
+            soundEffectInstance.Volume = conditionToPlayUnder ? 1f : 0f;
+        }
+        public override string ToString()
+        {
+            return "{ isLooped: " + IsLooped + " | path: " + Path + " | name: " + Name + " | isPlaying: " + Condition    + " }";
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Initialize()
+        {
+            validSound?.soundEffectInstance?.Play();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        public static void InitializeAll()
+        {
+            foreach (SoundInstancing instancing in allSounds)
+            {
+                instancing.Initialize();
+
+                count = allSounds.Count;
+            }
         }
     }
 }

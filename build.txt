@@ -1,4 +1,4 @@
 displayName = Terraria Ambience
 author = Ryan (RighteousRyan), Tika
-version = 0.1.0.1
-side = client
+version = 0.1.0.4
+homepage = https://discord.gg/pT2BzSG

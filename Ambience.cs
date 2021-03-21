@@ -141,119 +141,124 @@ namespace TerrariaAmbience
 
             var loader = Instance;
 
-            loader.DayCrickets = mod.GetSound($"{ambienceDirectory}/biome/forest_day");
-            loader.DayCricketsInstance = loader.DayCrickets.CreateInstance();
-            loader.DayCrickets.Name = "Daytime Crickets";
-            loader.EveningCrickets = mod.GetSound($"{ambienceDirectory}/biome/forest_evening");
-            loader.EveningCricketsInstance = loader.DayCrickets.CreateInstance();
-            loader.EveningCrickets.Name = "Evening Crickets";
-            loader.NightCrickets = mod.GetSound($"{ambienceDirectory}/biome/forest_night");
-            loader.NightCricketsInstance = loader.NightCrickets.CreateInstance();
-            loader.NightCrickets.Name = "Night Crickets";
+            if (!Main.dedServ)
+            {
+                loader.DayCrickets = mod.GetSound($"{ambienceDirectory}/biome/forest_day");
+                loader.DayCricketsInstance = loader.DayCrickets.CreateInstance();
+                loader.DayCrickets.Name = "Daytime Crickets";
+                loader.EveningCrickets = mod.GetSound($"{ambienceDirectory}/biome/forest_evening");
+                loader.EveningCricketsInstance = loader.DayCrickets.CreateInstance();
+                loader.EveningCrickets.Name = "Evening Crickets";
+                loader.NightCrickets = mod.GetSound($"{ambienceDirectory}/biome/forest_night");
+                loader.NightCricketsInstance = loader.NightCrickets.CreateInstance();
+                loader.NightCrickets.Name = "Night Crickets";
 
-            loader.DesertAmbience = mod.GetSound($"{ambienceDirectory}/biome/desert_crickets");
-            loader.DesertAmbienceInstance = Instance.DesertAmbience.CreateInstance();
-            loader.DesertAmbience.Name = "Desert Crickets";
-;
-            loader.CampfireCrackle = mod.GetSound($"{ambienceDirectory}/environment/campfire_crackle");
-            loader.CampfireCrackleInstance = loader.CampfireCrackle.CreateInstance();
-            loader.CampfireCrackle.Name = "Campfire Embers";
+                loader.DesertAmbience = mod.GetSound($"{ambienceDirectory}/biome/desert_crickets");
+                loader.DesertAmbienceInstance = Instance.DesertAmbience.CreateInstance();
+                loader.DesertAmbience.Name = "Desert Crickets";
+                ;
+                loader.CampfireCrackle = mod.GetSound($"{ambienceDirectory}/environment/campfire_crackle");
+                loader.CampfireCrackleInstance = loader.CampfireCrackle.CreateInstance();
+                loader.CampfireCrackle.Name = "Campfire Embers";
 
-            loader.CavesAmbience = mod.GetSound($"{ambienceDirectory}/biome/ug_drip");
-            loader.CavesAmbienceInstance = loader.CavesAmbience.CreateInstance();
-            loader.CavesAmbience.Name = "Caves/Underground Ambience";
+                loader.CavesAmbience = mod.GetSound($"{ambienceDirectory}/biome/ug_drip");
+                loader.CavesAmbienceInstance = loader.CavesAmbience.CreateInstance();
+                loader.CavesAmbience.Name = "Caves/Underground Ambience";
 
-            loader.SnowBreezeDay = mod.GetSound($"{ambienceDirectory}/biome/snowfall_day");
-            loader.SnowBreezeDayInstance = loader.SnowBreezeDay.CreateInstance();
-            loader.SnowBreezeDay.Name = "Daytime Snowfall";
+                loader.SnowBreezeDay = mod.GetSound($"{ambienceDirectory}/biome/snowfall_day");
+                loader.SnowBreezeDayInstance = loader.SnowBreezeDay.CreateInstance();
+                loader.SnowBreezeDay.Name = "Daytime Snowfall";
 
-            loader.SnowBreezeNight = mod.GetSound($"{ambienceDirectory}/biome/snowfall_night");
-            loader.SnowBreezeNightInstance = loader.SnowBreezeNight.CreateInstance();
-            loader.SnowBreezeNight.Name = "Night Snowfall";
+                loader.SnowBreezeNight = mod.GetSound($"{ambienceDirectory}/biome/snowfall_night");
+                loader.SnowBreezeNightInstance = loader.SnowBreezeNight.CreateInstance();
+                loader.SnowBreezeNight.Name = "Night Snowfall";
 
-            loader.CrimsonRumbles = mod.GetSound($"{ambienceDirectory}/biome/crimson_rumbles");
-            loader.CrimsonRumblesInstance = loader.CrimsonRumbles.CreateInstance();
-            loader.CrimsonRumbles.Name = "Crimson Rumbles";
+                loader.CrimsonRumbles = mod.GetSound($"{ambienceDirectory}/biome/crimson_rumbles");
+                loader.CrimsonRumblesInstance = loader.CrimsonRumbles.CreateInstance();
+                loader.CrimsonRumbles.Name = "Crimson Rumbles";
 
-            loader.CorruptionRoars = mod.GetSound($"{ambienceDirectory}/biome/corruption_roars");
-            loader.CorruptionRoarsInstance = loader.CorruptionRoars.CreateInstance();
-            loader.CorruptionRoars.Name = "Corruption Roars";
+                loader.CorruptionRoars = mod.GetSound($"{ambienceDirectory}/biome/corruption_roars");
+                loader.CorruptionRoarsInstance = loader.CorruptionRoars.CreateInstance();
+                loader.CorruptionRoars.Name = "Corruption Roars";
 
-            loader.DayJungle = mod.GetSound($"{ambienceDirectory}/biome/jungle_day");
-            loader.DaytimeJungleInstance = loader.DayJungle.CreateInstance();
-            loader.DayJungle.Name = "Daytime Jungle";
-            loader.NightJungle = mod.GetSound($"{ambienceDirectory}/biome/jungle_night");
-            loader.NightJungleInstance = loader.NightJungle.CreateInstance();
-            loader.NightJungle.Name = "Night Jungle";
+                loader.DayJungle = mod.GetSound($"{ambienceDirectory}/biome/jungle_day");
+                loader.DaytimeJungleInstance = loader.DayJungle.CreateInstance();
+                loader.DayJungle.Name = "Daytime Jungle";
+                loader.NightJungle = mod.GetSound($"{ambienceDirectory}/biome/jungle_night");
+                loader.NightJungleInstance = loader.NightJungle.CreateInstance();
+                loader.NightJungle.Name = "Night Jungle";
 
-            loader.BeachWaves = mod.GetSound($"{ambienceDirectory}/biome/beach_waves");
-            loader.BeachWavesInstance = loader.BeachWaves.CreateInstance();
-            loader.BeachWaves.Name = "Beach Waves";
+                loader.BeachWaves = mod.GetSound($"{ambienceDirectory}/biome/beach_waves");
+                loader.BeachWavesInstance = loader.BeachWaves.CreateInstance();
+                loader.BeachWaves.Name = "Beach Waves";
 
-            loader.HellRumble = mod.GetSound($"{ambienceDirectory}/biome/hell_rumble");
-            loader.HellRumbleInstance = loader.HellRumble.CreateInstance();
-            loader.HellRumble.Name = "Hell Rumbling";
+                loader.HellRumble = mod.GetSound($"{ambienceDirectory}/biome/hell_rumble");
+                loader.HellRumbleInstance = loader.HellRumble.CreateInstance();
+                loader.HellRumble.Name = "Hell Rumbling";
 
-            loader.Drip1 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip1");
-            loader.Drip2 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip2");
-            loader.Drip3 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip3");
-            loader.Drip1Instance = loader.Drip1.CreateInstance();
-            loader.Drip2Instance = loader.Drip2.CreateInstance();
-            loader.Drip3Instance = loader.Drip3.CreateInstance();
+                loader.Drip1 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip1");
+                loader.Drip2 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip2");
+                loader.Drip3 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip3");
+                loader.Drip1Instance = loader.Drip1.CreateInstance();
+                loader.Drip2Instance = loader.Drip2.CreateInstance();
+                loader.Drip3Instance = loader.Drip3.CreateInstance();
 
-            loader.LavaStream = mod.GetSound($"{ambienceDirectory}/environment/stream_lava");
-            loader.WaterStream = mod.GetSound($"{ambienceDirectory}/environment/stream_water");
-            loader.LavaStreamInstance = loader.LavaStream.CreateInstance();
-            loader.WaterStreamInstance = loader.WaterStream.CreateInstance();
+                loader.LavaStream = mod.GetSound($"{ambienceDirectory}/environment/stream_lava");
+                loader.WaterStream = mod.GetSound($"{ambienceDirectory}/environment/stream_water");
+                loader.LavaStreamInstance = loader.LavaStream.CreateInstance();
+                loader.WaterStreamInstance = loader.WaterStream.CreateInstance();
 
-            loader.Rain = mod.GetSound($"{ambienceDirectory}/environment/rain_new");
-            loader.RainInstance = loader.Rain.CreateInstance();
+                loader.Rain = mod.GetSound($"{ambienceDirectory}/environment/rain_new");
+                loader.RainInstance = loader.Rain.CreateInstance();
 
-            loader.DayCricketsInstance.IsLooped = true;
-            loader.EveningCricketsInstance.IsLooped = true;
-            loader.NightCricketsInstance.IsLooped = true;
-            loader.CampfireCrackleInstance.IsLooped = true;
-            loader.DesertAmbienceInstance.IsLooped = true;
-            loader.CavesAmbienceInstance.IsLooped = true;
-            loader.SnowBreezeDayInstance.IsLooped = true;
-            loader.SnowBreezeNightInstance.IsLooped = true;
-            loader.CrimsonRumblesInstance.IsLooped = true;
-            loader.CorruptionRoarsInstance.IsLooped = true;
-            loader.DaytimeJungleInstance.IsLooped = true;
-            loader.NightJungleInstance.IsLooped = true;
-            loader.BeachWavesInstance.IsLooped = true;
-            loader.HellRumbleInstance.IsLooped = true;
-            loader.RainInstance.IsLooped = true;
-            loader.LavaStreamInstance.IsLooped = true;
-            loader.WaterStreamInstance.IsLooped = true;
+                loader.DayCricketsInstance.IsLooped = true;
+                loader.EveningCricketsInstance.IsLooped = true;
+                loader.NightCricketsInstance.IsLooped = true;
+                loader.CampfireCrackleInstance.IsLooped = true;
+                loader.DesertAmbienceInstance.IsLooped = true;
+                loader.CavesAmbienceInstance.IsLooped = true;
+                loader.SnowBreezeDayInstance.IsLooped = true;
+                loader.SnowBreezeNightInstance.IsLooped = true;
+                loader.CrimsonRumblesInstance.IsLooped = true;
+                loader.CorruptionRoarsInstance.IsLooped = true;
+                loader.DaytimeJungleInstance.IsLooped = true;
+                loader.NightJungleInstance.IsLooped = true;
+                loader.BeachWavesInstance.IsLooped = true;
+                loader.HellRumbleInstance.IsLooped = true;
+                loader.RainInstance.IsLooped = true;
+                loader.LavaStreamInstance.IsLooped = true;
+                loader.WaterStreamInstance.IsLooped = true;
 
-            #region SFX Changes
+                #region SFX Changes
 
-            loader.runSFX_Cashe = Main.soundRun;
-            loader.drip_Cashe = Main.soundDrip;
-            loader.liquid_Cashe = Main.soundLiquid;
+                loader.runSFX_Cashe = Main.soundRun;
+                loader.drip_Cashe = Main.soundDrip;
+                loader.liquid_Cashe = Main.soundLiquid;
 
-            loader.liquidInstance_Cashe = Main.soundInstanceLiquid;
-            loader.dripInstance_Cashe = Main.soundInstanceDrip;
+                loader.liquidInstance_Cashe = Main.soundInstanceLiquid;
+                loader.dripInstance_Cashe = Main.soundInstanceDrip;
 
-            // Now change the sound (Main.soundX = y)
+                // Now change the sound (Main.soundX = y)
 
-            // NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
-            // NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
+                // NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
+                // NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
 
-            Main.soundDrip[0] = loader.Drip1;
-            Main.soundDrip[1] = loader.Drip2;
-            Main.soundDrip[2] = loader.Drip3;
+                Main.soundRun = mod.GetSound("Sounds/Custom/nothingness");
 
-            Main.soundLiquid[0] = loader.WaterStream;
-            Main.soundLiquid[1] = loader.LavaStream;
+                Main.soundDrip[0] = loader.Drip1;
+                Main.soundDrip[1] = loader.Drip2;
+                Main.soundDrip[2] = loader.Drip3;
 
-            Main.soundInstanceDrip[0] = loader.Drip1Instance;
-            Main.soundInstanceDrip[1] = loader.Drip2Instance;
-            Main.soundInstanceDrip[2] = loader.Drip3Instance;
+                Main.soundLiquid[0] = loader.WaterStream;
+                Main.soundLiquid[1] = loader.LavaStream;
 
-            Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
-            Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
+                Main.soundInstanceDrip[0] = loader.Drip1Instance;
+                Main.soundInstanceDrip[1] = loader.Drip2Instance;
+                Main.soundInstanceDrip[2] = loader.Drip3Instance;
+
+                Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
+                Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
+            }
 
             #endregion
         }
@@ -289,144 +294,148 @@ namespace TerrariaAmbience
         public static void DoUpdate_Ambience()
         {
             Terraria.ModLoader.Audio.Music rainSFX = Main.music[Terraria.ID.MusicID.RainSoundEffect];
-            if (rainSFX.IsPlaying)
+            if (!Main.dedServ)
             {
-                rainSFX?.Pause();
-                rainSFX?.SetVariable("Volume", 0f);
-            }
-            if (!Instance.playerBehindWall)
-            {
-                Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.65f * Main.ambientVolume;
-                Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.65f * Main.ambientVolume;
-                Instance.NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.65f * Main.ambientVolume;
-                Instance.DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.65f * Main.ambientVolume;
-                Instance.CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.65f * Main.ambientVolume;
-                Instance.CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.5f * Main.ambientVolume;
-                Instance.CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.5f * Main.ambientVolume;
+                if (rainSFX.IsPlaying)
+                {
+                    rainSFX?.Pause();
+                    rainSFX?.SetVariable("Volume", 0f);
+                }
 
-                Instance.HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.6f * Main.ambientVolume;
+                if (!Instance.playerBehindWall)
+                {
+                    Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.65f * Main.ambientVolume;
+                    Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.65f * Main.ambientVolume;
+                    Instance.NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.65f * Main.ambientVolume;
+                    Instance.DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.65f * Main.ambientVolume;
+                    Instance.CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.65f * Main.ambientVolume;
+                    Instance.CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.5f * Main.ambientVolume;
+                    Instance.CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.5f * Main.ambientVolume;
 
-                Instance.BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.75f * Main.ambientVolume;
+                    Instance.HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.6f * Main.ambientVolume;
 
-                Instance.DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.5f * Main.ambientVolume;
-                Instance.NightJungleInstance.Volume = Instance.nightJungleVolume * 0.5f * Main.ambientVolume;
+                    Instance.BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.75f * Main.ambientVolume;
 
-                Instance.SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.7f * Main.ambientVolume;
-                Instance.SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.7f * Main.ambientVolume;
+                    Instance.DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.5f * Main.ambientVolume;
+                    Instance.NightJungleInstance.Volume = Instance.nightJungleVolume * 0.5f * Main.ambientVolume;
 
-                if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
-                    Instance.CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.95f * Main.soundVolume;
-            }
-            else
-            {
+                    Instance.SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.7f * Main.ambientVolume;
+                    Instance.SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.7f * Main.ambientVolume;
 
-                Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.4f * Main.ambientVolume;
-                Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.4f * Main.ambientVolume;
-                Instance.NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.4f * Main.ambientVolume;
-                Instance.DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.4f * Main.ambientVolume;
-                Instance.CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.4f * Main.ambientVolume;
-                Instance.CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.3f * Main.ambientVolume;
-                Instance.CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.3f * Main.ambientVolume;
+                    if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
+                        Instance.CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.95f * Main.soundVolume;
+                }
+                else
+                {
 
-                Instance.HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.5f * Main.ambientVolume;
+                    Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.4f * Main.ambientVolume;
+                    Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.4f * Main.ambientVolume;
+                    Instance.NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.4f * Main.ambientVolume;
+                    Instance.DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.4f * Main.ambientVolume;
+                    Instance.CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.4f * Main.ambientVolume;
+                    Instance.CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.3f * Main.ambientVolume;
+                    Instance.CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.3f * Main.ambientVolume;
 
-                Instance.BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.5f * Main.ambientVolume;
+                    Instance.HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.5f * Main.ambientVolume;
 
-                Instance.DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.35f * Main.ambientVolume;
-                Instance.NightJungleInstance.Volume = Instance.nightJungleVolume * 0.35f * Main.ambientVolume;
+                    Instance.BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.5f * Main.ambientVolume;
 
-                Instance.SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.45f * Main.ambientVolume;
-                Instance.SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.45f * Main.ambientVolume;
+                    Instance.DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.35f * Main.ambientVolume;
+                    Instance.NightJungleInstance.Volume = Instance.nightJungleVolume * 0.35f * Main.ambientVolume;
 
-                if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
-                    Instance.CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.8f * Main.soundVolume;
-            }
-            if (!Instance.playerBehindWall && !Instance.playerInLiquid)
-            {
-                Instance.RainInstance.Volume = Instance.rainVolume * 0.6f * Main.ambientVolume;
-            }
-            else if (Instance.playerInLiquid && !Instance.playerBehindWall)
-            {
-                Instance.RainInstance.Volume = Instance.rainVolume * 0.2f * Main.ambientVolume;
-            }
-            else if (Instance.playerBehindWall && !Instance.playerInLiquid)
-            {
-                Instance.RainInstance.Volume = Instance.rainVolume * 0.4f * Main.ambientVolume;
-            }
-            else if (Instance.playerBehindWall && Instance.playerInLiquid)
-            {
-                Instance.RainInstance.Volume = Instance.rainVolume * 0.05f * Main.ambientVolume;
-            }
+                    Instance.SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.45f * Main.ambientVolume;
+                    Instance.SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.45f * Main.ambientVolume;
 
-            // Main.NewText(Instance.crackleVolume * 0.95f * Main.soundVolume);
+                    if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
+                        Instance.CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.8f * Main.soundVolume;
+                }
+                if (!Instance.playerBehindWall && !Instance.playerInLiquid)
+                {
+                    Instance.RainInstance.Volume = Instance.rainVolume * 0.6f * Main.ambientVolume;
+                }
+                else if (Instance.playerInLiquid && !Instance.playerBehindWall)
+                {
+                    Instance.RainInstance.Volume = Instance.rainVolume * 0.2f * Main.ambientVolume;
+                }
+                else if (Instance.playerBehindWall && !Instance.playerInLiquid)
+                {
+                    Instance.RainInstance.Volume = Instance.rainVolume * 0.4f * Main.ambientVolume;
+                }
+                else if (Instance.playerBehindWall && Instance.playerInLiquid)
+                {
+                    Instance.RainInstance.Volume = Instance.rainVolume * 0.05f * Main.ambientVolume;
+                }
 
-            if (Main.gameMenu) return;
-            Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbiencePlayer>().player;
+                // Main.NewText(Instance.crackleVolume * 0.95f * Main.soundVolume);
 
-            if (Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.25) / 16].liquid > 0)
-            {
-                Instance.playerInLiquid = true;
-                Instance.dayCricketsVolume *= 0.85f;
-                Instance.eveningCricketsVolume *= 0.85f;
-                Instance.nightCricketsVolume *= 0.85f;
-                Instance.desertCricketsVolume *= 0.85f;
-                Instance.ugAmbienceVolume *= 0.85f;
-                Instance.crackleVolume *= 0.85f;
-                Instance.snowNightVolume *= 0f;
-                Instance.snowDayVolume *= 0f;
-                Instance.crimsonRumblesVolume *= 0.9f;
-                Instance.corruptionRoarsVolume *= 0.9f;
-                Instance.dayJungleVolume *= 0.9f;
-                Instance.nightJungleVolume *= 0.9f;
-                Instance.hellRumbleVolume *= 0.95f;
-                Main.soundInstanceDrip[0].Volume = 0.5f;
-                Main.soundInstanceDrip[1].Volume = 0.5f;
-                Main.soundInstanceDrip[2].Volume = 0.5f;
+                if (Main.gameMenu) return;
+                Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbiencePlayer>().player;
 
-                Instance.NightCricketsInstance.Pitch = -0.25f;
-                Instance.DayCricketsInstance.Pitch = -0.25f;
-                Instance.EveningCricketsInstance.Pitch = -0.25f;
-                Instance.CampfireCrackleInstance.Pitch = -0.15f;
-                Instance.DesertAmbienceInstance.Pitch = -0.25f;
-                Instance.CavesAmbienceInstance.Pitch = -0.25f;
-                Instance.CrimsonRumblesInstance.Pitch = -0.25f;
-                Instance.CorruptionRoarsInstance.Pitch = -0.25f;
-                Instance.DaytimeJungleInstance.Pitch = -0.25f;
-                Instance.NightJungleInstance.Pitch = -0.25f;
-                Instance.BeachWavesInstance.Pitch = 0.1f;
-                Instance.HellRumbleInstance.Pitch = -0.3f;
+                if (Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.25) / 16].liquid > 0)
+                {
+                    Instance.playerInLiquid = true;
+                    Instance.dayCricketsVolume *= 0.85f;
+                    Instance.eveningCricketsVolume *= 0.85f;
+                    Instance.nightCricketsVolume *= 0.85f;
+                    Instance.desertCricketsVolume *= 0.85f;
+                    Instance.ugAmbienceVolume *= 0.85f;
+                    Instance.crackleVolume *= 0.85f;
+                    Instance.snowNightVolume *= 0f;
+                    Instance.snowDayVolume *= 0f;
+                    Instance.crimsonRumblesVolume *= 0.9f;
+                    Instance.corruptionRoarsVolume *= 0.9f;
+                    Instance.dayJungleVolume *= 0.9f;
+                    Instance.nightJungleVolume *= 0.9f;
+                    Instance.hellRumbleVolume *= 0.95f;
+                    Main.soundInstanceDrip[0].Volume = 0.5f;
+                    Main.soundInstanceDrip[1].Volume = 0.5f;
+                    Main.soundInstanceDrip[2].Volume = 0.5f;
 
-                Main.soundInstanceDrip[0].Pitch = -0.25f;
-                Main.soundInstanceDrip[1].Pitch = -0.25f;
-                Main.soundInstanceDrip[2].Pitch = -0.25f;
-            }
-            else
-            {
-                Instance.playerInLiquid = false;
-                Instance.NightCricketsInstance.Pitch = 0f;
-                Instance.DayCricketsInstance.Pitch = 0f;
-                Instance.EveningCricketsInstance.Pitch = 0f;
-                Instance.CampfireCrackleInstance.Pitch = 0f;
-                Instance.DesertAmbienceInstance.Pitch = 0f;
-                Instance.CavesAmbienceInstance.Pitch = 0f;
-                Instance.CrimsonRumblesInstance.Pitch = 0f;
-                Instance.CorruptionRoarsInstance.Pitch = -0f;
-                Instance.DaytimeJungleInstance.Pitch = 0f;
-                Instance.NightJungleInstance.Pitch = 0f;
-                Instance.BeachWavesInstance.Pitch = 0f;
-                Instance.HellRumbleInstance.Pitch = 0f;
-                Main.soundInstanceDrip[0].Pitch = 0f;
-                Main.soundInstanceDrip[1].Pitch = 0f;
-                Main.soundInstanceDrip[2].Pitch = 0f;
-            }
+                    Instance.NightCricketsInstance.Pitch = -0.25f;
+                    Instance.DayCricketsInstance.Pitch = -0.25f;
+                    Instance.EveningCricketsInstance.Pitch = -0.25f;
+                    Instance.CampfireCrackleInstance.Pitch = -0.15f;
+                    Instance.DesertAmbienceInstance.Pitch = -0.25f;
+                    Instance.CavesAmbienceInstance.Pitch = -0.25f;
+                    Instance.CrimsonRumblesInstance.Pitch = -0.25f;
+                    Instance.CorruptionRoarsInstance.Pitch = -0.25f;
+                    Instance.DaytimeJungleInstance.Pitch = -0.25f;
+                    Instance.NightJungleInstance.Pitch = -0.25f;
+                    Instance.BeachWavesInstance.Pitch = 0.1f;
+                    Instance.HellRumbleInstance.Pitch = -0.3f;
 
-            if (Main.tile[(int)player.Top.X / 16, (int)player.Top.Y / 16].wall > 0)
-            {
-                Instance.playerBehindWall = true;
-            }
-            else
-            {
-                Instance.playerBehindWall = false;
+                    Main.soundInstanceDrip[0].Pitch = -0.25f;
+                    Main.soundInstanceDrip[1].Pitch = -0.25f;
+                    Main.soundInstanceDrip[2].Pitch = -0.25f;
+                }
+                else
+                {
+                    Instance.playerInLiquid = false;
+                    Instance.NightCricketsInstance.Pitch = 0f;
+                    Instance.DayCricketsInstance.Pitch = 0f;
+                    Instance.EveningCricketsInstance.Pitch = 0f;
+                    Instance.CampfireCrackleInstance.Pitch = 0f;
+                    Instance.DesertAmbienceInstance.Pitch = 0f;
+                    Instance.CavesAmbienceInstance.Pitch = 0f;
+                    Instance.CrimsonRumblesInstance.Pitch = 0f;
+                    Instance.CorruptionRoarsInstance.Pitch = -0f;
+                    Instance.DaytimeJungleInstance.Pitch = 0f;
+                    Instance.NightJungleInstance.Pitch = 0f;
+                    Instance.BeachWavesInstance.Pitch = 0f;
+                    Instance.HellRumbleInstance.Pitch = 0f;
+                    Main.soundInstanceDrip[0].Pitch = 0f;
+                    Main.soundInstanceDrip[1].Pitch = 0f;
+                    Main.soundInstanceDrip[2].Pitch = 0f;
+                }
+
+                if (Main.tile[(int)player.Top.X / 16, (int)player.Top.Y / 16].wall > 0)
+                {
+                    Instance.playerBehindWall = true;
+                }
+                else
+                {
+                    Instance.playerBehindWall = false;
+                }
             }
         }
         /// <summary>
