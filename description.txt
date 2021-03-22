@@ -19,10 +19,7 @@ Nothing for now!
 
 Most Recent Update:
 
-[BUG] Made footsteps track properly, before they weren't making sound based on a good system.
-[FEATURE?] Added Disord Server link for homepage.
-[BUG][FEATURE] Now a both-sided mod.
-
+[NEW FEATURE] Added wet footsteps and new splash sounds based on how long you have been falling.
 
 
 
@@ -107,3 +104,4 @@ S: summer evening.WAV by inchadney -- License: Attribution
 S: Grillen - viele Grillen, Tag.wav by BockelSound -- License: Attribution
 S: forest summer Roond 020 200619_0186.wav by klankbeeld  -- License: Attribution
 S: summer evening.WAV by inchadney  -- License: Attribution
+S: Water Swirl, Small, 14.wav by InspectorJ -- Licence: Attribution

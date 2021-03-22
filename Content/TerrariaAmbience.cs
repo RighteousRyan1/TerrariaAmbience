@@ -2,12 +2,12 @@ using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
 using Terraria.ID;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
-using System.IO;
-using System.Collections.Generic;
 
-namespace TerrariaAmbience
+using Microsoft.Xna.Framework.Audio;
+using System.Collections.Generic;
+using TerrariaAmbience.Core;
+
+namespace TerrariaAmbience.Content
 {
 	public class TerrariaAmbience : Mod
 	{
@@ -24,17 +24,17 @@ namespace TerrariaAmbience
             Ambience.Unload();
         }
 
-        public static float decOrIncRate = 0.01f;
+        public float lastPlayerPositionOnGround;
+        public float delta_lastPos_playerBottom;
         // SoundInstancing soundInstancer = new SoundInstancing(ModContent.GetInstance<TerrariaAmbience>(), "Sounds/Custom/ambient/animals/rattling_bones", "Bones Do Be Rattling", true, true);
 
         private void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
         {
             orig(self, gameTime);
-            decOrIncRate = 0.01f;
             var aLoader = Ambience.Instance;
 
             Ambience.DoUpdate_Ambience();
-
+            Ambience.UpdateVolume();
             if (Main.gameMenu)
             {
                 aLoader.dayCricketsVolume = 0f;
@@ -56,173 +56,33 @@ namespace TerrariaAmbience
             if (Main.gameMenu) return;
             Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbiencePlayer>().player;
             // soundInstancer.Condition = player.ZoneSkyHeight;
-            Main.NewText(SoundInstancing.allSounds.Count);
             if (Main.hasFocus)
             {
-                if ((player.ZoneForest() || player.ZoneHoly) && (Main.dayTime && Main.time > 14400) && (Main.dayTime && Main.time < 46800))
-                {
-                    aLoader.dayCricketsVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.dayCricketsVolume -= decOrIncRate;
-                }
+                delta_lastPos_playerBottom = lastPlayerPositionOnGround - player.Bottom.Y;
 
-                if ((player.ZoneForest() || player.ZoneHoly) && aLoader.DayCricketsInstance.Volume == 0 && Main.dayTime)
+                // Main.NewText(delta_lastPos_playerBottom);
+                if (player.velocity.Y <= 0 || player.teleporting)
                 {
-                    aLoader.eveningCricketsVolume += decOrIncRate;
+                    lastPlayerPositionOnGround = player.Bottom.Y;
                 }
-                else
+                // Main.NewText(player.fallStart - player.Bottom.Y);
+                if (delta_lastPos_playerBottom > -300)
                 {
-
-                    aLoader.eveningCricketsVolume -= decOrIncRate;
+                    Main.soundSplash[0] = Ambience.Instance.SplashNew;
                 }
-
-                if ((player.ZoneForest() || player.ZoneHoly) && !Main.dayTime)
+                else if (delta_lastPos_playerBottom <= -300)
                 {
-                    aLoader.nightCricketsVolume += decOrIncRate;
+                    Main.soundSplash[0] = GetSound($"{Ambience.ambienceDirectory}/environment/liquid/entity_splash_heavy");
                 }
-                else
+                /*if (Main.mouseRight)
                 {
-                    aLoader.nightCricketsVolume -= decOrIncRate;
+                    Main.soundInstanceSplash[0]?.Play(); // entity splash
                 }
-
-                if (player.ZoneUnderground())
+                if (Main.mouseLeft)
                 {
-                    aLoader.ugAmbienceVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.ugAmbienceVolume -= decOrIncRate;
-                }
-
-                if (player.ZoneDesert)
-                {
-                    aLoader.desertCricketsVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.desertCricketsVolume -= decOrIncRate;
-                }
-
-                if (player.ZoneDesert && Main.dayTime)
-                {
-                    aLoader.DesertAmbienceInstance.Pitch = -0.075f;
-                }
-                else
-                {
-                    aLoader.DesertAmbienceInstance.Pitch = 0f;
-                }
-
-                if (player.ZoneSnow && Main.dayTime && !player.ZoneUnderworldHeight)
-                {
-                    aLoader.snowDayVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.snowDayVolume -= decOrIncRate;
-                }
-
-                if (player.ZoneSnow && !Main.dayTime && !player.ZoneUnderworldHeight)
-                {
-                    aLoader.snowNightVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.snowNightVolume -= decOrIncRate;
-                }
-
-                if (player.ZoneCrimson)
-                {
-                    aLoader.crimsonRumblesVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.crimsonRumblesVolume -= decOrIncRate;
-                }
-                if (player.ZoneCorrupt)
-                {
-                    aLoader.corruptionRoarsVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.corruptionRoarsVolume -= decOrIncRate;
-                }
-
-                if (player.ZoneJungle && !player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight && Main.dayTime)
-                {
-                    aLoader.dayJungleVolume += decOrIncRate;
-                }
-                else if(!player.ZoneRockLayerHeight)
-                {
-                    aLoader.dayJungleVolume -= decOrIncRate;
-                }
-                else if (player.ZoneRockLayerHeight && player.ZoneJungle)
-                {
-                    aLoader.dayJungleVolume = 0.05f;
-                }
-
-                if (player.ZoneJungle && !player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight && !Main.dayTime)
-                {
-                    aLoader.nightJungleVolume += decOrIncRate;
-                }
-                else if (!player.ZoneRockLayerHeight)
-                {
-                    aLoader.nightJungleVolume -= decOrIncRate;
-                }
-                else if (player.ZoneRockLayerHeight && player.ZoneJungle)
-                {
-                    aLoader.nightJungleVolume = 0.05f;
-                }
-
-                if (player.ZoneBeach && !player.ZoneRockLayerHeight)
-                {
-                    aLoader.beachWavesVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.beachWavesVolume -= decOrIncRate;
-                }
-
-                if (player.ZoneUnderworldHeight)
-                {
-                    aLoader.hellRumbleVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.hellRumbleVolume -= decOrIncRate;
-                }
-
-                foreach (Rain rain in Main.rain)
-                {
-                    rain.rotation = rain.velocity.ToRotation() + MathHelper.PiOver2;
-                }
-                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight))
-                {
-                    aLoader.rainVolume += decOrIncRate;
-                }
-                else
-                {
-                    aLoader.rainVolume -= decOrIncRate;
-                }
-            }
-            else
-            {
-                aLoader.dayCricketsVolume -= decOrIncRate;
-                aLoader.eveningCricketsVolume -= decOrIncRate;
-                aLoader.nightCricketsVolume -= decOrIncRate;
-                aLoader.crackleVolume -= decOrIncRate;
-                aLoader.desertCricketsVolume -= decOrIncRate;
-                aLoader.ugAmbienceVolume -= decOrIncRate;
-                aLoader.snowDayVolume -= decOrIncRate;
-                aLoader.snowNightVolume -= decOrIncRate;
-                aLoader.crimsonRumblesVolume -= decOrIncRate;
-                aLoader.corruptionRoarsVolume -= decOrIncRate;
-                aLoader.dayJungleVolume -= decOrIncRate;
-                aLoader.nightJungleVolume -= decOrIncRate;
-                aLoader.beachWavesVolume -= decOrIncRate;
-                aLoader.hellRumbleVolume -= decOrIncRate;
-                aLoader.rainVolume -= decOrIncRate;
+                    Main.soundInstanceSplash[1]?.Play(); // hook bob?
+                // Finish mini-spla
+                }*/
             }
             Ambience.ClampAll();
         }
@@ -256,8 +116,28 @@ namespace TerrariaAmbience
 
         private int legFrameSnapShotNew;
         private int legFrameSnapShotOld;
+
+        private bool hasTilesAbove;
         public override void PreUpdate()
         {
+            Tile playerTile = Main.tile[(int)player.Center.X / 16, (int)player.Center.Y / 16];
+            for (int i = (int)player.Top.X - 1; i < player.Top.X + 1; i++)
+            {
+                for (int j = (int)player.Top.Y - 1; playerTile.wall <= 0 ? j > player.Top.Y - 350 : j > player.Top.Y - 600; j--)
+                {
+                    Tile tile = Main.tile[i / 16, j / 16];
+                    if (tile.active() && tile.collisionType == 1)
+                    {
+                        hasTilesAbove = true;
+                        break;
+                    }
+                    else
+                    {
+                        hasTilesAbove = false;
+                    }
+                }
+            }
+
             legFrameSnapShotNew = player.legFrame.Y / 20;
 
             // Good Values -> 25 (first), 44 (second), 14 = midair
@@ -267,16 +147,20 @@ namespace TerrariaAmbience
             int randStone = Main.rand.Next(1, 9);
             int randGrass = Main.rand.Next(1, 9);
             int randSnow = Main.rand.Next(1, 12);
+            int randWet = Main.rand.Next(1, 4);
 
             string pathWood = $"Sounds/Custom/steps/wood/step{randWood}";
             string pathSand = $"Sounds/Custom/steps/sand/step{randSand}";
             string pathStone = $"Sounds/Custom/steps/stone/step{randStone}";
             string pathGrass = $"Sounds/Custom/steps/grass/step{randGrass}";
             string pathSnow = $"Sounds/Custom/steps/snow/step{randSnow}";
+            string pathWet = $"Sounds/Custom/steps/wet/step{randWet}";
             // Main.NewText($"{legFrameSnapShotNew}, {legFrameSnapShotOld}, {player.legFrame.Y == player.legFrame.Height * 16 }");
 
             if (ModContent.GetInstance<AmbientConfig>().footsteps)
             {
+                // Main.NewText(Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16].wall);
+                // Main.NewText(hasTilesAbove);
                 if (Main.soundVolume != 0f)
                 {
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSandyTile)
@@ -287,9 +171,18 @@ namespace TerrariaAmbience
                     }
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnGrassyTile)
                     {
-                        soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom);
-                        soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume * 0.45f : Main.soundVolume * 0.65f;
-                        soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
+                        if (!Main.raining || hasTilesAbove)
+                        {
+                            soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom);
+                            soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume * 0.45f : Main.soundVolume * 0.65f;
+                            soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
+                        }
+                        if (!hasTilesAbove && Main.raining && !player.wet)
+                        {
+                            soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWet), player.Bottom);
+                            soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
+                            soundInstanceGrassStep.Pitch = Main.rand.NextFloat(-0.3f, 0.3f);
+                        }
                     }
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnStoneTile)
                     {
@@ -305,9 +198,18 @@ namespace TerrariaAmbience
                     }
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnWoodTile)
                     {
-                        soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom);
-                        soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
-                        soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
+                        if (!Main.raining || hasTilesAbove) // rain and no tiles covering said player
+                        {
+                            soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom);
+                            soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
+                            soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
+                        }
+                        if (!hasTilesAbove && Main.raining && !player.wet)
+                        {
+                            soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWet), player.Bottom);
+                            soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
+                            soundInstanceWoodStep.Pitch = Main.rand.NextFloat(-0.3f, 0.3f);
+                        }
                     }
 
                     // Top: landing sounds
@@ -321,9 +223,18 @@ namespace TerrariaAmbience
                     }
                     if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnGrassyTile)
                     {
-                        soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom);
-                        soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume / 5 : Main.soundVolume / 2;
-                        soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
+                        if (!Main.raining || hasTilesAbove) // rain and no tiles covering said player
+                        {
+                            soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathGrass), player.Bottom);
+                            soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume / 5 : Main.soundVolume / 2;
+                            soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
+                        }
+                        if (!hasTilesAbove && Main.raining && !player.wet)
+                        {
+                            soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWet), player.Bottom);
+                            soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 8 : Main.soundVolume / 4;
+                            soundInstanceWoodStep.Pitch = Main.rand.NextFloat(-0.4f, 0.4f);
+                        }
                     }
                     if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnStoneTile)
                     {
@@ -333,9 +244,18 @@ namespace TerrariaAmbience
                     }
                     if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnWoodTile)
                     {
-                        soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom);
-                        soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 12 : Main.soundVolume / 8;
-                        soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
+                        if (!Main.raining || hasTilesAbove) // rain and no tiles covering said player
+                        {
+                            soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWood), player.Bottom);
+                            soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 12 : Main.soundVolume / 8;
+                            soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
+                        }
+                        if (!hasTilesAbove && Main.raining && !player.wet)
+                        {
+                            soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWet), player.Bottom);
+                            soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 8 : Main.soundVolume / 4;
+                            soundInstanceWoodStep.Pitch = Main.rand.NextFloat(-0.3f, 0.3f);
+                        }
                     }
                     if (((legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25)) && isOnSnowyTile)
                     {
@@ -347,10 +267,10 @@ namespace TerrariaAmbience
             }
             legFrameSnapShotOld = legFrameSnapShotNew;
         }
+        int a;
         public override void PostUpdate()
         {
-
-
+            // Main.NewText(Main.soundZombie.Length);
             if (!Main.dayTime)
             {
                 int rand = Main.rand.Next(1, 3);
@@ -394,7 +314,6 @@ namespace TerrariaAmbience
                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/animals/rattling_bones"), player.Center + new Vector2(randX, randY)).Volume = Main.ambientVolume * 0.05f;
                 }
             }
-            // Main.NewText(Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16]);
             var aLoader = Ambience.Instance;
             if (aLoader.crackleVolume > 1)
             {
@@ -434,6 +353,10 @@ namespace TerrariaAmbience
         public static bool ZoneUnderground(this Player player)
         {
             return player.Center.Y >= Main.rockLayer * 16 && !player.ZoneUnderworldHeight;
+        }
+        public static bool HeadWet(this Player player)
+        {
+            return Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.25) / 16].liquid > 0;
         }
     }
     public class CampfireDetection : GlobalTile
@@ -559,6 +482,22 @@ namespace TerrariaAmbience
                 instancing.Initialize();
 
                 count = allSounds.Count;
+            }
+        }
+    }
+
+    public class x:GlobalNPC
+    {
+        public override void AI(NPC npc)
+        {
+            if (npc.aiStyle == NPCID.Zombie)
+            {
+                Tile tileToLeft = Main.tile[(int)npc.Left.X / 16 - 1, (int)npc.Left.Y / 16];
+                Tile tileToRight = Main.tile[(int)npc.Right.X / 16 + 1, (int)npc.Right.Y / 16];
+                if (TileLoader.IsClosedDoor(tileToLeft) || TileLoader.IsClosedDoor(tileToRight) && npc.ai[0] == 20)
+                {
+                    // God damn, wtf do i do
+                }
             }
         }
     }

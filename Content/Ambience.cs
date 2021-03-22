@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Terraria.ModLoader;
 using Terraria;
 
-namespace TerrariaAmbience
+namespace TerrariaAmbience.Content
 {
     public class Ambience
     {
@@ -99,6 +99,9 @@ namespace TerrariaAmbience
         public SoundEffect Rain { get; set; }
         public SoundEffectInstance RainInstance { get; set; }
 
+        public SoundEffect SplashNew { get; set; }
+        public SoundEffectInstance SplashNewInstance { get; set; }
+
         #endregion
 
         public float dayCricketsVolume;
@@ -130,6 +133,9 @@ namespace TerrariaAmbience
 
         private SoundEffectInstance[] dripInstance_Cashe = new SoundEffectInstance[] { };
         private SoundEffectInstance[] liquidInstance_Cashe = new SoundEffectInstance[] { };
+
+        private SoundEffect[] splashCashe = new SoundEffect[] { };
+        private SoundEffect[] zombieCashe = new SoundEffect[] { };
 
         public static string ambienceDirectory = "Sounds/Custom/ambient";
 
@@ -196,19 +202,23 @@ namespace TerrariaAmbience
                 loader.HellRumbleInstance = loader.HellRumble.CreateInstance();
                 loader.HellRumble.Name = "Hell Rumbling";
 
-                loader.Drip1 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip1");
-                loader.Drip2 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip2");
-                loader.Drip3 = mod.GetSound($"{ambienceDirectory}/environment/liquid_drip3");
+                loader.Drip1 = mod.GetSound($"{ambienceDirectory}/environment/liquid/liquid_drip1");
+                loader.Drip2 = mod.GetSound($"{ambienceDirectory}/environment/liquid/liquid_drip2");
+                loader.Drip3 = mod.GetSound($"{ambienceDirectory}/environment/liquid/liquid_drip3");
                 loader.Drip1Instance = loader.Drip1.CreateInstance();
                 loader.Drip2Instance = loader.Drip2.CreateInstance();
                 loader.Drip3Instance = loader.Drip3.CreateInstance();
 
-                loader.LavaStream = mod.GetSound($"{ambienceDirectory}/environment/stream_lava");
-                loader.WaterStream = mod.GetSound($"{ambienceDirectory}/environment/stream_water");
+                loader.SplashNew = mod.GetSound($"{ambienceDirectory}/environment/liquid/entity_splash_light");
+                loader.SplashNewInstance = loader.SplashNew.CreateInstance();
+                loader.SplashNew.Name = "Water Splash (Light)";
+
+                loader.LavaStream = mod.GetSound($"{ambienceDirectory}/environment/liquid/stream_lava");
+                loader.WaterStream = mod.GetSound($"{ambienceDirectory}/environment/liquid/stream_water");
                 loader.LavaStreamInstance = loader.LavaStream.CreateInstance();
                 loader.WaterStreamInstance = loader.WaterStream.CreateInstance();
 
-                loader.Rain = mod.GetSound($"{ambienceDirectory}/environment/rain_new");
+                loader.Rain = mod.GetSound($"{ambienceDirectory}/rain/rain_new");
                 loader.RainInstance = loader.Rain.CreateInstance();
 
                 loader.DayCricketsInstance.IsLooped = true;
@@ -238,6 +248,13 @@ namespace TerrariaAmbience
                 loader.liquidInstance_Cashe = Main.soundInstanceLiquid;
                 loader.dripInstance_Cashe = Main.soundInstanceDrip;
 
+                loader.splashCashe = Main.soundSplash;
+
+                loader.zombieCashe = Main.soundZombie;
+
+
+                // loader.splashCashe = Main.soundSplash;
+
                 // Now change the sound (Main.soundX = y)
 
                 // NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
@@ -258,6 +275,12 @@ namespace TerrariaAmbience
 
                 Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
                 Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
+
+                Main.soundZombie[0] = mod.GetSound($"{ambienceDirectory}/npcs/zombie1");
+                Main.soundZombie[1] = mod.GetSound($"{ambienceDirectory}/npcs/zombie2");
+                Main.soundZombie[2] = mod.GetSound($"{ambienceDirectory}/npcs/zombie3");
+
+                // Main.soundDig[]
             }
 
             #endregion
@@ -270,6 +293,187 @@ namespace TerrariaAmbience
 
             Main.soundInstanceDrip = Instance.dripInstance_Cashe;
             Main.soundInstanceLiquid = Instance.liquidInstance_Cashe;
+
+            Main.soundZombie = Instance.zombieCashe;
+
+            Main.soundSplash = Instance.splashCashe;
+        }
+        public static float decOrIncRate = 0.01f;
+        public static void UpdateVolume()
+        {
+            decOrIncRate = 0.01f;
+            if (Main.gameMenu) return;
+            AmbiencePlayer ambiencePlayer = Main.player[Main.myPlayer].GetModPlayer<AmbiencePlayer>();
+
+            Player player = ambiencePlayer.player;
+            var aLoader = Instance;
+            if (Main.hasFocus)
+            {
+                if ((player.ZoneForest() || player.ZoneHoly) && (Main.dayTime && Main.time > 14400) && (Main.dayTime && Main.time < 46800))
+                {
+                    aLoader.dayCricketsVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.dayCricketsVolume -= decOrIncRate;
+                }
+
+                if ((player.ZoneForest() || player.ZoneHoly) && aLoader.DayCricketsInstance.Volume == 0 && Main.dayTime)
+                {
+                    aLoader.eveningCricketsVolume += decOrIncRate;
+                }
+                else
+                {
+
+                    aLoader.eveningCricketsVolume -= decOrIncRate;
+                }
+
+                if ((player.ZoneForest() || player.ZoneHoly) && !Main.dayTime)
+                {
+                    aLoader.nightCricketsVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.nightCricketsVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneUnderground())
+                {
+                    aLoader.ugAmbienceVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.ugAmbienceVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneDesert)
+                {
+                    aLoader.desertCricketsVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.desertCricketsVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneDesert && Main.dayTime)
+                {
+                    aLoader.DesertAmbienceInstance.Pitch = -0.075f;
+                }
+                else
+                {
+                    aLoader.DesertAmbienceInstance.Pitch = 0f;
+                }
+
+                if (player.ZoneSnow && Main.dayTime && !player.ZoneUnderworldHeight)
+                {
+                    aLoader.snowDayVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.snowDayVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneSnow && !Main.dayTime && !player.ZoneUnderworldHeight)
+                {
+                    aLoader.snowNightVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.snowNightVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneCrimson)
+                {
+                    aLoader.crimsonRumblesVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.crimsonRumblesVolume -= decOrIncRate;
+                }
+                if (player.ZoneCorrupt)
+                {
+                    aLoader.corruptionRoarsVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.corruptionRoarsVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneJungle && !player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight && Main.dayTime)
+                {
+                    aLoader.dayJungleVolume += decOrIncRate;
+                }
+                else if (!player.ZoneRockLayerHeight)
+                {
+                    aLoader.dayJungleVolume -= decOrIncRate;
+                }
+                else if (player.ZoneRockLayerHeight && player.ZoneJungle)
+                {
+                    aLoader.dayJungleVolume = 0.05f;
+                }
+
+                if (player.ZoneJungle && !player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight && !Main.dayTime)
+                {
+                    aLoader.nightJungleVolume += decOrIncRate;
+                }
+                else if (!player.ZoneRockLayerHeight)
+                {
+                    aLoader.nightJungleVolume -= decOrIncRate;
+                }
+                else if (player.ZoneRockLayerHeight && player.ZoneJungle)
+                {
+                    aLoader.nightJungleVolume = 0.05f;
+                }
+
+                if (player.ZoneBeach && !player.ZoneRockLayerHeight)
+                {
+                    aLoader.beachWavesVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.beachWavesVolume -= decOrIncRate;
+                }
+
+                if (player.ZoneUnderworldHeight)
+                {
+                    aLoader.hellRumbleVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.hellRumbleVolume -= decOrIncRate;
+                }
+
+                foreach (Rain rain in Main.rain)
+                {
+                    rain.rotation = rain.velocity.ToRotation() + MathHelper.PiOver2;
+                }
+                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight))
+                {
+                    aLoader.rainVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.rainVolume -= decOrIncRate;
+                }
+            }
+            else
+            {
+                aLoader.dayCricketsVolume -= decOrIncRate;
+                aLoader.eveningCricketsVolume -= decOrIncRate;
+                aLoader.nightCricketsVolume -= decOrIncRate;
+                aLoader.crackleVolume -= decOrIncRate;
+                aLoader.desertCricketsVolume -= decOrIncRate;
+                aLoader.ugAmbienceVolume -= decOrIncRate;
+                aLoader.snowDayVolume -= decOrIncRate;
+                aLoader.snowNightVolume -= decOrIncRate;
+                aLoader.crimsonRumblesVolume -= decOrIncRate;
+                aLoader.corruptionRoarsVolume -= decOrIncRate;
+                aLoader.dayJungleVolume -= decOrIncRate;
+                aLoader.nightJungleVolume -= decOrIncRate;
+                aLoader.beachWavesVolume -= decOrIncRate;
+                aLoader.hellRumbleVolume -= decOrIncRate;
+                aLoader.rainVolume -= decOrIncRate;
+            }
         }
         public static void PlayAllAmbience()
         {
@@ -371,7 +575,7 @@ namespace TerrariaAmbience
                 if (Main.gameMenu) return;
                 Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbiencePlayer>().player;
 
-                if (Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.25) / 16].liquid > 0)
+                if (player.HeadWet())
                 {
                     Instance.playerInLiquid = true;
                     Instance.dayCricketsVolume *= 0.85f;

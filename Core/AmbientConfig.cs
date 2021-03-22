@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
-namespace TerrariaAmbience
+namespace TerrariaAmbience.Core
 {
     public class AmbientConfig : ModConfig
     {
