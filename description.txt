@@ -19,7 +19,8 @@ Nothing for now!
 
 Most Recent Update:
 
-[NEW FEATURE] Added wet footsteps and new splash sounds based on how long you have been falling.
+[POTENTIAL BUGFIX] Fixed rain not working.
+[NEW FEATURE] Crafting sounds. Players should hear when another player crafts something!
 
 
 
