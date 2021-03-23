@@ -6,6 +6,7 @@ using Terraria.ID;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using TerrariaAmbience.Core;
+using System.Linq;
 
 namespace TerrariaAmbience.Content
 {
@@ -15,10 +16,40 @@ namespace TerrariaAmbience.Content
         {
             Ambience.Initialize();
             On.Terraria.Main.DoUpdate += Main_DoUpdate;
-
-            SoundInstancing.InitializeAll();
+            ModContent.GetInstance<CraftSounds>().UsedMod = this;
+            MethodDetours.DetourAll();
         }
+        public override void PostSetupContent()
+        {
+            Mod calamity = ModLoader.GetMod("CalamityMod");
+            Mod thor = ModLoader.GetMod("ThoriumMod");
 
+            // TODO: Finish adding these another day...
+            if (calamity != null)
+            {
+                TileDetection.AddTilesToList(calamity, TileDetection.sandBlocks,
+                    "SulphurousSand",
+                    "AstralSand",
+                    "EutrophicSand",
+                    "AstralClay");
+
+                TileDetection.AddTilesToList(calamity, TileDetection.grassTiles,
+                    "AstralDirt",
+                    "AstralGrass",
+                    "PlantyMush");
+
+                TileDetection.AddTilesToList(calamity, TileDetection.stoneBlocks,
+                    "AstralOre",
+                    "AstralStone",
+                    "AstralMonolith",
+                    "AstralMonolith", "AbyssGravel", "Tenebris", "ChaoticOre", "SmoothCoal", "Voidstone");
+            }
+            if (thor != null)
+            {
+                TileDetection.AddTilesToList(thor, TileDetection.stoneBlocks,
+                    "ThoriumOre", "LifeQuartz");
+            }
+        }
         public override void Unload()
         {
             Ambience.Unload();
@@ -27,7 +58,11 @@ namespace TerrariaAmbience.Content
         public float lastPlayerPositionOnGround;
         public float delta_lastPos_playerBottom;
         // SoundInstancing soundInstancer = new SoundInstancing(ModContent.GetInstance<TerrariaAmbience>(), "Sounds/Custom/ambient/animals/rattling_bones", "Bones Do Be Rattling", true, true);
-
+        public override object Call(params object[] args)
+        {
+            args = new object[] { new TileDetection(), new Ambience() };
+            return args;
+        }
         private void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
         {
             orig(self, gameTime);
@@ -155,12 +190,10 @@ namespace TerrariaAmbience.Content
             string pathGrass = $"Sounds/Custom/steps/grass/step{randGrass}";
             string pathSnow = $"Sounds/Custom/steps/snow/step{randSnow}";
             string pathWet = $"Sounds/Custom/steps/wet/step{randWet}";
-            // Main.NewText($"{legFrameSnapShotNew}, {legFrameSnapShotOld}, {player.legFrame.Y == player.legFrame.Height * 16 }");
 
             if (ModContent.GetInstance<AmbientConfig>().footsteps)
             {
                 // Main.NewText(Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16].wall);
-                // Main.NewText(hasTilesAbove);
                 if (Main.soundVolume != 0f)
                 {
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSandyTile)
@@ -267,10 +300,8 @@ namespace TerrariaAmbience.Content
             }
             legFrameSnapShotOld = legFrameSnapShotNew;
         }
-        int a;
         public override void PostUpdate()
         {
-            // Main.NewText(Main.soundZombie.Length);
             if (!Main.dayTime)
             {
                 int rand = Main.rand.Next(1, 3);
@@ -281,8 +312,6 @@ namespace TerrariaAmbience.Content
                 int randY = Main.rand.Next(-1750, 1750);
                 int chance1 = Main.rand.Next(750);
                 int chance2 = Main.rand.Next(1500);
-
-                // Main.NewText(chance);
                 if (Main.soundVolume > 0f)
                 {
                     if (chance1 == 0)
@@ -383,121 +412,18 @@ namespace TerrariaAmbience.Content
             }
         }
     }
-    public class SoundInstancing
-    {
-        public SoundEffect soundEffect;
-        public SoundEffectInstance soundEffectInstance;
-        public bool Condition
-        {
-            get;
-            set;
-        }
-        public string Name
-        {
-            get;
-            private set;
-        }
-        public string Path
-        {
-            get;
-            private set;
-        }
-        public bool IsLooped
-        {
-            get;
-            private set;
-        }
-
-        public float Volume
-        {
-            get;
-            private set;
-        }
-        private Mod Mod
-        {
-            get;
-            set;
-        }
-
-        private SoundInstancing validSound;
-
-        private static int count;
-
-        // Change back to private
-        public static List<SoundInstancing> allSounds = new List<SoundInstancing> { };
-        /// <summary>
-        /// Creates a completely new ambience sound. This will do all of the work for you.
-        /// </summary>
-        /// <param name="mod">The mod to default a path from.</param>
-        /// <param name="pathForSound">The path to the ambient after your mod's direcotry.</param>
-        /// <param name="name">The name for the ambience effect created.</param>
-        /// <param name="conditionToPlayUnder">When or when to not play this ambience.</param>
-        /// <param name="isLooped">Whether or not to loop the ambient.</param>
-        public SoundInstancing(Mod mod, string pathForSound, string name, bool conditionToPlayUnder, bool isLooped = true)
-        {
-
-            validSound = this;
-            allSounds.Add(this);
-
-            Name = name;
-
-            Path = pathForSound;
-
-            IsLooped = isLooped;
-
-            Mod = mod;
-            soundEffect = mod.GetSound(pathForSound);
-            soundEffectInstance = soundEffect.CreateInstance();
-
-            soundEffect.Name = name;
-            Condition = conditionToPlayUnder;
-
-            Volume = soundEffectInstance.Volume;
-
-            if (isLooped)
-            {
-                soundEffectInstance.IsLooped = true;
-            }
-
-            soundEffectInstance.Volume = conditionToPlayUnder ? 1f : 0f;
-        }
-        public override string ToString()
-        {
-            return "{ isLooped: " + IsLooped + " | path: " + Path + " | name: " + Name + " | isPlaying: " + Condition    + " }";
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Initialize()
-        {
-            validSound?.soundEffectInstance?.Play();
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public static void InitializeAll()
-        {
-            foreach (SoundInstancing instancing in allSounds)
-            {
-                instancing.Initialize();
-
-                count = allSounds.Count;
-            }
-        }
-    }
-
-    public class x:GlobalNPC
+    public class NewDoorKnockSound :GlobalNPC
     {
         public override void AI(NPC npc)
         {
             if (npc.aiStyle == NPCID.Zombie)
             {
-                Tile tileToLeft = Main.tile[(int)npc.Left.X / 16 - 1, (int)npc.Left.Y / 16];
+                /*Tile tileToLeft = Main.tile[(int)npc.Left.X / 16 - 1, (int)npc.Left.Y / 16];
                 Tile tileToRight = Main.tile[(int)npc.Right.X / 16 + 1, (int)npc.Right.Y / 16];
                 if (TileLoader.IsClosedDoor(tileToLeft) || TileLoader.IsClosedDoor(tileToRight) && npc.ai[0] == 20)
                 {
                     // God damn, wtf do i do
-                }
+                }*/
             }
         }
     }

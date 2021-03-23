@@ -139,15 +139,19 @@ namespace TerrariaAmbience.Core
                 TileID.Slush,
                 TileID.Silt,
                 TileID.Ash,
-                TileID.Glass
+                TileID.Glass,
+                TileID.Pearlsand
         };
+        /// <summary>
+        /// Blocks that are either snow or are akin to snow. Y
+        /// </summary>
 
         public static List<int> snowyblocks = new List<int>
         {
                 TileID.SnowBlock,
                 TileID.SnowCloud,
                 TileID.RainCloud,
-                TileID.Cloud
+                TileID.Cloud,
         };
         public override void FloorVisuals(int type, Player player)
         {
@@ -177,6 +181,95 @@ namespace TerrariaAmbience.Core
                 player.GetModPlayer<AmbiencePlayer>().isOnWoodTile = true;
             else
                 player.GetModPlayer<AmbiencePlayer>().isOnWoodTile = false;
+        }
+        /// <summary>
+        /// Access this for when you want to add a modded tile to the valid tiles list
+        /// </summary>
+        /// <param name="listToAddTo"></param>
+        /// <param name="tiles"></param>
+        public static void AddTilesToList(List<int> listToAddTo, params int[] tiles)
+        {
+            foreach (int tile in tiles)
+            {
+                listToAddTo.Add(tile);
+            }
+        }
+        public static void AddTilesToList(Mod mod, List<int> listToAddTo, params string[] name)
+        {
+            foreach (string tile in name)
+            {
+                listToAddTo.Add(mod.TileType(tile));
+            }
+        }
+    }
+    public class CraftSounds : GlobalItem
+    {
+        public override bool InstancePerEntity => true;
+        public override bool CloneNewInstances => true;
+        /// <summary>
+        /// A list containing all ANVILS. Add to this if you wish, mods out there.
+        /// </summary>
+        public static List<int> anvils = new List<int>
+        {
+            TileID.Anvils,
+            TileID.MythrilAnvil
+        };
+        /// <summary>
+        /// A list containing all WORK BENCHES. Add to this if you wish, mods out there.
+        /// </summary>
+        public static List<int> workBenches = new List<int>
+        {
+            TileID.WorkBenches,
+            TileID.HeavyWorkBench,
+            TileID.TinkerersWorkbench
+        };
+        /// <summary>
+        /// A list containing all FURNACES. Add to this if you wish, mods out there. (By default, no sounds connected)
+        /// </summary>
+        public static List<int> furnaces = new List<int>
+        {
+            TileID.Furnaces,
+            TileID.LihzahrdFurnace
+        };
+        /// <summary>
+        /// A list containing all BOOK RELATED THINGS. Add to this if you wish, mods out there. (By default, no sounds connected)
+        /// </summary>
+        public static List<int> books = new List<int>
+        {
+            TileID.Bookcases,
+            TileID.Books
+        };
+
+        public static string FurnaceSoundDir { get; set; }
+        public static string WorkBenchesSoundDir { get => $"{Ambience.ambienceDirectory}/player/crafting_workbenches";
+            set { } }
+        public static string AnvilsSoundDir { get => $"{Ambience.ambienceDirectory}/player/crafting_anvils";
+            set { } }
+        public static string BooksSoundDir { get => $"{Ambience.ambienceDirectory}/player/crafting_bookrelated";
+            set { } }
+        public Mod UsedMod { get; set; }
+        public override void OnCraft(Item item, Recipe recipe)
+        {
+            if (anvils.Intersect(recipe.requiredTile).Any())
+            {
+                Main.PlaySound(UsedMod.GetLegacySoundSlot(SoundType.Custom, AnvilsSoundDir)).Volume *= .8f;
+            }
+            if (workBenches.Intersect(recipe.requiredTile).Any())
+            {
+                Main.PlaySound(UsedMod.GetLegacySoundSlot(SoundType.Custom, WorkBenchesSoundDir)).Volume *= .8f;
+            }
+            if (furnaces.Intersect(recipe.requiredTile).Any())
+            {
+                Main.PlaySound(UsedMod.GetLegacySoundSlot(SoundType.Custom, FurnaceSoundDir)).Volume *= .8f;
+            }
+            if (books.Intersect(recipe.requiredTile).Any())
+            {
+                Main.PlaySound(UsedMod.GetLegacySoundSlot(SoundType.Custom, BooksSoundDir)).Volume *= .8f;
+            }
+            if (recipe.needWater || recipe.needHoney)
+            {
+                Main.PlaySound(SoundID.Splash);
+            }
         }
     }
 }

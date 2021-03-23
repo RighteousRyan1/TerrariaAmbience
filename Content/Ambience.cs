@@ -12,12 +12,96 @@ namespace TerrariaAmbience.Content
 {
     public class Ambience
     {
+        public SoundEffect soundEffect;
+        public SoundEffectInstance soundEffectInstance;
+        public bool Condition
+        {
+            get;
+            set;
+        }
+        public string Name
+        {
+            get;
+            private set;
+        }
+        public string Path
+        {
+            get;
+            private set;
+        }
+        public bool IsLooped
+        {
+            get;
+            private set;
+        }
+
+        public float Volume
+        {
+            get;
+            private set;
+        }
+        private Mod Mod
+        {
+            get;
+            set;
+        }
+        private Ambience validSound;
+
+        private static int count;
+
+        // Change back to private
+        public static List<Ambience> allSounds = new List<Ambience> { };
+        /// <summary>
+        /// Just a generic struct for later changing.
+        /// </summary>
+        public Ambience() { }
+        /// <summary>
+        /// Creates a completely new ambience sound. This will do all of the work for you.
+        /// </summary>
+        /// <param name="mod">The mod to default a path from.</param>
+        /// <param name="pathForSound">The path to the ambient after your mod's direcotry.</param>
+        /// <param name="name">The name for the ambience effect created.</param>
+        /// <param name="conditionToPlayUnder">When or when to not play this ambience.</param>
+        /// <param name="isLooped">Whether or not to loop the ambient.</param>
+        public Ambience(Mod mod, string pathForSound, string name, bool conditionToPlayUnder, bool isLooped = true)
+        {
+
+            validSound = this;
+            allSounds.Add(this);
+
+            Name = name;
+
+            Path = pathForSound;
+
+            IsLooped = isLooped;
+
+            Mod = mod;
+            soundEffect = mod.GetSound(pathForSound);
+            soundEffectInstance = soundEffect.CreateInstance();
+
+            soundEffect.Name = name;
+            Condition = conditionToPlayUnder;
+
+            Volume = soundEffectInstance.Volume;
+
+            if (isLooped)
+            {
+                soundEffectInstance.IsLooped = true;
+            }
+
+            soundEffectInstance.Volume = conditionToPlayUnder ? 1f : 0f;
+        }
+        public override string ToString()
+        {
+            return "{ isLooped: " + IsLooped + " | path: " + Path + " | name: " + Name + " | condition: " + Condition + " }";
+        }
+
         // I really wished that using a list or an array for these values could affect them, through experimentation, I realized..
         // No, it's not gonna work. :/
 
         // In hindsight, I realize that this code could be ultra-optimised, but I'll do that when I have the time to, since I am/was on
         // spring break as of writing this code.
-        
+
         // If someone wants to PR to this repository, it is welcome as long as you don't ruin anything :)
 
         #region Forest SFX
@@ -141,6 +225,7 @@ namespace TerrariaAmbience.Content
 
         public static void Initialize()
         {
+
             var mod = ModContent.GetInstance<TerrariaAmbience>();
 
             ContentInstance.Register(new Ambience());
@@ -281,6 +366,14 @@ namespace TerrariaAmbience.Content
                 Main.soundZombie[2] = mod.GetSound($"{ambienceDirectory}/npcs/zombie3");
 
                 // Main.soundDig[]
+
+
+                // Initialize ModAmbiences
+                foreach (Ambience ambient in allSounds)
+                {
+                    ambient?.soundEffectInstance?.Play();
+                    count = allSounds.Count;
+                }
             }
 
             #endregion
@@ -495,16 +588,25 @@ namespace TerrariaAmbience.Content
         }
         private bool playerBehindWall;
         private bool playerInLiquid;
+
+        private static bool rainSFXStopped;
         public static void DoUpdate_Ambience()
         {
             Terraria.ModLoader.Audio.Music rainSFX = Main.music[Terraria.ID.MusicID.RainSoundEffect];
             if (!Main.dedServ)
             {
-                if (rainSFX.IsPlaying)
+                // TODO: Fix?
+                rainSFX?.Stop(AudioStopOptions.Immediate);
+                if (!rainSFXStopped)
                 {
                     rainSFX?.Pause();
-                    rainSFX?.SetVariable("Volume", 0f);
+                    rainSFXStopped = true;
                 }
+                if (!Main.raining)
+                {
+                    rainSFXStopped = false;
+                }
+                rainSFX?.SetVariable("Volume", 0f);
 
                 if (!Instance.playerBehindWall)
                 {
