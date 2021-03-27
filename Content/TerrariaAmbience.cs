@@ -120,7 +120,6 @@ namespace TerrariaAmbience.Content
         public float delta_lastPos_playerBottom;
         private void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
         {
-            Main.NewText(ModAmbience.allAmbiences.Count);
             orig(self, gameTime);
             var aLoader = Ambience.Instance;
 

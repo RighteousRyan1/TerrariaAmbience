@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
 using Terraria.ModLoader;
 using TerrariaAmbience.Content;
 
@@ -32,10 +33,10 @@ namespace TerrariaAmbience.Core
 
         internal static ModAmbience Instance { get => ModContent.GetInstance<ModAmbience>(); }
 
-        public ModAmbience()
-        {
-            allAmbiences.Add(this);
-        }
+        /// <summary>
+        /// Wh... why are you abusing reflection to make an instance? You're only going to get bad results :/
+        /// </summary>
+        internal ModAmbience() { }
         /// <summary>
         /// Creates a completely new ambience sound. This will do all of the work for you.
         /// </summary>
@@ -121,8 +122,19 @@ namespace TerrariaAmbience.Core
         {
         }
 
+        internal static ModAmbience modAmbiences;
+        internal static List<ModAmbience> modAmbienceList;
+
+        internal static int forIterationNum;
         public static void UpdateModAmbience()
         {
+            modAmbienceList = AllSubClassesOf<ModAmbience>();
+            for (int i = 0; i < AllSubClassesOf<ModAmbience>().Count; i++)
+            {
+                forIterationNum = i;
+                modAmbiences = AllSubClassesOf<ModAmbience>()[i];
+            }
+            // if (!Main.gameMenu) Main.NewText(modAmbienceList[forIterationNum].Name);
             if (Instance.soundEffectInstance != null)
             {
                 if (Instance?.soundEffectInstance.Volume != 0f)
@@ -136,5 +148,13 @@ namespace TerrariaAmbience.Core
                 Instance.soundEffectInstance.Volume += Ambience.decOrIncRate;
             }
         }
+    }
+    class x : ModAmbience
+    {
+        public override string Name => "Sound Number One";
+    }
+    class y : ModAmbience
+    {
+        public override string Name => "Sound Number Two";
     }
 }

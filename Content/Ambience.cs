@@ -452,15 +452,19 @@ namespace TerrariaAmbience.Content
         /// </summary>
         internal static void DoUpdate_Ambience()
         {
+            ModAmbience.UpdateModAmbience();
             Terraria.ModLoader.Audio.Music rainSFX = Main.music[Terraria.ID.MusicID.RainSoundEffect];
             if (!Main.dedServ)
             {
                 // TODO: Fix?
                 rainSFX?.Stop(AudioStopOptions.Immediate);
-                if (!rainSFXStopped)
+                if (!Main.gameMenu)
                 {
-                    rainSFX?.Pause();
-                    rainSFXStopped = true;
+                    if (!rainSFXStopped)
+                    {
+                        rainSFX?.Pause();
+                        rainSFXStopped = true;
+                    }
                 }
                 if (!Main.raining)
                 {
