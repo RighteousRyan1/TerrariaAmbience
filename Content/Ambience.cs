@@ -7,94 +7,14 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework;
 using Terraria.ModLoader;
 using Terraria;
+using TerrariaAmbience.Core;
+using TerrariaAmbience.Content.Players;
+using System.Reflection;
 
 namespace TerrariaAmbience.Content
 {
     public class Ambience
     {
-        public SoundEffect soundEffect;
-        public SoundEffectInstance soundEffectInstance;
-        public bool Condition
-        {
-            get;
-            set;
-        }
-        public string Name
-        {
-            get;
-            private set;
-        }
-        public string Path
-        {
-            get;
-            private set;
-        }
-        public bool IsLooped
-        {
-            get;
-            private set;
-        }
-
-        public float Volume
-        {
-            get;
-            private set;
-        }
-        private Mod Mod
-        {
-            get;
-            set;
-        }
-        private Ambience validSound;
-
-        private static int count;
-
-        // Change back to private
-        public static List<Ambience> allSounds = new List<Ambience> { };
-        /// <summary>
-        /// Just a generic struct for later changing.
-        /// </summary>
-        public Ambience() { }
-        /// <summary>
-        /// Creates a completely new ambience sound. This will do all of the work for you.
-        /// </summary>
-        /// <param name="mod">The mod to default a path from.</param>
-        /// <param name="pathForSound">The path to the ambient after your mod's direcotry.</param>
-        /// <param name="name">The name for the ambience effect created.</param>
-        /// <param name="conditionToPlayUnder">When or when to not play this ambience.</param>
-        /// <param name="isLooped">Whether or not to loop the ambient.</param>
-        public Ambience(Mod mod, string pathForSound, string name, bool conditionToPlayUnder, bool isLooped = true)
-        {
-
-            validSound = this;
-            allSounds.Add(this);
-
-            Name = name;
-
-            Path = pathForSound;
-
-            IsLooped = isLooped;
-
-            Mod = mod;
-            soundEffect = mod.GetSound(pathForSound);
-            soundEffectInstance = soundEffect.CreateInstance();
-
-            soundEffect.Name = name;
-            Condition = conditionToPlayUnder;
-
-            Volume = soundEffectInstance.Volume;
-
-            if (isLooped)
-            {
-                soundEffectInstance.IsLooped = true;
-            }
-
-            soundEffectInstance.Volume = conditionToPlayUnder ? 1f : 0f;
-        }
-        public override string ToString()
-        {
-            return "{ isLooped: " + IsLooped + " | path: " + Path + " | name: " + Name + " | condition: " + Condition + " }";
-        }
 
         // I really wished that using a list or an array for these values could affect them, through experimentation, I realized..
         // No, it's not gonna work. :/
@@ -211,16 +131,6 @@ namespace TerrariaAmbience.Content
                 return ModContent.GetInstance<Ambience>();
             }
         }
-        private SoundEffect runSFX_Cashe;
-        private SoundEffect[] drip_Cashe = new SoundEffect[] { };
-        private SoundEffect[] liquid_Cashe = new SoundEffect[] { };
-
-        private SoundEffectInstance[] dripInstance_Cashe = new SoundEffectInstance[] { };
-        private SoundEffectInstance[] liquidInstance_Cashe = new SoundEffectInstance[] { };
-
-        private SoundEffect[] splashCashe = new SoundEffect[] { };
-        private SoundEffect[] zombieCashe = new SoundEffect[] { };
-
         public static string ambienceDirectory = "Sounds/Custom/ambient";
 
         public static void Initialize()
@@ -254,7 +164,7 @@ namespace TerrariaAmbience.Content
 
                 loader.CavesAmbience = mod.GetSound($"{ambienceDirectory}/biome/ug_drip");
                 loader.CavesAmbienceInstance = loader.CavesAmbience.CreateInstance();
-                loader.CavesAmbience.Name = "Caves/Underground Ambience";
+                loader.CavesAmbience.Name = "Caves";
 
                 loader.SnowBreezeDay = mod.GetSound($"{ambienceDirectory}/biome/snowfall_day");
                 loader.SnowBreezeDayInstance = loader.SnowBreezeDay.CreateInstance();
@@ -305,6 +215,7 @@ namespace TerrariaAmbience.Content
 
                 loader.Rain = mod.GetSound($"{ambienceDirectory}/rain/rain_new");
                 loader.RainInstance = loader.Rain.CreateInstance();
+                loader.Rain.Name = "Rain Outside";
 
                 loader.DayCricketsInstance.IsLooped = true;
                 loader.EveningCricketsInstance.IsLooped = true;
@@ -323,86 +234,29 @@ namespace TerrariaAmbience.Content
                 loader.RainInstance.IsLooped = true;
                 loader.LavaStreamInstance.IsLooped = true;
                 loader.WaterStreamInstance.IsLooped = true;
-
-                #region SFX Changes
-
-                loader.runSFX_Cashe = Main.soundRun;
-                loader.drip_Cashe = Main.soundDrip;
-                loader.liquid_Cashe = Main.soundLiquid;
-
-                loader.liquidInstance_Cashe = Main.soundInstanceLiquid;
-                loader.dripInstance_Cashe = Main.soundInstanceDrip;
-
-                loader.splashCashe = Main.soundSplash;
-
-                loader.zombieCashe = Main.soundZombie;
-
-
-                // loader.splashCashe = Main.soundSplash;
-
-                // Now change the sound (Main.soundX = y)
-
-                // NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
-                // NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
-
-                Main.soundRun = mod.GetSound("Sounds/Custom/nothingness");
-
-                Main.soundDrip[0] = loader.Drip1;
-                Main.soundDrip[1] = loader.Drip2;
-                Main.soundDrip[2] = loader.Drip3;
-
-                Main.soundLiquid[0] = loader.WaterStream;
-                Main.soundLiquid[1] = loader.LavaStream;
-
-                Main.soundInstanceDrip[0] = loader.Drip1Instance;
-                Main.soundInstanceDrip[1] = loader.Drip2Instance;
-                Main.soundInstanceDrip[2] = loader.Drip3Instance;
-
-                Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
-                Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
-
-                Main.soundZombie[0] = mod.GetSound($"{ambienceDirectory}/npcs/zombie1");
-                Main.soundZombie[1] = mod.GetSound($"{ambienceDirectory}/npcs/zombie2");
-                Main.soundZombie[2] = mod.GetSound($"{ambienceDirectory}/npcs/zombie3");
-
-                // Main.soundDig[]
-
-
-                // Initialize ModAmbiences
-                foreach (Ambience ambient in allSounds)
-                {
-                    ambient?.soundEffectInstance?.Play();
-                    count = allSounds.Count;
-                }
             }
-
-            #endregion
-        }
-        public static void Unload()
-        {
-            Main.soundRun = Instance.runSFX_Cashe;
-            Main.soundDrip = Instance.drip_Cashe;
-            Main.soundLiquid = Instance.liquid_Cashe;
-
-            Main.soundInstanceDrip = Instance.dripInstance_Cashe;
-            Main.soundInstanceLiquid = Instance.liquidInstance_Cashe;
-
-            Main.soundZombie = Instance.zombieCashe;
-
-            Main.soundSplash = Instance.splashCashe;
         }
         public static float decOrIncRate = 0.01f;
         public static void UpdateVolume()
         {
-            decOrIncRate = 0.01f;
+            if (float.TryParse(ModContent.GetInstance<AmbientConfig>().transitionHarshness, out float given) && given != 0f)
+            {
+                decOrIncRate = float.Parse(ModContent.GetInstance<AmbientConfig>().transitionHarshness);
+            }
+            else
+            {
+                ModContent.GetInstance<AmbientConfig>().transitionHarshness = "0.01";
+                // decOrIncRate = 0.01f;
+            }
+            // Main.NewText(decOrIncRate);
             if (Main.gameMenu) return;
-            AmbiencePlayer ambiencePlayer = Main.player[Main.myPlayer].GetModPlayer<AmbiencePlayer>();
+            FootstepsAndAmbiencePlayer ambiencePlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsAndAmbiencePlayer>();
 
             Player player = ambiencePlayer.player;
             var aLoader = Instance;
             if (Main.hasFocus)
             {
-                if ((player.ZoneForest() || player.ZoneHoly) && (Main.dayTime && Main.time > 14400) && (Main.dayTime && Main.time < 46800))
+                if ((player.ZoneForest() || (player.ZoneHoly && player.ZoneOverworldHeight && !player.ZoneDesert)) && (Main.dayTime && Main.time > 14400) && (Main.dayTime && Main.time < 46800))
                 {
                     aLoader.dayCricketsVolume += decOrIncRate;
                 }
@@ -411,7 +265,7 @@ namespace TerrariaAmbience.Content
                     aLoader.dayCricketsVolume -= decOrIncRate;
                 }
 
-                if ((player.ZoneForest() || player.ZoneHoly) && aLoader.DayCricketsInstance.Volume == 0 && Main.dayTime)
+                if ((player.ZoneForest() || (player.ZoneHoly && player.ZoneOverworldHeight && !player.ZoneDesert)) && (Main.time >= 46800 && Main.dayTime))
                 {
                     aLoader.eveningCricketsVolume += decOrIncRate;
                 }
@@ -421,7 +275,7 @@ namespace TerrariaAmbience.Content
                     aLoader.eveningCricketsVolume -= decOrIncRate;
                 }
 
-                if ((player.ZoneForest() || player.ZoneHoly) && !Main.dayTime)
+                if ((player.ZoneForest() || (player.ZoneHoly && player.ZoneOverworldHeight && !player.ZoneDesert)) && !Main.dayTime)
                 {
                     aLoader.nightCricketsVolume += decOrIncRate;
                 }
@@ -540,7 +394,7 @@ namespace TerrariaAmbience.Content
                 {
                     rain.rotation = rain.velocity.ToRotation() + MathHelper.PiOver2;
                 }
-                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight))
+                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight) && player.ZoneForest())
                 {
                     aLoader.rainVolume += decOrIncRate;
                 }
@@ -568,7 +422,10 @@ namespace TerrariaAmbience.Content
                 aLoader.rainVolume -= decOrIncRate;
             }
         }
-        public static void PlayAllAmbience()
+        /// <summary>
+        /// Useable only in this assembly for many reasons. Plays all sounds once they are initialized.
+        /// </summary>
+        internal static void PlayAllAmbience()
         {
             Instance.DayCricketsInstance?.Play();
             Instance.EveningCricketsInstance?.Play();
@@ -590,7 +447,10 @@ namespace TerrariaAmbience.Content
         private bool playerInLiquid;
 
         private static bool rainSFXStopped;
-        public static void DoUpdate_Ambience()
+        /// <summary>
+        /// Updates everything that has to do with ambiences.
+        /// </summary>
+        internal static void DoUpdate_Ambience()
         {
             Terraria.ModLoader.Audio.Music rainSFX = Main.music[Terraria.ID.MusicID.RainSoundEffect];
             if (!Main.dedServ)
@@ -607,7 +467,6 @@ namespace TerrariaAmbience.Content
                     rainSFXStopped = false;
                 }
                 rainSFX?.SetVariable("Volume", 0f);
-
                 if (!Instance.playerBehindWall)
                 {
                     Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.65f * Main.ambientVolume;
@@ -675,7 +534,7 @@ namespace TerrariaAmbience.Content
                 // Main.NewText(Instance.crackleVolume * 0.95f * Main.soundVolume);
 
                 if (Main.gameMenu) return;
-                Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbiencePlayer>().player;
+                Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsAndAmbiencePlayer>().player;
 
                 if (player.HeadWet())
                 {
@@ -750,6 +609,18 @@ namespace TerrariaAmbience.Content
         public static void ClampAll()
         {
             var aLoader = Instance;
+
+            if (ModAmbience.Instance.soundEffectInstance != null)
+            {
+                if (ModAmbience.Instance.soundEffectInstance.Volume > 1)
+                {
+                    ModAmbience.Instance.soundEffectInstance.Volume = 1;
+                }
+                if (ModAmbience.Instance.soundEffectInstance.Volume < 0)
+                {
+                    ModAmbience.Instance.soundEffectInstance.Volume = 0;
+                }
+            }
             if (aLoader.rainVolume > 1)
             {
                 aLoader.rainVolume = 1;

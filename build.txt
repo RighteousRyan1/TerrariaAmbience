@@ -1,5 +1,5 @@
 displayName = Terraria Ambience
 author = Ryan (RighteousRyan), Tika
-version = 0.1.1.2
+version = 0.1.2
 homepage = https://discord.gg/pT2BzSG
 includePDB = true

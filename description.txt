@@ -19,8 +19,15 @@ Nothing for now!
 
 Most Recent Update:
 
-[POTENTIAL BUGFIX] Fixed rain not working.
-[NEW FEATURE] Crafting sounds. Players should hear when another player crafts something!
+[ANNOUNCEMENT] Other players hearing crafting will only be client-sided for now. Wait for updates.
+[NEW FEATURE] Barebones crossmod compatibility with footstep sounds has been added, If you wish to add footstep-tiles to your mods from this mod, feel free to depend on the mod and add the code necessary.
+
+
+
+
+
+
+
 
 
 
@@ -106,3 +113,4 @@ S: Grillen - viele Grillen, Tag.wav by BockelSound -- License: Attribution
 S: forest summer Roond 020 200619_0186.wav by klankbeeld  -- License: Attribution
 S: summer evening.WAV by inchadney  -- License: Attribution
 S: Water Swirl, Small, 14.wav by InspectorJ -- Licence: Attribution
+S: Page turn.wav by InspectorJ -- Liscence: Attribution
