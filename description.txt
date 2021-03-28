@@ -20,7 +20,11 @@ Nothing for now!
 Most Recent Update:
 
 [ANNOUNCEMENT] Other players hearing crafting will only be client-sided for now. Wait for updates.
-[NEW FEATURE] Barebones crossmod compatibility with footstep sounds has been added, If you wish to add footstep-tiles to your mods from this mod, feel free to depend on the mod and add the code necessary.
+[ANNOUNCEMENT] Other mods can now add their own tiles for footstep sounds for easy mod compatibility. Ambiences are still on the wait, so about 60-65% of all the work is done!
+[PREVIOUS FEATURE] Barebones crossmod compatibility with footstep sounds has been added, If you wish to add footstep-tiles to your mods from this mod, feel free to depend on the mod and add the code necessary.
+
+[BUG FIX] Fixed no ambience in the mornings.
+[NEW FEATURE] Mod Config updated to change how harsh biome ambience transitions are. Input a good value otherwise the value will default itself!
 
 
 

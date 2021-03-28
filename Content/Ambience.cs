@@ -265,7 +265,7 @@ namespace TerrariaAmbience.Content
                     aLoader.dayCricketsVolume -= decOrIncRate;
                 }
 
-                if ((player.ZoneForest() || (player.ZoneHoly && player.ZoneOverworldHeight && !player.ZoneDesert)) && (Main.time >= 46800 && Main.dayTime))
+                if ((player.ZoneForest() || (player.ZoneHoly && player.ZoneOverworldHeight && !player.ZoneDesert)) && ((Main.time >= 46800 || Main.time <= 14400) && Main.dayTime))
                 {
                     aLoader.eveningCricketsVolume += decOrIncRate;
                 }
