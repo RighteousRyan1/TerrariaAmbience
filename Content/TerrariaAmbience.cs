@@ -9,11 +9,71 @@ using TerrariaAmbience.Core;
 using System.Linq;
 using System.IO;
 using TerrariaAmbience.Content.Players;
+using System;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace TerrariaAmbience.Content
 {
 	public partial class TerrariaAmbience : Mod
 	{
+        public object x;
+        public override object Call(params object[] args)
+        {
+            try
+            {
+                string message = args[0] as string;
+                if (message == "AddTilesToList")
+                {
+                    Mod mod = args[1] as Mod;
+                    string listName = args[2] as string; // Can be Stone, Grass, Sand, or Snow (FOR NOW, OR EVER)
+                    string[] nameStringList = args[3] as string[];
+                    int[] tiles = args[4] as int[];
+                    if (!Main.dedServ)
+                        if (mod != null)
+                        {
+                            if (listName == "Grass")
+                                TileDetection.AddTilesToList(mod, TileDetection.grassTiles, nameStringList);
+                            else if (listName == "Stone")
+                                TileDetection.AddTilesToList(mod, TileDetection.stoneBlocks, nameStringList);
+                            else if (listName == "Sand")
+                                TileDetection.AddTilesToList(mod, TileDetection.sandBlocks, nameStringList);
+                            else if (listName == "Snow")
+                                TileDetection.AddTilesToList(mod, TileDetection.snowyblocks, nameStringList);
+                        }
+                        else if (mod == null)
+                        {
+                            if (listName == "Grass")
+                                TileDetection.AddTilesToList(TileDetection.grassTiles, tiles);
+                            else if (listName == "Stone")
+                                TileDetection.AddTilesToList(TileDetection.stoneBlocks, tiles);
+                            else if (listName == "Sand")
+                                TileDetection.AddTilesToList(TileDetection.sandBlocks, tiles);
+                            else if (listName == "Snow")
+                                TileDetection.AddTilesToList(TileDetection.snowyblocks, tiles);
+                        }
+                    return "Tiles added successfully!";
+                }
+                else if (message == "AddAmbience")
+                {
+                    Mod mod = args[1] as Mod;
+                    string soundPath = args[2] as string;
+                    string name = args[3] as string;
+                    bool? checkConditional = args[4] as bool?;
+                    if (!Main.dedServ)
+                        x = new ModAmbience(mod,soundPath, name, checkConditional.Value);
+                    return x;
+                }
+                else
+                {
+                    Logger.Error("Call Error: Unknown Message: " + message);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Mod.Call Error: " + e.StackTrace + e.Message);
+            }
+            return "Call Failed";
+        }
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
             /*int pktType = reader.ReadInt32();
@@ -56,13 +116,13 @@ namespace TerrariaAmbience.Content
         }
         public override void Load()
         {
-            ModAmbience.Initialize();
             Ambience.Initialize();
             On.Terraria.Main.DoUpdate += Main_DoUpdate;
             MethodDetours.DetourAll();
         }
         public override void PostSetupContent()
         {
+            ModAmbience.Initialize();
             Mod calamity = ModLoader.GetMod("CalamityMod");
             Mod thor = ModLoader.GetMod("ThoriumMod");
 

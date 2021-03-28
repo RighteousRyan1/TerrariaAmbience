@@ -16,14 +16,11 @@ namespace TerrariaAmbience.Core
     /// </summary>
     public class ModAmbience
     {
-
         public SoundEffect soundEffect;
         public SoundEffectInstance soundEffectInstance;
         public bool Condition { get; set; }
         public string SFXName { get; private set; }
         public string Path { get; private set; }
-        public bool IsLooped { get; private set; }
-
         public float Volume { get; private set; }
         private Mod Mod { get; set; }
 
@@ -32,6 +29,7 @@ namespace TerrariaAmbience.Core
         internal static List<ModAmbience> allAmbiences = new List<ModAmbience> { };
 
         internal static ModAmbience Instance { get => ModContent.GetInstance<ModAmbience>(); }
+
 
         /// <summary>
         /// Wh... why are you abusing reflection to make an instance? You're only going to get bad results :/
@@ -45,17 +43,16 @@ namespace TerrariaAmbience.Core
         /// <param name="name">The name for the ambience effect created.</param>
         /// <param name="conditionToPlayUnder">When or when to not play this ambience.</param>
         /// <param name="isLooped">Whether or not to loop the ambient.</param>
-        /*public Ambience(Mod mod, string pathForSound, string name, bool conditionToPlayUnder, bool isLooped = true)
+        public ModAmbience(Mod mod, string pathForSound, string name, bool conditionToPlayUnder)
         {
-            ContentInstance.Register(this);
-            validSound = this;
-            allAmbiences.Add(this);
+            if (allAmbiences.All(x => x.Name != name))
+            {
+                allAmbiences.Add(this);
+            }
 
             Name = name;
 
             Path = pathForSound;
-
-            IsLooped = isLooped;
 
             Mod = mod;
             soundEffect = mod.GetSound(pathForSound);
@@ -66,16 +63,11 @@ namespace TerrariaAmbience.Core
 
             Volume = soundEffectInstance.Volume;
 
-            if (isLooped)
-            {
-                soundEffectInstance.IsLooped = true;
-            }
-
             soundEffectInstance.Volume = conditionToPlayUnder ? 1f : 0f;
-        }*/
+        }
         public override string ToString()
         {
-            return "{ isLooped: " + IsLooped + " | path: " + Path + " | name: " + Name + " | condition: " + Condition + " }";
+            return "{ path: " + Path + " | name: " + Name + " | condition: " + Condition + " }";
         }
         /// <summary>
         /// Do things while your ambience is playing.
@@ -124,37 +116,37 @@ namespace TerrariaAmbience.Core
 
         internal static ModAmbience modAmbiences;
         internal static List<ModAmbience> modAmbienceList;
-
         internal static int forIterationNum;
         public static void UpdateModAmbience()
         {
             modAmbienceList = AllSubClassesOf<ModAmbience>();
-            for (int i = 0; i < AllSubClassesOf<ModAmbience>().Count; i++)
+            for (int i = 0; i < allAmbiences.Count; i++)
             {
                 forIterationNum = i;
-                modAmbiences = AllSubClassesOf<ModAmbience>()[i];
+                modAmbiences = allAmbiences[i];
             }
             // if (!Main.gameMenu) Main.NewText(modAmbienceList[forIterationNum].Name);
-            if (Instance.soundEffectInstance != null)
+            /*if (modAmbienceList[forIterationNum] != null)
             {
-                if (Instance?.soundEffectInstance.Volume != 0f)
+                if (modAmbienceList[forIterationNum].Volume != 0f)
                 {
-                    Instance.UpdateActive(ref Instance.soundEffectInstance);
+                    modAmbienceList[forIterationNum].UpdateActive(ref Instance.soundEffectInstance);
                 }
-            }
+            }*/
 
-            if (Instance.WhenToPlay())
+            /*if (modAmbienceList[forIterationNum].WhenToPlay())
             {
                 Instance.soundEffectInstance.Volume += Ambience.decOrIncRate;
-            }
+            }*/
         }
     }
-    class x : ModAmbience
+    public static class ModAmbienceExtensions
     {
-        public override string Name => "Sound Number One";
-    }
-    class y : ModAmbience
-    {
-        public override string Name => "Sound Number Two";
+        public static void Remove(this ModAmbience modAmbience)
+        {
+            ModAmbience.allAmbiences.Remove(modAmbience);
+            // This is literally the definition of being stupid
+            // Mirsario is gonna see this and flame me but it's fine :)
+        }
     }
 }

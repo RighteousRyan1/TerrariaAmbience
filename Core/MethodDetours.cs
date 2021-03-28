@@ -29,7 +29,8 @@ namespace TerrariaAmbience.Core
             var aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsAndAmbiencePlayer>();
             if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null)
             {
-                displayable = ModAmbience.modAmbienceList.Count <= 0 ?$"{loader.BeachWaves.Name}: {loader.beachWavesVolume}"
+                displayable = ModAmbience.modAmbienceList.Count <= 0 && ModAmbience.allAmbiences.Count <= 0 ? 
+                    $"{loader.BeachWaves.Name}: {loader.beachWavesVolume}"
                     + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
                     + $"\n{loader.SnowBreezeDay.Name}: {loader.snowDayVolume}"
                     + $"\n{loader.SnowBreezeNight.Name}: {loader.snowNightVolume}"
@@ -48,8 +49,8 @@ namespace TerrariaAmbience.Core
                     + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
                     + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
                     + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
-                    + $"\nSand: {aPlayer.soundInstanceSandStep.State}" :
-
+                    + $"\nSand: {aPlayer.soundInstanceSandStep.State}" 
+                    :
                displayable = $"{loader.BeachWaves.Name}: {loader.beachWavesVolume}"
                     + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
                     + $"\n{loader.SnowBreezeDay.Name}: {loader.snowDayVolume}"
@@ -79,12 +80,22 @@ namespace TerrariaAmbience.Core
                     {
                         if (ModAmbience.modAmbienceList.Count > 0)
                         {
-                            index = ModAmbience.modAmbienceList.Count;
+                            index = ModAmbience.allAmbiences.Count;
                             displayable += $"\n{ambient.Name}: {ambient.Volume}";
                         }
                     }
                 }
-                // Main.NewText(index);
+                foreach (ModAmbience ambient in ModAmbience.allAmbiences)
+                {
+                    if (ambient != null)
+                    {
+                        if (ModAmbience.allAmbiences.Count > 0)
+                        {
+                            index = ModAmbience.allAmbiences.Count;
+                            displayable = string.Concat(displayable, $"\n{ambient.Name}: {ambient.Volume}");
+                        }
+                    }
+                }
             }
 
             if (ModContent.GetInstance<AmbientConfig>().volVals)
@@ -108,7 +119,7 @@ namespace TerrariaAmbience.Core
 
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, 
                     Main.fontDeathText, 
-                    displayable != default ? displayable : "NUT", 
+                    displayable != default ? displayable : "Sounds not valid", 
                     position: drawPos, 
                     Color.LightGray, 
                     0f, 
