@@ -57,26 +57,28 @@ namespace TerrariaAmbience.Content
 
             // NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
             // NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
+            if (!Main.dedServ)
+            {
+                Main.soundRun = mod.GetSound("Sounds/Custom/nothingness");
 
-            Main.soundRun = mod.GetSound("Sounds/Custom/nothingness");
+                Main.soundDrip[0] = loader.Drip1;
+                Main.soundDrip[1] = loader.Drip2;
+                Main.soundDrip[2] = loader.Drip3;
 
-            Main.soundDrip[0] = loader.Drip1;
-            Main.soundDrip[1] = loader.Drip2;
-            Main.soundDrip[2] = loader.Drip3;
+                Main.soundLiquid[0] = loader.WaterStream;
+                Main.soundLiquid[1] = loader.LavaStream;
 
-            Main.soundLiquid[0] = loader.WaterStream;
-            Main.soundLiquid[1] = loader.LavaStream;
+                Main.soundInstanceDrip[0] = loader.Drip1Instance;
+                Main.soundInstanceDrip[1] = loader.Drip2Instance;
+                Main.soundInstanceDrip[2] = loader.Drip3Instance;
 
-            Main.soundInstanceDrip[0] = loader.Drip1Instance;
-            Main.soundInstanceDrip[1] = loader.Drip2Instance;
-            Main.soundInstanceDrip[2] = loader.Drip3Instance;
+                Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
+                Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
 
-            Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
-            Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
-
-            Main.soundZombie[0] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie1");
-            Main.soundZombie[1] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie2");
-            Main.soundZombie[2] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie3");
+                Main.soundZombie[0] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie1");
+                Main.soundZombie[1] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie2");
+                Main.soundZombie[2] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie3");
+            }
             #endregion
         }
         public static void Unload()

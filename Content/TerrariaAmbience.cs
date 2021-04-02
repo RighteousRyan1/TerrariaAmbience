@@ -11,6 +11,7 @@ using System.IO;
 using TerrariaAmbience.Content.Players;
 using System;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria.Localization;
 
 namespace TerrariaAmbience.Content
 {
@@ -116,6 +117,19 @@ namespace TerrariaAmbience.Content
         }
         public override void Load()
         {
+            string path = $"C://Users//{Environment.UserName}//Documents//My Games//Terraria//ModLoader//Mods//Cache//ta_secretconfig.txt";
+
+            if (File.Exists(path) && File.ReadAllLines(path)[0] != null)
+            {
+                string[] lines = File.ReadAllLines(path);
+
+                Ambience.TAAmbient = float.Parse(lines[0]);
+            }
+            else
+            {
+                Ambience.TAAmbient = 100f;
+            }
+
             Ambience.Initialize();
             On.Terraria.Main.DoUpdate += Main_DoUpdate;
             MethodDetours.DetourAll();
@@ -165,6 +179,12 @@ namespace TerrariaAmbience.Content
         }
         public override void Unload()
         {
+            string path = $"C://Users//{Environment.UserName}//Documents//My Games//Terraria//ModLoader//Mods//Cache//ta_secretconfig.txt";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            File.WriteAllText(path, Ambience.TAAmbient.ToString() + "\n\nDO NOT CHANGE THIS NUMBER.");
             ModAmbience.Unload();
             SoundChanges.Unload();
         }
@@ -202,6 +222,7 @@ namespace TerrariaAmbience.Content
                 aLoader.beachWavesVolume = 0f;
                 aLoader.hellRumbleVolume = 0f;
                 aLoader.rainVolume = 0f;
+                aLoader.morningCricketsVolume = 0f;
             }
             if (Main.gameMenu) return;
             Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsAndAmbiencePlayer>().player;
@@ -226,32 +247,6 @@ namespace TerrariaAmbience.Content
                 }
             }
             Ambience.ClampAll();
-        }
-    }
-    public static class ExtensionMethods
-    {
-        public static bool ZoneForest(this Player player)
-        {
-            return !player.ZoneJungle
-                   && !player.ZoneDungeon
-                   && !player.ZoneCorrupt
-                   && !player.ZoneCrimson
-                   && !player.ZoneHoly
-                   && !player.ZoneSnow
-                   && !player.ZoneUndergroundDesert
-                   && !player.ZoneGlowshroom
-                   && !player.ZoneMeteor
-                   && !player.ZoneBeach
-                   && !player.ZoneDesert
-                   && player.ZoneOverworldHeight;
-        }
-        public static bool ZoneUnderground(this Player player)
-        {
-            return player.Center.Y >= Main.rockLayer * 16 && !player.ZoneUnderworldHeight;
-        }
-        public static bool HeadWet(this Player player)
-        {
-            return Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.25) / 16].liquid > 0;
         }
     }
     public class CampfireDetection : GlobalTile

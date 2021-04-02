@@ -29,10 +29,16 @@ namespace TerrariaAmbience.Content.Players
         public SoundEffectInstance soundInstanceSnowStep;
         public SoundEffectInstance soundInstanceGrassStep;
 
+        public SoundEffectInstance thunderInstance;
+        public SoundEffectInstance hootInstance;
+        public SoundEffectInstance howlInstance;
+
+        internal int timerUntilValidChestStateChange;
+
         public override void OnEnterWorld(Player player)
         {
             Ambience.PlayAllAmbience();
-
+            timerUntilValidChestStateChange = 0;
             soundInstanceGrassStep = Main.soundInstanceRun;
             soundInstanceWoodStep = Main.soundInstanceRun;
             soundInstanceSandStep = Main.soundInstanceRun;
@@ -42,6 +48,9 @@ namespace TerrariaAmbience.Content.Players
 
         private int legFrameSnapShotNew; // These 2 variables should never be modified. Ever.
         private int legFrameSnapShotOld;
+
+        private int chestStateNew;
+        private int chestStateOld; // Same as above.
 
         /// <summary>
         /// For the use of rain. Not modifyable publically due to potential anomalies happening otherwise.
@@ -61,6 +70,8 @@ namespace TerrariaAmbience.Content.Players
         }
         public override void PreUpdate()
         {
+            timerUntilValidChestStateChange++;
+            // This is a pretty niche finding for tiles above said player
             Tile playerTile = Main.tile[(int)player.Center.X / 16, (int)player.Center.Y / 16];
             for (int i = (int)player.Top.X - 1; i < player.Top.X + 1; i++)
             {
@@ -79,9 +90,34 @@ namespace TerrariaAmbience.Content.Players
                 }
             }
 
+            bool hasLegArmor = Utils.CheckPlayerArmorSlot(player, Utils.IDs.ArmorSlotID.LegSlot);
+
+            // Main.NewText(hasLegArmor);
+
             legFrameSnapShotNew = player.legFrame.Y / 20;
 
+            chestStateNew = player.chest;
+
             // Good Values -> 25 (first), 44 (second), 14 = midair
+            // Main.NewText($"{chestStateNew}, {chestStateOld}");
+
+            if (Main.soundVolume > 0f)
+            {
+                if (ModContent.GetInstance<AmbientConfigServer>().chestSounds)
+                {
+                    if (timerUntilValidChestStateChange > 10)
+                    {
+                        if ((chestStateNew != chestStateOld) && chestStateNew != -1)
+                        {
+                            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/player/chest_open"), player.Center).Volume = 0.6f;
+                        }
+                        if ((chestStateNew != chestStateOld) && chestStateNew == -1)
+                        {
+                            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/player/chest_close"), player.Center);
+                        }
+                    }
+                }
+            }
 
             int randWood = Main.rand.Next(1, 8);
             int randSand = Main.rand.Next(1, 4);
@@ -97,10 +133,11 @@ namespace TerrariaAmbience.Content.Players
             string pathSnow = $"Sounds/Custom/steps/snow/step{randSnow}";
             string pathWet = $"Sounds/Custom/steps/wet/step{randWet}";
 
-            if (ModContent.GetInstance<AmbientConfig>().footsteps)
+            if (ModContent.GetInstance<AmbientConfigClient>().footsteps)
             {
+                // TODO: if (!hasLegArmor)
                 // Main.NewText(Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16].wall);
-                if (Main.soundVolume != 0f)
+                if (Main.soundVolume != 0f && !player.mount.Active)
                 {
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSandyTile)
                     {
@@ -208,35 +245,67 @@ namespace TerrariaAmbience.Content.Players
                 }
             }
             legFrameSnapShotOld = legFrameSnapShotNew;
+            chestStateOld = chestStateNew;
         }
         public override void PostUpdate()
         {
+            // Main.NewText(hootInstance == null);
             if (!Main.dayTime)
             {
                 int rand = Main.rand.Next(1, 3);
                 string pathToHoot = $"Sounds/Custom/ambient/animals/hoot{rand}";
                 string pathToHowl = $"Sounds/Custom/ambient/animals/howl";
+                string pathToThunder = $"Sounds/Custom/ambient/rain/thunder";
 
                 int randX = Main.rand.Next(-1750, 1750);
                 int randY = Main.rand.Next(-1750, 1750);
                 int chance1 = Main.rand.Next(750);
                 int chance2 = Main.rand.Next(1500);
+                int chance3 = Main.rand.Next(3500);
                 if (Main.soundVolume > 0f)
                 {
-                    if (chance1 == 0)
+                    //if (hootInstance.IsStopped())
                     {
-                        if (player.ZoneForest())
+                        if (chance1 == 0)
                         {
-                            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHoot), player.Center + new Vector2(randX, randY)).Volume = Main.ambientVolume * 0.9f;
+                            if (player.ZoneForest())
+                            {
+                                hootInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHoot), player.Center + new Vector2(randX, randY));
+                                hootInstance.Volume = Main.ambientVolume * 0.9f;
+                            }
                         }
                     }
-                    if (player.ZoneSnow && !player.ZoneUnderworldHeight && !player.ZoneRockLayerHeight)
+                    //if (howlInstance.IsStopped())
                     {
-                        if (chance2 == 1)
+                        if (player.ZoneSnow && !player.ZoneUnderworldHeight && !player.ZoneRockLayerHeight)
                         {
-                            var SFE = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHowl), player.Center + new Vector2(randX, randY));
-                            SFE.Volume = Main.ambientVolume * 0.1f;
-                            SFE.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
+                            if (chance2 == 1)
+                            {
+                                howlInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHowl), player.Center + new Vector2(randX, randY));
+                                howlInstance.Volume = Main.ambientVolume * 0.1f;
+                                howlInstance.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
+                            }
+                        }
+                    }
+                    //if (thunderInstance.IsStopped())
+                    {
+                        if (Main.raining && !player.ZoneSnow && !player.ZoneUnderworldHeight && !player.ZoneRockLayerHeight && !player.ZoneDirtLayerHeight)
+                        {
+                            if (chance3 == 2)
+                            {
+                                thunderInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToThunder), player.Center + new Vector2(randX, randY));
+                                thunderInstance.Volume = Main.ambientVolume * 0.9f;
+                                thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
+                            }
+                        }
+                        else if (player.ZoneDirtLayerHeight)
+                        {
+                            if (chance3 == 2)
+                            {
+                                thunderInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToThunder), player.Center + new Vector2(randX, randY));
+                                thunderInstance.Volume = Main.ambientVolume * 0.45f;
+                                thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
+                            }
                         }
                     }
                 }
@@ -261,7 +330,7 @@ namespace TerrariaAmbience.Content.Players
             {
                 aLoader.crackleVolume = 0;
             }
-            if (isNearCampfire && ModContent.GetInstance<AmbientConfig>().campfireSounds)
+            if (isNearCampfire && ModContent.GetInstance<AmbientConfigClient>().campfireSounds)
             {
                 Ambience.Instance.crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceOf / 780;
             }

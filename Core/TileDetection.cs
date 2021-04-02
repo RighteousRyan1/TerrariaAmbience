@@ -130,7 +130,8 @@ namespace TerrariaAmbience.Core
                 TileID.Platinum,
                 TileID.PlatinumBrick,
                 TileID.Hellstone,
-                TileID.HellstoneBrick
+                TileID.HellstoneBrick,
+                TileID.Asphalt,
         };
         public static List<int> sandBlocks = new List<int>
         {
@@ -173,12 +174,13 @@ namespace TerrariaAmbience.Core
                 player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSandyTile = false;
 
             // TODO: Include ore bricks later, as well as the ore themselves
-            if (stoneBlocks.Any(x => x == type))
+            if (stoneBlocks.Any(x => x == type) || (type == TileID.FishingCrate && Main.tile[(int)player.Bottom.X / 16, (int)player.Bottom.Y / 16 + 1].frameX > 32))
                 player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile = true;
             else
                 player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile = false;
 
-            if (!player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnGrassyTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSandyTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSnowyTile)
+            if (!player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnGrassyTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSandyTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSnowyTile
+                || (type == TileID.FishingCrate && Main.tile[(int)player.Bottom.X / 16, (int)player.Bottom.Y / 16 + 1].frameX <= 32))
                 player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnWoodTile = true;
             else
                 player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnWoodTile = false;

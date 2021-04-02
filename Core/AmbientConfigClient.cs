@@ -3,7 +3,7 @@ using Terraria.ModLoader.Config;
 
 namespace TerrariaAmbience.Core
 {
-    public class AmbientConfig : ModConfig
+    public class AmbientConfigClient : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
         [Header("Ambience and Sounds")]
@@ -28,5 +28,15 @@ namespace TerrariaAmbience.Core
         [Tooltip("Toggle volume debugging values, such as snow, crickets, and more.")]
         [DefaultValue(false)]
         public bool volVals;
+    }
+    public class AmbientConfigServer : ModConfig
+    {
+
+        public override ConfigScope Mode => ConfigScope.ServerSide;
+        [Header("Ambience and Sounds")]
+        [Label("Toggle Chest Opening Sounds")]
+        [Tooltip("Toggle on to turn chest sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.")]
+        [DefaultValue(true)]
+        public bool chestSounds;
     }
 }
