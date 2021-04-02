@@ -18,7 +18,7 @@ namespace TerrariaAmbience.Content
         private SoundEffectInstance[] dripInstance_Cashe = new SoundEffectInstance[] { };
         private SoundEffectInstance[] liquidInstance_Cashe = new SoundEffectInstance[] { };
 
-        private SoundEffect[] splashCashe = new SoundEffect[] { };
+        internal SoundEffect[] splashCashe = new SoundEffect[] { };
         private SoundEffect[] zombieCashe = new SoundEffect[] { };
 
         public static SoundChanges Instance

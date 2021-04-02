@@ -31,12 +31,17 @@ namespace TerrariaAmbience.Core
     }
     public class AmbientConfigServer : ModConfig
     {
-
         public override ConfigScope Mode => ConfigScope.ServerSide;
         [Header("Ambience and Sounds")]
         [Label("Toggle Chest Opening Sounds")]
         [Tooltip("Toggle on to turn chest sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.")]
         [DefaultValue(true)]
         public bool chestSounds;
+
+        [Label("Toggle New Splash Sounds")]
+        [Tooltip("Toggle on to turn new splash sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.\n\nReload Required.")]
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool newSplashes;
     }
 }

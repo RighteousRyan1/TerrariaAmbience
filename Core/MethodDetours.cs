@@ -22,6 +22,9 @@ namespace TerrariaAmbience.Core
             On.Terraria.IngameOptions.Draw += IngameOptions_Draw;
             On.Terraria.IngameOptions.DrawRightSide += IngameOptions_DrawRightSide;
             On.Terraria.IngameOptions.DrawLeftSide += IngameOptions_DrawLeftSide;
+
+            active = true;
+            posY = 4;
         }
         private static bool IngameOptions_DrawLeftSide(On.Terraria.IngameOptions.orig_DrawLeftSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float[] scales, float minscale, float maxscale, float scalespeed)
         {
@@ -104,44 +107,46 @@ namespace TerrariaAmbience.Core
             if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null)
             {
                 displayable = ModAmbience.modAmbienceList.Count <= 0 && ModAmbience.allAmbiences.Count <= 0 ? 
-                    $"{loader.BeachWaves.Name}: {loader.beachWavesVolume}"
+                    $"{loader.BeachWaves.Name}: {loader.BeachWavesInstance.Volume}"
                     + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
-                    + $"\n{loader.SnowBreezeDay.Name}: {loader.snowDayVolume}"
-                    + $"\n{loader.SnowBreezeNight.Name}: {loader.snowNightVolume}"
-                    + $"\n{loader.MorningCrickets.Name}: {loader.morningCricketsVolume}"
-                    + $"\n{loader.DayCrickets.Name}: {loader.dayCricketsVolume}"
-                    + $"\n{loader.NightCrickets.Name}: {loader.nightCricketsVolume}"
-                    + $"\n{loader.EveningCrickets.Name}: {loader.eveningCricketsVolume}"
-                    + $"\n{loader.CavesAmbience.Name}: {loader.ugAmbienceVolume}"
-                    + $"\n{loader.CrimsonRumbles.Name}: {loader.crimsonRumblesVolume}"
-                    + $"\n{loader.CorruptionRoars.Name}: {loader.corruptionRoarsVolume}"
-                    + $"\n{loader.DayJungle.Name}: {loader.dayJungleVolume}"
-                    + $"\n{loader.NightJungle.Name}: {loader.nightJungleVolume}"
-                    + $"\n{loader.DesertAmbience.Name}: {loader.desertCricketsVolume}"
-                    + $"\n{loader.HellRumble.Name}: {loader.hellRumbleVolume}"
-                    + $"\n{loader.Rain.Name}: {loader.rainVolume}"
+                    + $"\n{loader.SnowBreezeDay.Name}: {loader.SnowBreezeDayInstance.Volume}"
+                    + $"\n{loader.SnowBreezeNight.Name}: {loader.SnowBreezeNightInstance.Volume}"
+                    + $"\n{loader.MorningCrickets.Name}: {loader.MorningCricketsInstance.Volume}"
+                    + $"\n{loader.DayCrickets.Name}: {loader.DayCricketsInstance.Volume}"
+                    + $"\n{loader.NightCrickets.Name}: {loader.NightCricketsInstance.Volume}"
+                    + $"\n{loader.EveningCrickets.Name}: {loader.EveningCricketsInstance.Volume}"
+                    + $"\n{loader.CavesAmbience.Name}: {loader.CavesAmbienceInstance.Volume}"
+                    + $"\n{loader.CrimsonRumbles.Name}: {loader.CrimsonRumblesInstance.Volume}"
+                    + $"\n{loader.CorruptionRoars.Name}: {loader.CorruptionRoarsInstance.Volume}"
+                    + $"\n{loader.DayJungle.Name}: {loader.DaytimeJungleInstance.Volume}"
+                    + $"\n{loader.NightJungle.Name}: {loader.NightJungleInstance.Volume}"
+                    + $"\n{loader.DesertAmbience.Name}: {loader.DesertAmbienceInstance.Volume}"
+                    + $"\n{loader.HellRumble.Name}: {loader.HellRumbleInstance.Volume}"
+                    + $"\n{loader.Rain.Name}: {loader.RainInstance.Volume}"
+                    + $"\n{loader.Breeze.Name}: {loader.BreezeInstance.Volume}"
                     + $"\nFootsteps:\nGrass: {aPlayer.soundInstanceGrassStep.State}"
                     + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
                     + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
                     + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
                     + $"\nSand: {aPlayer.soundInstanceSandStep.State}"
                     :
-               displayable = $"{loader.BeachWaves.Name}: {loader.beachWavesVolume}"
+               displayable = $"{loader.BeachWaves.Name}: {loader.BeachWavesInstance.Volume}"
                     + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
-                    + $"\n{loader.SnowBreezeDay.Name}: {loader.snowDayVolume}"
-                    + $"\n{loader.SnowBreezeNight.Name}: {loader.snowNightVolume}"
-                    + $"\n{loader.MorningCrickets.Name}: {loader.morningCricketsVolume}"
-                    + $"\n{loader.DayCrickets.Name}: {loader.dayCricketsVolume}"
-                    + $"\n{loader.NightCrickets.Name}: {loader.nightCricketsVolume}"
-                    + $"\n{loader.EveningCrickets.Name}: {loader.eveningCricketsVolume}"
-                    + $"\n{loader.CavesAmbience.Name}: {loader.ugAmbienceVolume}"
-                    + $"\n{loader.CrimsonRumbles.Name}: {loader.crimsonRumblesVolume}"
-                    + $"\n{loader.CorruptionRoars.Name}: {loader.corruptionRoarsVolume}"
-                    + $"\n{loader.DayJungle.Name}: {loader.dayJungleVolume}"
-                    + $"\n{loader.NightJungle.Name}: {loader.nightJungleVolume}"
-                    + $"\n{loader.DesertAmbience.Name}: {loader.desertCricketsVolume}"
-                    + $"\n{loader.HellRumble.Name}: {loader.hellRumbleVolume}"
-                    + $"\n{loader.Rain.Name}: {loader.rainVolume}"
+                    + $"\n{loader.SnowBreezeDay.Name}: {loader.SnowBreezeDayInstance.Volume}"
+                    + $"\n{loader.SnowBreezeNight.Name}: {loader.SnowBreezeNightInstance.Volume}"
+                    + $"\n{loader.MorningCrickets.Name}: {loader.MorningCricketsInstance.Volume}"
+                    + $"\n{loader.DayCrickets.Name}: {loader.DayCricketsInstance.Volume}"
+                    + $"\n{loader.NightCrickets.Name}: {loader.NightCricketsInstance.Volume}"
+                    + $"\n{loader.EveningCrickets.Name}: {loader.EveningCricketsInstance.Volume}"
+                    + $"\n{loader.CavesAmbience.Name}: {loader.CavesAmbienceInstance.Volume}"
+                    + $"\n{loader.CrimsonRumbles.Name}: {loader.CrimsonRumblesInstance.Volume}"
+                    + $"\n{loader.CorruptionRoars.Name}: {loader.CorruptionRoarsInstance.Volume}"
+                    + $"\n{loader.DayJungle.Name}: {loader.DaytimeJungleInstance}"
+                    + $"\n{loader.NightJungle.Name}: {loader.NightJungleInstance.Volume}"
+                    + $"\n{loader.DesertAmbience.Name}: {loader.DesertAmbienceInstance.Volume}"
+                    + $"\n{loader.HellRumble.Name}: {loader.HellRumbleInstance.Volume}"
+                    + $"\n{loader.Rain.Name}: {loader.RainInstance.Volume}"
+                    + $"\n{loader.Breeze.Name}: {loader.BreezeInstance.Volume}"
                     + $"\nFootsteps:\nGrass: {aPlayer.soundInstanceGrassStep.State}"
                     + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
                     + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
@@ -205,21 +210,46 @@ namespace TerrariaAmbience.Core
                     1);
             }
         }
-
+        private static float posX;
+        private static float posY;
+        private static bool active;
         private static void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
+            posX = MathHelper.Clamp(posX, -450, -16);
             var sb = Main.spriteBatch;
             string viewPost = "View the Terraria Ambience forums post here:";
             string forums = "Forums Post";
-            var rect = new Rectangle((int)(Main.fontDeathText.MeasureString(viewPost).X * 0.35f) + 10, 4, (int)(Main.fontDeathText.MeasureString(forums).X * 0.35f), (int)(Main.fontDeathText.MeasureString(forums).Y * 0.25f));
 
+            var click2Activate = new Rectangle((int)posX + 455, (int)posY, 12, 20);
+
+            Texture2D arrow = ModContent.GetInstance<Content.TerrariaAmbience>().GetTexture("Content/UI/UIButtonRight");
+            if (arrow != null && !arrow.IsDisposed) Main.spriteBatch.Draw(arrow, new Vector2(posX + 455, posY), null, Color.White, 0f, Vector2.Zero, 0.6f, !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
+            var rect = new Rectangle((int)posX + 350, (int)posY, (int)(Main.fontDeathText.MeasureString(forums).X * 0.35f), (int)(Main.fontDeathText.MeasureString(forums).Y * 0.25f));
+            // Main.spriteBatch.Draw(Main.magicPixel, click2Activate, Color.White * 0.35f);
             bool hovering = rect.Contains(Main.MouseScreen.ToPoint());
+            bool hoverAct = click2Activate.Contains(Main.MouseScreen.ToPoint());
 
+            if (hoverAct)
+            {
+                if (Main.mouseRight)
+                {
+                    if (Main.MouseScreen.Y < Main.screenHeight && Main.MouseScreen.Y > 0)
+                    {
+                        posY = Main.MouseScreen.Y - 10;
+                    }
+                }
+                if (Main.mouseLeft && Main.mouseLeftRelease)
+                {
+                    Main.PlaySound(SoundID.MenuTick);
+                    active = !active;
+                }
+            }
+            posX += active ? 20f : -20f;
 
-            ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, viewPost, new Vector2(4, 4), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
-            ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, forums, new Vector2((int)(Main.fontDeathText.MeasureString(viewPost).X * 0.35f) + 10, 4), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+            ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+            ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, forums, new Vector2(posX + (int)(Main.fontDeathText.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
 
-            var svol = (float)System.Math.Round(Ambience.TAAmbient);
+            var svol = (float)Math.Round(Ambience.TAAmbient);
             svol = MathHelper.Clamp(svol, 0f, 100f);
             Ambience.TAAmbient = MathHelper.Clamp(Ambience.TAAmbient, 0f, 100f);
             string percent = $"TA Ambient: {svol}%";
@@ -244,7 +274,10 @@ namespace TerrariaAmbience.Core
             {
                 if (Main.mouseLeft && Main.mouseLeftRelease)
                 {
-                    System.Diagnostics.Process.Start("https://forums.terraria.org/index.php?threads/terraria-ambience-mod.104161/");
+                    if (active)
+                    {
+                        System.Diagnostics.Process.Start("https://forums.terraria.org/index.php?threads/terraria-ambience-mod.104161/");
+                    }
                 }
             }
             orig(self, gameTime);

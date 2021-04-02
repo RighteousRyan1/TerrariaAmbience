@@ -109,6 +109,9 @@ namespace TerrariaAmbience.Content
         public SoundEffect SplashNew { get; set; }
         public SoundEffectInstance SplashNewInstance { get; set; }
 
+        public SoundEffect Breeze { get; set; }
+        public SoundEffectInstance BreezeInstance { get; set; }
+
         #endregion
 
         public float dayCricketsVolume;
@@ -127,6 +130,7 @@ namespace TerrariaAmbience.Content
         public float hellRumbleVolume;
         public float rainVolume;
         public float morningCricketsVolume;
+        public float breezeVolume;
 
         public static Ambience Instance
         {
@@ -224,6 +228,10 @@ namespace TerrariaAmbience.Content
                 loader.RainInstance = loader.Rain.CreateInstance();
                 loader.Rain.Name = "Rain Outside";
 
+                loader.Breeze = mod.GetSound($"{ambienceDirectory}/environment/breeze");
+                loader.BreezeInstance = loader.Breeze.CreateInstance();
+                loader.Breeze.Name = "Wind Breeze";
+
                 loader.DayCricketsInstance.IsLooped = true;
                 loader.EveningCricketsInstance.IsLooped = true;
                 loader.NightCricketsInstance.IsLooped = true;
@@ -242,6 +250,7 @@ namespace TerrariaAmbience.Content
                 loader.LavaStreamInstance.IsLooped = true;
                 loader.WaterStreamInstance.IsLooped = true;
                 loader.MorningCricketsInstance.IsLooped = true;
+                loader.BreezeInstance.IsLooped = true;
             }
         }
         public static float decOrIncRate = 0.01f;
@@ -268,6 +277,14 @@ namespace TerrariaAmbience.Content
                     (Main.dayTime && Main.time > 7000) && (Main.dayTime && Main.time < 46800) ? 
                     decOrIncRate : -decOrIncRate;
 
+                if ((player.ZoneForest() || (player.ZoneDesert && !player.ZoneUndergroundDesert) || player.ZoneJungle || player.ZoneBeach || player.ZoneCorrupt || player.ZoneCrimson) && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight)
+                {
+                    aLoader.breezeVolume += decOrIncRate;
+                }
+                else
+                {
+                    aLoader.breezeVolume -= decOrIncRate;
+                }
                 if ((player.ZoneForest() || (player.ZoneHoly && player.ZoneOverworldHeight && !player.ZoneDesert)) && (Main.time >= 46800 && Main.dayTime))
                 {
                     aLoader.eveningCricketsVolume += decOrIncRate;
@@ -431,6 +448,7 @@ namespace TerrariaAmbience.Content
                 aLoader.hellRumbleVolume -= decOrIncRate;
                 aLoader.rainVolume -= decOrIncRate;
                 aLoader.morningCricketsVolume -= decOrIncRate;
+                aLoader.breezeVolume -= decOrIncRate;
             }
         }
         /// <summary>
@@ -454,6 +472,7 @@ namespace TerrariaAmbience.Content
             Instance.HellRumbleInstance?.Play();
             Instance.RainInstance?.Play();
             Instance.MorningCricketsInstance?.Play();
+            Instance.BreezeInstance?.Play();
         }
         private bool playerBehindWall;
         private bool playerInLiquid;
@@ -486,23 +505,24 @@ namespace TerrariaAmbience.Content
                 rainSFX?.SetVariable("Volume", 0f);
                 if (!Instance.playerBehindWall)
                 {
-                    Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.65f * ambVol;
-                    Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.65f * ambVol;
-                    Instance.NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.65f * ambVol;
-                    Instance.DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.65f * ambVol;
-                    Instance.CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.65f * ambVol;
-                    Instance.CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.5f * ambVol;
-                    Instance.CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.5f * ambVol;
-                    Instance.MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.85f * ambVol;
+                    Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.75f * ambVol;
+                    Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.75f * ambVol;
+                    Instance.NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.75f * ambVol;
+                    Instance.DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.75f * ambVol;
+                    Instance.CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.75f * ambVol;
+                    Instance.CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.7f * ambVol;
+                    Instance.CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.7f * ambVol;
+                    Instance.MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.9f * ambVol;
+                    Instance.BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeed) * ambVol;
 
-                    Instance.HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.6f * ambVol;
+                    Instance.HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.75f * ambVol;
 
-                    Instance.BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.75f * ambVol;
+                    Instance.BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.8f * ambVol;
 
                     Instance.DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.5f * ambVol;
                     Instance.NightJungleInstance.Volume = Instance.nightJungleVolume * 0.5f * ambVol;
 
-                    Instance.SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.7f * ambVol;
+                    Instance.SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.65f * ambVol;
                     Instance.SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.7f * ambVol;
 
                     if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
@@ -510,6 +530,7 @@ namespace TerrariaAmbience.Content
                 }
                 else
                 {
+                    Instance.BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeed) * ambVol * 0.8f;
                     Instance.MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.5f * ambVol;
                     Instance.DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.4f * ambVol;
                     Instance.EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.4f * ambVol;
@@ -542,10 +563,12 @@ namespace TerrariaAmbience.Content
                 }
                 else if (Instance.playerBehindWall && !Instance.playerInLiquid)
                 {
+                    Instance.BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeed) * ambVol * 0.6f;
                     Instance.RainInstance.Volume = Instance.rainVolume * 0.4f * ambVol;
                 }
                 else if (Instance.playerBehindWall && Instance.playerInLiquid)
                 {
+                    Instance.BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeed) * ambVol * 0.4f;
                     Instance.RainInstance.Volume = Instance.rainVolume * 0.05f * ambVol;
                 }
 
@@ -588,6 +611,7 @@ namespace TerrariaAmbience.Content
                     Instance.BeachWavesInstance.Pitch = 0.1f;
                     Instance.HellRumbleInstance.Pitch = -0.3f;
                     Instance.MorningCricketsInstance.Pitch = -0.25f;
+                    Instance.BreezeInstance.Pitch = -0.25f;
 
                     Main.soundInstanceDrip[0].Pitch = -0.25f;
                     Main.soundInstanceDrip[1].Pitch = -0.25f;
@@ -596,6 +620,7 @@ namespace TerrariaAmbience.Content
                 else
                 {
                     Instance.playerInLiquid = false;
+                    Instance.BreezeInstance.Pitch = 0f;
                     Instance.NightCricketsInstance.Pitch = 0f;
                     Instance.DayCricketsInstance.Pitch = 0f;
                     Instance.EveningCricketsInstance.Pitch = 0f;
@@ -642,6 +667,22 @@ namespace TerrariaAmbience.Content
                 {
                     ModAmbience.Instance.soundEffectInstance.Volume = 0;
                 }
+            }
+            if (aLoader.breezeVolume > 1)
+            {
+                aLoader.breezeVolume = 1;
+            }
+            if (aLoader.breezeVolume < 0)
+            {
+                aLoader.breezeVolume = 0;
+            }
+            if (aLoader.BreezeInstance.Volume > 1)
+            {
+                aLoader.BreezeInstance.Volume = 1;
+            }
+            if (aLoader.BreezeInstance.Volume < 0)
+            {
+                aLoader.BreezeInstance.Volume = 0;
             }
             if (aLoader.morningCricketsVolume > 1)
             {

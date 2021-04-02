@@ -2,7 +2,6 @@ using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
 using Terraria.ID;
-
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using TerrariaAmbience.Core;
@@ -12,10 +11,13 @@ using TerrariaAmbience.Content.Players;
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.Localization;
+using Terraria.GameContent.UI.Elements;
+using Terraria.UI;
+using Microsoft.Xna.Framework.Input;
 
 namespace TerrariaAmbience.Content
 {
-	public partial class TerrariaAmbience : Mod
+    public partial class TerrariaAmbience : Mod
 	{
         public object x;
         public override object Call(params object[] args)
@@ -223,6 +225,7 @@ namespace TerrariaAmbience.Content
                 aLoader.hellRumbleVolume = 0f;
                 aLoader.rainVolume = 0f;
                 aLoader.morningCricketsVolume = 0f;
+                aLoader.breezeVolume = 0f;
             }
             if (Main.gameMenu) return;
             Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsAndAmbiencePlayer>().player;
@@ -232,18 +235,21 @@ namespace TerrariaAmbience.Content
                 delta_lastPos_playerBottom = lastPlayerPositionOnGround - player.Bottom.Y;
 
                 // Main.NewText(delta_lastPos_playerBottom);
-                if (player.velocity.Y <= 0 || player.teleporting)
+                if (ModContent.GetInstance<AmbientConfigServer>().newSplashes)
                 {
-                    lastPlayerPositionOnGround = player.Bottom.Y;
-                }
-                // Main.NewText(player.fallStart - player.Bottom.Y);
-                if (delta_lastPos_playerBottom > -300)
-                {
-                    Main.soundSplash[0] = Ambience.Instance.SplashNew;
-                }
-                else if (delta_lastPos_playerBottom <= -300)
-                {
-                    Main.soundSplash[0] = GetSound($"{Ambience.ambienceDirectory}/environment/liquid/entity_splash_heavy");
+                    if (player.velocity.Y <= 0 || player.teleporting)
+                    {
+                        lastPlayerPositionOnGround = player.Bottom.Y;
+                    }
+                    // Main.NewText(player.fallStart - player.Bottom.Y);
+                    if (delta_lastPos_playerBottom > -300)
+                    {
+                        Main.soundSplash[0] = Ambience.Instance.SplashNew;
+                    }
+                    else if (delta_lastPos_playerBottom <= -300)
+                    {
+                        Main.soundSplash[0] = GetSound($"{Ambience.ambienceDirectory}/environment/liquid/entity_splash_heavy");
+                    }
                 }
             }
             Ambience.ClampAll();

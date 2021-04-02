@@ -109,9 +109,13 @@ namespace TerrariaAmbience.Content.Players
                     {
                         if ((chestStateNew != chestStateOld) && chestStateNew != -1)
                         {
-                            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/player/chest_open"), player.Center).Volume = 0.6f;
+                            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/player/chest_open"), player.Center).Volume = 0.35f;
                         }
                         if ((chestStateNew != chestStateOld) && chestStateNew == -1)
+                        {
+                            Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/player/chest_close"), player.Center);
+                        }
+                        else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
                         {
                             Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/player/chest_close"), player.Center);
                         }
@@ -153,7 +157,7 @@ namespace TerrariaAmbience.Content.Players
                             soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume * 0.45f : Main.soundVolume * 0.65f;
                             soundInstanceGrassStep.Pitch = player.wet ? -0.5f : 0f;
                         }
-                        if (!hasTilesAbove && Main.raining && !player.wet)
+                        if (!hasTilesAbove && Main.raining && !player.wet && !player.ZoneSnow && player.ZoneOverworldHeight)
                         {
                             soundInstanceGrassStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWet), player.Bottom);
                             soundInstanceGrassStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
@@ -180,7 +184,7 @@ namespace TerrariaAmbience.Content.Players
                             soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
                             soundInstanceWoodStep.Pitch = player.wet ? -0.5f : 0f;
                         }
-                        if (!hasTilesAbove && Main.raining && !player.wet)
+                        if (!hasTilesAbove && Main.raining && !player.wet && !player.ZoneSnow && player.ZoneOverworldHeight)
                         {
                             soundInstanceWoodStep = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathWet), player.Bottom);
                             soundInstanceWoodStep.Volume = player.wet ? Main.soundVolume / 2 : Main.soundVolume / 4;
@@ -259,9 +263,9 @@ namespace TerrariaAmbience.Content.Players
 
                 int randX = Main.rand.Next(-1750, 1750);
                 int randY = Main.rand.Next(-1750, 1750);
-                int chance1 = Main.rand.Next(750);
-                int chance2 = Main.rand.Next(1500);
-                int chance3 = Main.rand.Next(3500);
+                int chance1 = Main.rand.Next(750 * Main.ActivePlayersCount);
+                int chance2 = Main.rand.Next(1500 * Main.ActivePlayersCount);
+                int chance3 = Main.rand.Next(3500 * Main.ActivePlayersCount);
                 if (Main.soundVolume > 0f)
                 {
                     //if (hootInstance.IsStopped())

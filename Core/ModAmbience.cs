@@ -14,8 +14,9 @@ namespace TerrariaAmbience.Core
     /// <summary>
     /// A class that represents an ambient track or loop. You can use ModContent.GetInstance<T>() to access a ModAmbience.
     /// </summary>
-    public class ModAmbience
+    public class ModAmbience : IDisposable
     {
+        public void Dispose() { }
         public SoundEffect soundEffect;
         public SoundEffectInstance soundEffectInstance;
         public bool Condition { get; set; }
