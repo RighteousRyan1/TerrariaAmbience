@@ -132,6 +132,8 @@ namespace TerrariaAmbience.Core
                 TileID.Hellstone,
                 TileID.HellstoneBrick,
                 TileID.Asphalt,
+                TileID.FossilOre,
+                TileID.DesertFossil
         };
         public static List<int> sandBlocks = new List<int>
         {
@@ -159,31 +161,31 @@ namespace TerrariaAmbience.Core
         {
 
             if (grassTiles.Any(x => x == type))
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnGrassyTile = true;
+                player.GetModPlayer<FootstepsPlayer>().isOnGrassyTile = true;
             else
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnGrassyTile = false;
+                player.GetModPlayer<FootstepsPlayer>().isOnGrassyTile = false;
 
             if (snowyblocks.Any(x => x == type))
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSnowyTile = true;
+                player.GetModPlayer<FootstepsPlayer>().isOnSnowyTile = true;
             else
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSnowyTile = false;
+                player.GetModPlayer<FootstepsPlayer>().isOnSnowyTile = false;
 
             if (sandBlocks.Any(x => x == type))
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSandyTile = true;
+                player.GetModPlayer<FootstepsPlayer>().isOnSandyTile = true;
             else
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSandyTile = false;
+                player.GetModPlayer<FootstepsPlayer>().isOnSandyTile = false;
 
             // TODO: Include ore bricks later, as well as the ore themselves
             if (stoneBlocks.Any(x => x == type) || (type == TileID.FishingCrate && Main.tile[(int)player.Bottom.X / 16, (int)player.Bottom.Y / 16 + 1].frameX > 32))
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile = true;
+                player.GetModPlayer<FootstepsPlayer>().isOnStoneTile = true;
             else
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile = false;
+                player.GetModPlayer<FootstepsPlayer>().isOnStoneTile = false;
 
-            if (!player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnStoneTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnGrassyTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSandyTile && !player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnSnowyTile
+            if (!player.GetModPlayer<FootstepsPlayer>().isOnStoneTile && !player.GetModPlayer<FootstepsPlayer>().isOnGrassyTile && !player.GetModPlayer<FootstepsPlayer>().isOnSandyTile && !player.GetModPlayer<FootstepsPlayer>().isOnSnowyTile
                 || (type == TileID.FishingCrate && Main.tile[(int)player.Bottom.X / 16, (int)player.Bottom.Y / 16 + 1].frameX <= 32))
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnWoodTile = true;
+                player.GetModPlayer<FootstepsPlayer>().isOnWoodTile = true;
             else
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isOnWoodTile = false;
+                player.GetModPlayer<FootstepsPlayer>().isOnWoodTile = false;
         }
         /// <summary>
         /// Access this for when you want to add a modded tile to the valid tiles list. Use the ID for the tile.

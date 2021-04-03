@@ -10,6 +10,8 @@ using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
+using System.Linq;
+using Microsoft.Xna.Framework.Input;
 
 namespace TerrariaAmbience.Core
 {
@@ -28,12 +30,6 @@ namespace TerrariaAmbience.Core
         }
         private static bool IngameOptions_DrawLeftSide(On.Terraria.IngameOptions.orig_DrawLeftSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float[] scales, float minscale, float maxscale, float scalespeed)
         {
-            string path = $"C://Users//{Environment.UserName}//Documents//My Games//Terraria//ModLoader//Mods//Cache//ta_secretconfig.txt";
-            string[] lines = File.ReadAllLines(path);
-
-            lines[0] = "WHAT";
-
-
             if (i == 0)
             {
                 sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract to change the volume of Terraria Ambience!", new Vector2(8, 8), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
@@ -103,7 +99,7 @@ namespace TerrariaAmbience.Core
             // Main.spriteBatch.Begin();
             var loader = Ambience.Instance;
 
-            var aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsAndAmbiencePlayer>();
+            var aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
             if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null)
             {
                 displayable = ModAmbience.modAmbienceList.Count <= 0 && ModAmbience.allAmbiences.Count <= 0 ? 
@@ -215,39 +211,67 @@ namespace TerrariaAmbience.Core
         private static bool active;
         private static void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
+            Texture2D arrow = ModContent.GetInstance<Content.TerrariaAmbience>().GetTexture("Content/UI/UIButtonRight");
+
+            // Echcode.tm
+            /*int i = 0;
+            int j = 1;
+            int z = 0;
+            foreach (Mod mod in ModLoader.Mods)
+            {
+                if (mod != null && mod.TextureExists("icon"))
+                {
+                    i++;
+                    if (((100 * i) + 95) < Main.screenHeight)
+                    {
+                        Main.spriteBatch.SafeDraw(mod.GetTexture("icon"), new Vector2(80, 100 * i), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+                        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, mod.DisplayName, new Vector2(120, (100 * i) + 95), Color.LightGray, 0f, Main.fontDeathText.MeasureString(mod.DisplayName) / 2, new Vector2(0.35f, 0.35f), 0, 1);
+                    }
+                    else
+                    {
+                        j++;
+                        z++;
+                        Main.spriteBatch.Draw(mod.GetTexture("icon"), new Vector2(100 * j, (100 * i) - (z * 900)), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
+                        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, mod.DisplayName, new Vector2(120 * j, ((100 * i) + 95) - (z * 900)), Color.LightGray, 0f, Main.fontDeathText.MeasureString(mod.DisplayName) / 2, new Vector2(0.35f, 0.35f), 0, 1);
+                    }
+                }
+            }*/
+
             posX = MathHelper.Clamp(posX, -450, -16);
             var sb = Main.spriteBatch;
             string viewPost = "View the Terraria Ambience forums post here:";
-            string forums = "Forums Post";
+            string forums = $"Forums Post";
 
             var click2Activate = new Rectangle((int)posX + 455, (int)posY, 12, 20);
 
-            Texture2D arrow = ModContent.GetInstance<Content.TerrariaAmbience>().GetTexture("Content/UI/UIButtonRight");
-            if (arrow != null && !arrow.IsDisposed) Main.spriteBatch.Draw(arrow, new Vector2(posX + 455, posY), null, Color.White, 0f, Vector2.Zero, 0.6f, !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
+            if (Main.menuMode == 0) Main.spriteBatch.SafeDraw(arrow, new Vector2(posX + 455, posY), null, Color.White, 0f, Vector2.Zero, 0.6f, !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
             var rect = new Rectangle((int)posX + 350, (int)posY, (int)(Main.fontDeathText.MeasureString(forums).X * 0.35f), (int)(Main.fontDeathText.MeasureString(forums).Y * 0.25f));
             // Main.spriteBatch.Draw(Main.magicPixel, click2Activate, Color.White * 0.35f);
             bool hovering = rect.Contains(Main.MouseScreen.ToPoint());
             bool hoverAct = click2Activate.Contains(Main.MouseScreen.ToPoint());
 
-            if (hoverAct)
+            if (Main.menuMode == 0)
             {
-                if (Main.mouseRight)
+                if (hoverAct)
                 {
-                    if (Main.MouseScreen.Y < Main.screenHeight && Main.MouseScreen.Y > 0)
+                    if (Main.mouseRight)
                     {
-                        posY = Main.MouseScreen.Y - 10;
+                        if (Main.MouseScreen.Y < Main.screenHeight && Main.MouseScreen.Y > 0)
+                        {
+                            posY = Main.MouseScreen.Y - 10;
+                        }
                     }
-                }
-                if (Main.mouseLeft && Main.mouseLeftRelease)
-                {
-                    Main.PlaySound(SoundID.MenuTick);
-                    active = !active;
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        Main.PlaySound(SoundID.MenuTick);
+                        active = !active;
+                    }
                 }
             }
             posX += active ? 20f : -20f;
 
-            ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
-            ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, forums, new Vector2(posX + (int)(Main.fontDeathText.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+            if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+            if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, forums, new Vector2(posX + (int)(Main.fontDeathText.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
 
             var svol = (float)Math.Round(Ambience.TAAmbient);
             svol = MathHelper.Clamp(svol, 0f, 100f);
@@ -261,11 +285,11 @@ namespace TerrariaAmbience.Core
 
                 ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, percent, pos, Color.LightGray, 0f, Main.fontDeathText.MeasureString(percent) / 2, new Vector2(0.6f, 0.6f), 0, 2);
 
-                if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Add))
+                if (Main.keyState.IsKeyDown(Keys.Add))
                 {
                     Ambience.TAAmbient += 0.5f;
                 }
-                if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Subtract))
+                if (Main.keyState.IsKeyDown(Keys.Subtract))
                 {
                     Ambience.TAAmbient -= 0.5f;
                 }

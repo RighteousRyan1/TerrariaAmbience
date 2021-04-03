@@ -111,7 +111,7 @@ namespace TerrariaAmbience.Content
             }*/
 
             var pkt = GetPacket();
-            pkt.Write(Main.player[Main.myPlayer].GetModPlayer<FootstepsAndAmbiencePlayer>().playerCraftType);
+            pkt.Write(Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().playerCraftType);
 
             pkt.Send();
 
@@ -119,7 +119,7 @@ namespace TerrariaAmbience.Content
         }
         public override void Load()
         {
-            string path = $"C://Users//{Environment.UserName}//Documents//My Games//Terraria//ModLoader//Mods//Cache//ta_secretconfig.txt";
+            string path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
 
             if (File.Exists(path) && File.ReadAllLines(path)[0] != null)
             {
@@ -181,11 +181,7 @@ namespace TerrariaAmbience.Content
         }
         public override void Unload()
         {
-            string path = $"C://Users//{Environment.UserName}//Documents//My Games//Terraria//ModLoader//Mods//Cache//ta_secretconfig.txt";
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
+            string path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
             File.WriteAllText(path, Ambience.TAAmbient.ToString() + "\n\nDO NOT CHANGE THIS NUMBER.");
             ModAmbience.Unload();
             SoundChanges.Unload();
@@ -228,7 +224,7 @@ namespace TerrariaAmbience.Content
                 aLoader.breezeVolume = 0f;
             }
             if (Main.gameMenu) return;
-            Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsAndAmbiencePlayer>().player;
+            Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsPlayer>().player;
             // soundInstancer.Condition = player.ZoneSkyHeight;
             if (Main.hasFocus)
             {
@@ -265,21 +261,33 @@ namespace TerrariaAmbience.Content
         {
             originOfCampfire.X = i * 16;
             originOfCampfire.Y = j * 16;
-            Player player = Main.player[Main.myPlayer].GetModPlayer<FootstepsAndAmbiencePlayer>().player;
+            Player player = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().player;
 
             if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire))
             {
-                distanceOf = Vector2.Distance(originOfCampfire, player.Center);
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isNearCampfire = true;
+                /*var t = Main.tile[i, j];
+                var orig = new Vector2(i * 16, j * 16);
+                Main.NewText(t.frameY);*/
+                //if (t.frameY <= 18 && t.frameY >= 0)
+                {
+                    distanceOf = Vector2.Distance(originOfCampfire, player.Center);
+                    player.GetModPlayer<FootstepsPlayer>().isNearCampfire = true;
+                }
             }
             if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
             {
-                Ambience.Instance.CampfireCrackleInstance.Volume = 0f;
-                player.GetModPlayer<FootstepsAndAmbiencePlayer>().isNearCampfire = false;
+                /*var t = Main.tile[i, j];
+                var orig = new Vector2(i * 16, j * 16);
+                Main.NewText(t.frameY);*/
+                //if (t.frameY <= 54 && t.frameY >= 36)
+                {
+                    Ambience.Instance.CampfireCrackleInstance.Volume = 0f;
+                    player.GetModPlayer<FootstepsPlayer>().isNearCampfire = false;
+                }
             }
         }
     }
-    public class NewDoorKnockSound :GlobalNPC
+    public class NewDoorKnockSound : GlobalNPC
     {
         public override void AI(NPC npc)
         {

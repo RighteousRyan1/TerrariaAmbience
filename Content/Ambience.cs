@@ -266,7 +266,7 @@ namespace TerrariaAmbience.Content
                 // decOrIncRate = 0.01f;
             }
             if (Main.gameMenu) return;
-            FootstepsAndAmbiencePlayer ambiencePlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsAndAmbiencePlayer>();
+            FootstepsPlayer ambiencePlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
 
             Player player = ambiencePlayer.player;
             var aLoader = Instance;
@@ -420,8 +420,16 @@ namespace TerrariaAmbience.Content
                 foreach (Rain rain in Main.rain)
                 {
                     rain.rotation = rain.velocity.ToRotation() + MathHelper.PiOver2;
+
+                    if (player.ZoneDesert)
+                    {
+                        if (player.Distance(rain.position) < 1000f)
+                        {
+                            rain.active = false;
+                        }
+                    }
                 }
-                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight) && player.ZoneForest())
+                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight) && !player.ZoneDesert && !player.ZoneUndergroundDesert)
                 {
                     aLoader.rainVolume += decOrIncRate;
                 }
@@ -575,7 +583,7 @@ namespace TerrariaAmbience.Content
                 // Main.NewText(Instance.crackleVolume * 0.95f * Main.soundVolume);
 
                 if (Main.gameMenu) return;
-                Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsAndAmbiencePlayer>().player;
+                Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsPlayer>().player;
 
                 if (player.HeadWet())
                 {
@@ -594,6 +602,7 @@ namespace TerrariaAmbience.Content
                     Instance.nightJungleVolume *= 0.9f;
                     Instance.hellRumbleVolume *= 0.95f;
                     Instance.morningCricketsVolume *= 0.95f;
+                    Instance.breezeVolume *= 0.7f;
                     Main.soundInstanceDrip[0].Volume = 0.5f;
                     Main.soundInstanceDrip[1].Volume = 0.5f;
                     Main.soundInstanceDrip[2].Volume = 0.5f;
@@ -639,7 +648,8 @@ namespace TerrariaAmbience.Content
                     Main.soundInstanceDrip[2].Pitch = 0f;
                 }
 
-                if (Main.tile[(int)player.Top.X / 16, (int)player.Top.Y / 16].wall > 0)
+                Vector2 newTop = player.Top + new Vector2(0, 7.5f);
+                if (Main.tile[(int)newTop.X / 16, (int)newTop.Y / 16].wall > 0)
                 {
                     Instance.playerBehindWall = true;
                 }

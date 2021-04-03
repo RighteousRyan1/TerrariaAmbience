@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace TerrariaAmbience
 {
@@ -64,6 +66,55 @@ namespace TerrariaAmbience
     }
     public static class ExtensionMethods
     {
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, rect, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Rectangle? sourceRect, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, rect, sourceRect, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, sourceRect, color);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, rect, sourceRect, color, rot, orig, effects, layerDepth);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, layerDepth);
+            }
+        }
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, Vector2 scale, SpriteEffects effects, float layerDepth)
+        {
+            if (tex != null && !tex.IsDisposed)
+            {
+                spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, layerDepth);
+            }
+        }
         /// <summary>
         /// Checks if this SoundEffectInstance is Playing.
         /// </summary>
@@ -124,7 +175,7 @@ namespace TerrariaAmbience
         }
         public static bool HeadWet(this Player player)
         {
-            return Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.25) / 16].liquid > 0;
+            return Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.4) / 16].liquid > 0;
         }
     }
 }

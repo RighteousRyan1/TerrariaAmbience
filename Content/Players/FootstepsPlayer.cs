@@ -11,7 +11,7 @@ using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience.Content.Players
 {
-    public class FootstepsAndAmbiencePlayer : ModPlayer
+    public class FootstepsPlayer : ModPlayer
     {
         // This class serves the purpose of playing sounds and/or playing footsteps.
 
@@ -70,6 +70,10 @@ namespace TerrariaAmbience.Content.Players
         }
         public override void PreUpdate()
         {
+            var t = Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16];
+
+            // Main.NewText($"{t.frameY}, {isNearCampfire}");
+
             timerUntilValidChestStateChange++;
             // This is a pretty niche finding for tiles above said player
             Tile playerTile = Main.tile[(int)player.Center.X / 16, (int)player.Center.Y / 16];
@@ -141,7 +145,7 @@ namespace TerrariaAmbience.Content.Players
             {
                 // TODO: if (!hasLegArmor)
                 // Main.NewText(Main.tile[(int)Main.MouseWorld.X / 16, (int)Main.MouseWorld.Y / 16].wall);
-                if (Main.soundVolume != 0f && !player.mount.Active)
+                if (Main.soundVolume != 0f && !player.mount.Active && player.velocity.Y == 0)
                 {
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSandyTile)
                     {
