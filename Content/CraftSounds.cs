@@ -49,9 +49,9 @@ namespace TerrariaAmbience.Content
         };
         [Obsolete("Do not use for the time being- it is being finalized.")]
         public static string FurnaceSoundDir { get; }
-        public static string WorkBenchesSoundDir { get => $"{Ambience.ambienceDirectory}/player/crafting_workbenches"; }
-        public static string AnvilsSoundDir { get => $"{Ambience.ambienceDirectory}/player/crafting_anvils"; }
-        public static string BooksSoundDir { get => $"{Ambience.ambienceDirectory}/player/crafting_bookrelated"; }
+        public static string WorkBenchesSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_workbenches"; }
+        public static string AnvilsSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_anvils"; }
+        public static string BooksSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_bookrelated"; }
         public override void OnCraft(Item item, Recipe recipe)
         {
             Player player = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().player;

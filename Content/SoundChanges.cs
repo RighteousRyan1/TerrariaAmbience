@@ -75,9 +75,9 @@ namespace TerrariaAmbience.Content
                 Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
                 Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
 
-                Main.soundZombie[0] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie1");
-                Main.soundZombie[1] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie2");
-                Main.soundZombie[2] = mod.GetSound($"{Ambience.ambienceDirectory}/npcs/zombie3");
+                Main.soundZombie[0] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie1");
+                Main.soundZombie[1] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie2");
+                Main.soundZombie[2] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie3");
             }
             #endregion
         }

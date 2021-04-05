@@ -37,7 +37,8 @@ namespace TerrariaAmbience.Content.Players
 
         public override void OnEnterWorld(Player player)
         {
-            Ambience.PlayAllAmbience();
+            MethodDetours.attemptingToPlayTracks = false;
+            // Ambience.PlayAllAmbience();
             timerUntilValidChestStateChange = 0;
             soundInstanceGrassStep = Main.soundInstanceRun;
             soundInstanceWoodStep = Main.soundInstanceRun;

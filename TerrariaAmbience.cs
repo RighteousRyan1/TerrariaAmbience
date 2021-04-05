@@ -14,8 +14,9 @@ using Terraria.Localization;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Microsoft.Xna.Framework.Input;
+using TerrariaAmbience.Content;
 
-namespace TerrariaAmbience.Content
+namespace TerrariaAmbience
 {
     public partial class TerrariaAmbience : Mod
 	{
@@ -135,6 +136,26 @@ namespace TerrariaAmbience.Content
             Ambience.Initialize();
             On.Terraria.Main.DoUpdate += Main_DoUpdate;
             MethodDetours.DetourAll();
+
+            Ambience.PlayAllAmbience();
+            var aLoader = Ambience.Instance;
+            aLoader.dayCricketsVolume = 0f;
+            aLoader.nightCricketsVolume = 0f;
+            aLoader.eveningCricketsVolume = 0f;
+            aLoader.desertCricketsVolume = 0f;
+            aLoader.crackleVolume = 0f;
+            aLoader.ugAmbienceVolume = 0f;
+            aLoader.crimsonRumblesVolume = 0f;
+            aLoader.snowDayVolume = 0f;
+            aLoader.snowNightVolume = 0f;
+            aLoader.corruptionRoarsVolume = 0f;
+            aLoader.dayJungleVolume = 0f;
+            aLoader.nightJungleVolume = 0f;
+            aLoader.beachWavesVolume = 0f;
+            aLoader.hellRumbleVolume = 0f;
+            aLoader.rainVolume = 0f;
+            aLoader.morningCricketsVolume = 0f;
+            aLoader.breezeVolume = 0f;
         }
         public override void PostSetupContent()
         {
@@ -186,6 +207,27 @@ namespace TerrariaAmbience.Content
             ModAmbience.Unload();
             SoundChanges.Unload();
         }
+        public override void PreSaveAndQuit()
+        {
+            var aLoader = Ambience.Instance;
+            aLoader.dayCricketsVolume = 0f;
+            aLoader.nightCricketsVolume = 0f;
+            aLoader.eveningCricketsVolume = 0f;
+            aLoader.desertCricketsVolume = 0f;
+            aLoader.crackleVolume = 0f;
+            aLoader.ugAmbienceVolume = 0f;
+            aLoader.crimsonRumblesVolume = 0f;
+            aLoader.snowDayVolume = 0f;
+            aLoader.snowNightVolume = 0f;
+            aLoader.corruptionRoarsVolume = 0f;
+            aLoader.dayJungleVolume = 0f;
+            aLoader.nightJungleVolume = 0f;
+            aLoader.beachWavesVolume = 0f;
+            aLoader.hellRumbleVolume = 0f;
+            aLoader.rainVolume = 0f;
+            aLoader.morningCricketsVolume = 0f;
+            aLoader.breezeVolume = 0f;
+        }
         public override void Close()
         {
             for (int i = 0; i < ModAmbience.allAmbiences.Count; i++)
@@ -198,31 +240,13 @@ namespace TerrariaAmbience.Content
         public float delta_lastPos_playerBottom;
         private void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
         {
+            Utils.ClickHandling();
+            Utils.UpdateButtons();
             orig(self, gameTime);
             var aLoader = Ambience.Instance;
 
             Ambience.DoUpdate_Ambience();
             Ambience.UpdateVolume();
-            if (Main.gameMenu)
-            {
-                aLoader.dayCricketsVolume = 0f;
-                aLoader.nightCricketsVolume = 0f;
-                aLoader.eveningCricketsVolume = 0f;
-                aLoader.desertCricketsVolume = 0f;
-                aLoader.crackleVolume = 0f;
-                aLoader.ugAmbienceVolume = 0f;
-                aLoader.crimsonRumblesVolume = 0f;
-                aLoader.snowDayVolume = 0f;
-                aLoader.snowNightVolume = 0f;
-                aLoader.corruptionRoarsVolume = 0f;
-                aLoader.dayJungleVolume = 0f;
-                aLoader.nightJungleVolume = 0f;
-                aLoader.beachWavesVolume = 0f;
-                aLoader.hellRumbleVolume = 0f;
-                aLoader.rainVolume = 0f;
-                aLoader.morningCricketsVolume = 0f;
-                aLoader.breezeVolume = 0f;
-            }
             if (Main.gameMenu) return;
             Player player = Main.player[Main.myPlayer]?.GetModPlayer<FootstepsPlayer>().player;
             // soundInstancer.Condition = player.ZoneSkyHeight;
@@ -244,7 +268,7 @@ namespace TerrariaAmbience.Content
                     }
                     else if (delta_lastPos_playerBottom <= -300)
                     {
-                        Main.soundSplash[0] = GetSound($"{Ambience.ambienceDirectory}/environment/liquid/entity_splash_heavy");
+                        Main.soundSplash[0] = GetSound($"{Ambience.AmbientPath}/environment/liquid/entity_splash_heavy");
                     }
                 }
             }

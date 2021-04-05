@@ -133,7 +133,8 @@ namespace TerrariaAmbience.Core
                 TileID.HellstoneBrick,
                 TileID.Asphalt,
                 TileID.FossilOre,
-                TileID.DesertFossil
+                TileID.DesertFossil,
+                TileID.RedBrick
         };
         public static List<int> sandBlocks = new List<int>
         {
