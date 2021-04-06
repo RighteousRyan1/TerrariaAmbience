@@ -628,7 +628,7 @@ namespace TerrariaAmbience.Content
                         Instance.SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.45f * ambVol;
 
                         if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
-                            Instance.CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.8f * ambVol;
+                            Instance.CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.8f * Main.soundVolume;
                     }
                     if (!Instance.playerBehindWall && !Instance.playerInLiquid)
                     {
