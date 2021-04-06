@@ -38,6 +38,15 @@ namespace TerrariaAmbience
     public class Utils
     {
         public static Utils Utility => ModContent.GetInstance<Utils>();
+        public enum AudioFileExtension
+        {
+            MP3,
+            WAV,
+            OGG,
+            M4A,
+            FLAC,
+            VOX
+        }
         public static void AddMainMenuButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons)
         {
             buttonNames[buttonIndex] = text;
@@ -207,12 +216,17 @@ namespace TerrariaAmbience
                 public const short AccSlot3 = 4;
                 public const short AccSlot4 = 5;
                 public const short AccSlot5 = 6;
+                
             }
         }
     }
     public static class ExtensionMethods
     {
         public static Mod mod => ModContent.GetInstance<TerrariaAmbience>();
+        public static string AppendFileExtension(this string str, Utils.AudioFileExtension extension)
+        {
+            return $"{str}.{extension.ToString().ToLower()}";
+        }
         public static void InitializeSoundEffect(this SoundEffect toInit, ref SoundEffectInstance toBindTo, string path, string name)
         {
             var mod = ModContent.GetInstance<TerrariaAmbience>();

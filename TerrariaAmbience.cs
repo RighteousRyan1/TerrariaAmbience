@@ -212,8 +212,16 @@ namespace TerrariaAmbience
         }
         public override void Unload()
         {
-            string path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
-            File.WriteAllText(path, Ambience.TAAmbient.ToString() + $"\n{Ambience.fStepsVol}\n\nDO NOT CHANGE THESE NUMBERS.");
+            string path = "";
+            if (Directory.Exists(Path.Combine(ModLoader.ModPath, "Cache")))
+            {
+                path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
+                File.WriteAllText(path, Ambience.TAAmbient.ToString() + $"\n{Ambience.fStepsVol}\n\nDO NOT CHANGE THESE NUMBERS.");
+            }
+            else
+            {
+                Logger.Error("Failed to write save data for TerrariaAmbience volume config.");
+            }
             ModAmbience.Unload();
             SoundChanges.Unload();
         }
