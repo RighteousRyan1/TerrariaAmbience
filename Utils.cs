@@ -351,5 +351,61 @@ namespace TerrariaAmbience
         {
             return Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.4) / 16].liquid > 0;
         }
+        /// <summary>
+        /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
+        /// </summary>
+        /// <param name="player">The player</param>
+        /// <param name="dist">The distance from the player</param>
+        /// <returns></returns>
+        public static int TilesAround(this Player player, int dist, bool condition)
+        {
+            int index = 0;
+            if (condition)
+            {
+                for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++)
+                {
+                    for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++)
+                    {
+                        Tile tile = Main.tile[i, j];
+
+                        if (tile.active() && tile.collisionType == 1)
+                        {
+                            index++;
+                        }
+                    }
+                }
+            }
+            return index;
+        }
+
+        /// <summary>
+        /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
+        /// </summary>
+        /// <param name="player">The player</param>
+        /// <param name="dist">The distance from the player</param>
+        /// <param name="tile">An tile to do something with the tiles inside <paramref name="dist"/>.</param>
+        /// <returns></returns>
+        public static int TilesAround(this Player player, int dist, out Tile tile, bool condition)
+        {
+            Tile leTile = Main.tile[1, 1];
+            int index = 0;
+            if (condition)
+            {
+                for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++)
+                {
+                    for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++)
+                    {
+                        leTile = Main.tile[i, j];
+
+                        if (leTile.active() && leTile.collisionType == 1)
+                        {
+                            index++;
+                        }
+                    }
+                }
+            }
+            tile = leTile;
+            return index;
+        }
     }
 }

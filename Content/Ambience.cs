@@ -10,6 +10,7 @@ using Terraria;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Content.Players;
 using System.Reflection;
+using Terraria.ID;
 
 namespace TerrariaAmbience.Content
 {
@@ -17,6 +18,7 @@ namespace TerrariaAmbience.Content
     {
 
         public static float TAAmbient;
+        public static float fStepsVol;
         // I really wished that using a list or an array for these values could affect them, through experimentation, I realized..
         // No, it's not gonna work. :/
 
@@ -451,16 +453,27 @@ namespace TerrariaAmbience.Content
                 foreach (Rain rain in Main.rain)
                 {
                     rain.rotation = rain.velocity.ToRotation() + MathHelper.PiOver2;
-
-                    if (player.ZoneDesert)
+                    for (int i = (int)rain.position.Y; i < rain.position.Y + 1200; i++)
+                    {
+                        Tile tile = Main.tile[(int)rain.position.X / 16, i / 16];
+                        if (player.ZoneDesert)
+                        {
+                            if (tile.type == TileID.Sand || tile.type == TileID.HardenedSand || tile.wall == WallID.Sandstone)
+                            {
+                                rain.active = false;
+                                break;
+                            }
+                        }
+                    }
+                    /*if (player.ZoneDesert)
                     {
                         if (player.Distance(rain.position) < 1000f)
                         {
                             rain.active = false;
                         }
-                    }
+                    }*/
                 }
-                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight) && !player.ZoneDesert && !player.ZoneUndergroundDesert)
+                if (Main.raining && (player.ZoneOverworldHeight || player.ZoneSkyHeight) && !player.ZoneDesert && !player.ZoneUndergroundDesert && !player.ZoneSnow)
                 {
                     aLoader.rainVolume += decOrIncRate;
                 }

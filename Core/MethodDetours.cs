@@ -42,22 +42,40 @@ namespace TerrariaAmbience.Core
         {
             if (i == 0)
             {
-                sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract to change the volume of Terraria Ambience!", new Vector2(8, 8), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
+                sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract (or period or comma) to change the volume of Terraria Ambience!\nPress the left or right arrow to change what you modify.", new Vector2(8, 8), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
             }
             return orig(sb, txt, i, anchor, offset, scales, minscale, maxscale, scalespeed);
         }
 
         private static bool oldHover;
         private static bool hovering;
+        private static bool _mode;
         private static bool IngameOptions_DrawRightSide(On.Terraria.IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
         {
-            if (Main.keyState.IsKeyDown(Keys.Add))
+            if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
             {
-                Ambience.TAAmbient += 0.025f;
+                if (!_mode)
+                    Ambience.TAAmbient += 0.025f;
+                else
+                    Ambience.fStepsVol += 0.025f;
             }
-            if (Main.keyState.IsKeyDown(Keys.Subtract))
+            if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
             {
-                Ambience.TAAmbient -= 0.025f;
+                if (!_mode)
+                    Ambience.TAAmbient -= 0.025f;
+                else
+                    Ambience.fStepsVol -= 0.025f;
+            }
+
+            if (Main.keyState.IsKeyDown(Keys.Right) && Main.oldKeyState.IsKeyUp(Keys.Right))
+            {
+                Main.PlaySound(SoundID.MenuTick);
+                _mode = true;
+            }
+            else if (Main.keyState.IsKeyDown(Keys.Left) && Main.oldKeyState.IsKeyUp(Keys.Left))
+            {
+                Main.PlaySound(SoundID.MenuTick);
+                _mode = false;
             }
 
             Rectangle hoverPos = new Rectangle((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
@@ -66,10 +84,11 @@ namespace TerrariaAmbience.Core
                 hovering = hoverPos.Contains(Main.MouseScreen.ToPoint());
             }
 
-            var svol = (float)System.Math.Round(Ambience.TAAmbient);
+            var svol = !_mode ? (float)Math.Round(Ambience.TAAmbient) : (float)Math.Round(Ambience.fStepsVol);
             svol = MathHelper.Clamp(svol, 0f, 100f);
             Ambience.TAAmbient = MathHelper.Clamp(Ambience.TAAmbient, 0f, 100f);
-            string percent = $"TA Ambient: {svol}%";
+            Ambience.fStepsVol = MathHelper.Clamp(Ambience.fStepsVol, 0f, 100f);
+            string percent = !_mode ? $"TA Ambient: {svol}%" : $"Footsteps: {svol}%";
             if (!oldHover && hovering)
             {
                 Main.PlaySound(SoundID.MenuTick);
@@ -112,7 +131,7 @@ namespace TerrariaAmbience.Core
             var aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
             if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null)
             {
-                displayable = ModAmbience.modAmbienceList.Count <= 0 && ModAmbience.allAmbiences.Count <= 0 ? 
+                displayable = ModAmbience.modAmbienceList.Count <= 0 && ModAmbience.allAmbiences.Count <= 0 ?
                     $"{loader.BeachWaves.Name}: {loader.BeachWavesInstance.Volume}"
                     + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
                     + $"\n{loader.SnowBreezeDay.Name}: {loader.SnowBreezeDayInstance.Volume}"
@@ -135,6 +154,7 @@ namespace TerrariaAmbience.Core
                     + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
                     + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
                     + $"\nSand: {aPlayer.soundInstanceSandStep.State}"
+                    + $"\nTiles Near -> {Main.LocalPlayer.TilesAround(20, true)}"
                     :
                displayable = $"{loader.BeachWaves.Name}: {loader.BeachWavesInstance.Volume}"
                     + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
@@ -157,6 +177,7 @@ namespace TerrariaAmbience.Core
                     + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
                     + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
                     + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
+                    + $"\nTiles Near -> {Main.LocalPlayer.TilesAround(20, true)}"
                     + $"\nSand: {aPlayer.soundInstanceSandStep.State}\nModded Sounds:";
 
 
@@ -1081,15 +1102,15 @@ namespace TerrariaAmbience.Core
             var pos = new Vector2(Main.screenWidth / 2, 435);
             if (Main.menuMode == 26)
             {
-                sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract to change the volume of Terraria Ambience!", new Vector2(6, 22), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
+                sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract (or period or comma) to change the volume of Terraria Ambience or footsteps volume!", new Vector2(6, 22), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
 
                 ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, percent, pos, Color.LightGray, 0f, Main.fontDeathText.MeasureString(percent) / 2, new Vector2(0.6f, 0.6f), 0, 2);
 
-                if (Main.keyState.IsKeyDown(Keys.Add))
+                if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
                 {
                     Ambience.TAAmbient += 0.5f;
                 }
-                if (Main.keyState.IsKeyDown(Keys.Subtract))
+                if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemPeriod))
                 {
                     Ambience.TAAmbient -= 0.5f;
                 }

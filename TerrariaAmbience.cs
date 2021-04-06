@@ -132,6 +132,16 @@ namespace TerrariaAmbience
             {
                 Ambience.TAAmbient = 100f;
             }
+            if (File.Exists(path) && File.ReadAllLines(path)[1] != null)
+            {
+                string[] lines = File.ReadAllLines(path);
+
+                Ambience.fStepsVol = float.Parse(lines[1]);
+            }
+            else
+            {
+                Ambience.fStepsVol = 100f;
+            }
 
             Ambience.Initialize();
             On.Terraria.Main.DoUpdate += Main_DoUpdate;
@@ -203,7 +213,7 @@ namespace TerrariaAmbience
         public override void Unload()
         {
             string path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
-            File.WriteAllText(path, Ambience.TAAmbient.ToString() + "\n\nDO NOT CHANGE THIS NUMBER.");
+            File.WriteAllText(path, Ambience.TAAmbient.ToString() + $"\n{Ambience.fStepsVol}\n\nDO NOT CHANGE THESE NUMBERS.");
             ModAmbience.Unload();
             SoundChanges.Unload();
         }

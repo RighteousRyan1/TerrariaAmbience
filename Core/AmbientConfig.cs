@@ -3,6 +3,7 @@ using Terraria.ModLoader.Config;
 
 namespace TerrariaAmbience.Core
 {
+    [Label("Clientside Config")]
     public class AmbientConfigClient : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -29,6 +30,7 @@ namespace TerrariaAmbience.Core
         [DefaultValue(false)]
         public bool volVals;
     }
+    [Label("Server Config")]
     public class AmbientConfigServer : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ServerSide;
@@ -43,5 +45,10 @@ namespace TerrariaAmbience.Core
         [DefaultValue(true)]
         [ReloadRequired]
         public bool newSplashes;
+
+        [Label("FPS Stabilizer")]
+        [Tooltip("Enable this if you have FPS issues underground. This is caused by the system that determines the reverb sounds of steps.\nSince the math required for this operation is hefty, it can cause FPS issues.\nEnable to have reverberated footsteps when underground at all times.\nDisable to have reverberated steps based on your underground environment.")]
+        [DefaultValue(false)]
+        public bool noReverbMath;
     }
 }
