@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoMod.RuntimeDetour.HookGen;
 using System.Reflection;
 using Terraria.ID;
+using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience
 {
@@ -37,6 +38,47 @@ namespace TerrariaAmbience
     }
     public class Utils
     {
+        public static void ReloadMods()
+        {
+            typeof(ModLoader).Assembly.GetType("Terraria.ModLoader.ModLoader").GetMethod("Reload", BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
+        }
+        private static Action<string> setLoadProgressText;
+        private static Action<float> setLoadProgressProgress;
+        private static Action<string> setLoadSubProgressText;
+        public static bool ChangeLoadProgress()
+        {
+            Assembly ass = Assembly.GetAssembly(typeof(Mod));
+
+            var type = ass.GetType("Terraria.ModLoader.UI.Interface");
+            FieldInfo lmf = type.GetField("loadMods", BindingFlags.Static | BindingFlags.NonPublic);
+            var lmv = lmf.GetValue(null);
+
+            var UILMType = ass.GetType("Terraria.ModLoader.UI.UILoadMods");
+
+            var SetLoadStageMethod = UILMType.GetMethod("SetLoadStage", BindingFlags.Instance | BindingFlags.Public);
+            var ProgressProperty = UILMType.GetProperty("Progress", BindingFlags.Instance | BindingFlags.Public);
+            PropertyInfo SubProgressTextProperty = UILMType.GetProperty("SubProgressText", BindingFlags.Instance | BindingFlags.Public);
+
+            setLoadProgressText = (string s) => SetLoadStageMethod.Invoke(lmv, new object[] { s, -1 });
+            setLoadProgressProgress = (float f) => ProgressProperty.SetValue(lmv, f);
+            setLoadSubProgressText = (string s) => SubProgressTextProperty.SetValue(lmv, s);
+            DoChanges();
+            return false;
+        }
+        public static float progress;
+        public static void DoChanges()
+        {
+            setLoadProgressText?.Invoke("Adding ModAmbience...");
+            progress += 0.05f;
+            int count = ModAmbience.allAmbiences.Count;
+
+            setLoadSubProgressText?.Invoke(count.ToString() + " Total ModAmbience tracks");
+            setLoadProgressProgress?.Invoke(progress);
+        }
+        public static bool KeyPress(Keys key)
+        {
+            return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
+        }
         public static Utils Utility => ModContent.GetInstance<Utils>();
         public enum AudioFileExtension
         {
@@ -359,11 +401,12 @@ namespace TerrariaAmbience
         }
         public static bool ZoneUnderground(this Player player)
         {
-            return player.Center.Y >= Main.rockLayer * 16 && !player.ZoneUnderworldHeight;
+            return player.ZoneRockLayerHeight;
         }
         public static bool HeadWet(this Player player)
         {
-            return Main.tile[(int)player.Top.X / 16, (int)(player.Top.Y - 1.4) / 16].liquid > 0;
+            Vector2 v = new Vector2(player.Top.X, player.Top.Y - 1.4f).RotatedBy(player.fullRotation, player.Center);
+            return Main.tile[(int)v.X / 16, (int)v.Y / 16].liquid > 0;
         }
         /// <summary>
         /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.

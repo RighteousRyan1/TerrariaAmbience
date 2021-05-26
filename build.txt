@@ -1,5 +1,5 @@
-displayName = Terraria Ambience
+displayName = Terraria Ambience - [c/abcdFF:Config Update]
 author = Ryan (RighteousRyan), Tika
-version = 0.1.5.6
+version = 0.1.6.3
 homepage = https://discord.gg/pT2BzSG
 includePDB = true

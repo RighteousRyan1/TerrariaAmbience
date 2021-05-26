@@ -20,7 +20,11 @@ namespace TerrariaAmbience
 {
     public partial class TerrariaAmbience : Mod
 	{
-        public object x;
+        public override void PostAddRecipes()
+        {
+            Utils.ChangeLoadProgress();
+            // Recipe Browser but real :ReaL:
+        }
         public override object Call(params object[] args)
         {
             try
@@ -56,16 +60,6 @@ namespace TerrariaAmbience
                                 TileDetection.AddTilesToList(TileDetection.snowyblocks, tiles);
                         }
                     return "Tiles added successfully!";
-                }
-                else if (message == "AddAmbience")
-                {
-                    Mod mod = args[1] as Mod;
-                    string soundPath = args[2] as string;
-                    string name = args[3] as string;
-                    bool? checkConditional = args[4] as bool?;
-                    if (!Main.dedServ)
-                        x = new ModAmbience(mod,soundPath, name, checkConditional.Value);
-                    return x;
                 }
                 else
                 {
@@ -120,7 +114,19 @@ namespace TerrariaAmbience
         }
         public override void Load()
         {
+            ContentInstance.Register(new Ambience());
             string path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
+
+            string replacePath = Path.Combine(ModLoader.ModPath, "TASoundReplace");
+
+            if (!Directory.Exists(replacePath))
+            {
+                Directory.CreateDirectory(replacePath);
+            }
+            File.WriteAllText(Path.Combine(replacePath, "README.txt"), "If you are replacing sounds, please read the index/key below for the sounds you might want to replace." +
+                    "\nThese replacements will ONLY work if you put it in here word-for-word.\n"
+                    + "\nforest_morning\nforest_day\nforest_evening\nforest_night\ndesert_crickets\nsnowfall_day\nsnowfall_night\njungle_day\njungle_night\ncorruption_roars"
+                    + "\ncrimson_rumbles\nug_drip\nhell_rumble\nbeach_waves\nbreeze\nrain_new\n\nPlease, do note that these files must be in the WAVE format (.wav)!");
 
             if (File.Exists(path) && File.ReadAllLines(path)[0] != null)
             {
@@ -169,7 +175,6 @@ namespace TerrariaAmbience
         }
         public override void PostSetupContent()
         {
-            ModAmbience.Initialize();
             Mod calamity = ModLoader.GetMod("CalamityMod");
             Mod thor = ModLoader.GetMod("ThoriumMod");
 
@@ -222,7 +227,6 @@ namespace TerrariaAmbience
             {
                 Logger.Error("Failed to write save data for TerrariaAmbience volume config.");
             }
-            ModAmbience.Unload();
             SoundChanges.Unload();
         }
         public override void PreSaveAndQuit()
@@ -248,10 +252,6 @@ namespace TerrariaAmbience
         }
         public override void Close()
         {
-            for (int i = 0; i < ModAmbience.allAmbiences.Count; i++)
-            {
-                ModAmbience.allAmbiences[i] = null;
-            }
             base.Close();
         }
         public float lastPlayerPositionOnGround;
@@ -282,7 +282,7 @@ namespace TerrariaAmbience
                     // Main.NewText(player.fallStart - player.Bottom.Y);
                     if (delta_lastPos_playerBottom > -300)
                     {
-                        Main.soundSplash[0] = Ambience.Instance.SplashNew;
+                        Main.soundSplash[0] = Ambience.SplashNew;
                     }
                     else if (delta_lastPos_playerBottom <= -300)
                     {
@@ -323,7 +323,7 @@ namespace TerrariaAmbience
                 Main.NewText(t.frameY);*/
                 //if (t.frameY <= 54 && t.frameY >= 36)
                 {
-                    Ambience.Instance.CampfireCrackleInstance.Volume = 0f;
+                    Ambience.CampfireCrackleInstance.Volume = 0f;
                     player.GetModPlayer<FootstepsPlayer>().isNearCampfire = false;
                 }
             }

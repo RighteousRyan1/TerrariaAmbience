@@ -3,9 +3,11 @@ using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaAmbience.Core;
 
@@ -37,6 +39,41 @@ namespace TerrariaAmbience.Content.Players
 
         public override void OnEnterWorld(Player player)
         {
+            string Between(string text, string start, string end)
+            {
+                if (text.Contains(start) && text.Contains(end))
+                {
+                    int stringStart;
+                    int stringEnd;
+                    stringStart = text.IndexOf(start, 0) + start.Length;
+                    stringEnd = text.IndexOf(end, stringStart);
+                    return text.Substring(stringStart, stringEnd - stringStart);
+                }
+                return "";
+            }
+            Version GetBrowserVersion()
+            {
+                Version vers;
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                WebClient client = new WebClient();
+                string URL = "https://mirror.sgkoi.dev/Mods/Details/TerrariaAmbience";
+                string htmlCode = client.DownloadString(URL);
+
+                htmlCode = Between(htmlCode, "Version", "</dd>");
+                htmlCode = htmlCode.Remove(0, 50).Trim().Remove(0, 1);
+                vers = new Version(htmlCode);
+
+                return vers;
+            }
+            if (mod.Version < GetBrowserVersion())
+            {
+                Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an outdated version of [c/FabcdF:Terraria Ambience].\nYour current version is [c/FFdd00:v{mod.Version}], the browser version is [c/00dd00:v{GetBrowserVersion()}]. Go to the mod browser and install the latest version!");
+            }
+            if (mod.Version > GetBrowserVersion())
+            {
+                Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an early release of [c/FabcdF:Terraria Ambience]. Do not spread this anywhere!");
+            }
             MethodDetours.attemptingToPlayTracks = false;
             // Ambience.PlayAllAmbience();
             timerUntilValidChestStateChange = 0;
@@ -149,7 +186,7 @@ namespace TerrariaAmbience.Content.Players
                 int tileReq = player.TilesAround(20, player.ZoneRockLayerHeight || player.ZoneDirtLayerHeight);
                 reverbRequirement = !ModContent.GetInstance<AmbientConfigServer>().noReverbMath ? (player.ZoneRockLayerHeight && tileReq > 100) || (player.ZoneDirtLayerHeight && tileReq > 650) : player.ZoneRockLayerHeight || player.ZoneDirtLayerHeight;
                 var actualVol = Ambience.fStepsVol / 100;
-                if (Ambience.fStepsVol != 0 && !player.mount.Active && player.velocity.Y == 0)
+                if (Ambience.fStepsVol != 0 && !player.mount.Active && player.velocity.Y == 0 && Main.soundVolume != 0f)
                 {
                     if ((legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14) && isOnSandyTile)
                     {

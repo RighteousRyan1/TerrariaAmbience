@@ -12,6 +12,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
+using System.Reflection;
 
 namespace TerrariaAmbience.Core
 {
@@ -131,79 +132,30 @@ namespace TerrariaAmbience.Core
             var aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
             if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null)
             {
-                displayable = ModAmbience.modAmbienceList.Count <= 0 && ModAmbience.allAmbiences.Count <= 0 ?
-                    $"{loader.BeachWaves.Name}: {loader.BeachWavesInstance.Volume}"
-                    + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
-                    + $"\n{loader.SnowBreezeDay.Name}: {loader.SnowBreezeDayInstance.Volume}"
-                    + $"\n{loader.SnowBreezeNight.Name}: {loader.SnowBreezeNightInstance.Volume}"
-                    + $"\n{loader.MorningCrickets.Name}: {loader.MorningCricketsInstance.Volume}"
-                    + $"\n{loader.DayCrickets.Name}: {loader.DayCricketsInstance.Volume}"
-                    + $"\n{loader.NightCrickets.Name}: {loader.NightCricketsInstance.Volume}"
-                    + $"\n{loader.EveningCrickets.Name}: {loader.EveningCricketsInstance.Volume}"
-                    + $"\n{loader.CavesAmbience.Name}: {loader.CavesAmbienceInstance.Volume}"
-                    + $"\n{loader.CrimsonRumbles.Name}: {loader.CrimsonRumblesInstance.Volume}"
-                    + $"\n{loader.CorruptionRoars.Name}: {loader.CorruptionRoarsInstance.Volume}"
-                    + $"\n{loader.DayJungle.Name}: {loader.DaytimeJungleInstance.Volume}"
-                    + $"\n{loader.NightJungle.Name}: {loader.NightJungleInstance.Volume}"
-                    + $"\n{loader.DesertAmbience.Name}: {loader.DesertAmbienceInstance.Volume}"
-                    + $"\n{loader.HellRumble.Name}: {loader.HellRumbleInstance.Volume}"
-                    + $"\n{loader.Rain.Name}: {loader.RainInstance.Volume}"
-                    + $"\n{loader.Breeze.Name}: {loader.BreezeInstance.Volume}"
+                displayable =
+                    $"{Ambience.BeachWaves.Name}: {Ambience.BeachWavesInstance.Volume}"
+                    + $"\n{Ambience.CampfireCrackle.Name}: {loader.crackleVolume}"
+                    + $"\n{Ambience.SnowBreezeDay.Name}: {Ambience.SnowBreezeDayInstance.Volume}"
+                    + $"\n{Ambience.SnowBreezeNight.Name}: {Ambience.SnowBreezeNightInstance.Volume}"
+                    + $"\n{Ambience.MorningCrickets.Name}: {Ambience.MorningCricketsInstance.Volume}"
+                    + $"\n{Ambience.DayCrickets.Name}: {Ambience.DayCricketsInstance.Volume}"
+                    + $"\n{Ambience.NightCrickets.Name}: {Ambience.NightCricketsInstance.Volume}"
+                    + $"\n{Ambience.EveningCrickets.Name}: {Ambience.EveningCricketsInstance.Volume}"
+                    + $"\n{Ambience.CavesAmbience.Name}: {Ambience.CavesAmbienceInstance.Volume}"
+                    + $"\n{Ambience.CrimsonRumbles.Name}: {Ambience.CrimsonRumblesInstance.Volume}"
+                    + $"\n{Ambience.CorruptionRoars.Name}: {Ambience.CorruptionRoarsInstance.Volume}"
+                    + $"\n{Ambience.DayJungle.Name}: {Ambience.DaytimeJungleInstance.Volume}"
+                    + $"\n{Ambience.NightJungle.Name}: {Ambience.NightJungleInstance.Volume}"
+                    + $"\n{Ambience.DesertAmbience.Name}: {Ambience.DesertAmbienceInstance.Volume}"
+                    + $"\n{Ambience.HellRumble.Name}: {Ambience.HellRumbleInstance.Volume}"
+                    + $"\n{Ambience.Rain.Name}: {Ambience.RainInstance.Volume}"
+                    + $"\n{Ambience.Breeze.Name}: {Ambience.BreezeInstance.Volume}"
                     + $"\nFootsteps:\nGrass: {aPlayer.soundInstanceGrassStep.State}"
                     + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
                     + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
                     + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
                     + $"\nSand: {aPlayer.soundInstanceSandStep.State}"
-                    + $"\nTiles Near -> {Main.LocalPlayer.TilesAround(20, true)}"
-                    :
-               displayable = $"{loader.BeachWaves.Name}: {loader.BeachWavesInstance.Volume}"
-                    + $"\n{loader.CampfireCrackle.Name}: {loader.crackleVolume}"
-                    + $"\n{loader.SnowBreezeDay.Name}: {loader.SnowBreezeDayInstance.Volume}"
-                    + $"\n{loader.SnowBreezeNight.Name}: {loader.SnowBreezeNightInstance.Volume}"
-                    + $"\n{loader.MorningCrickets.Name}: {loader.MorningCricketsInstance.Volume}"
-                    + $"\n{loader.DayCrickets.Name}: {loader.DayCricketsInstance.Volume}"
-                    + $"\n{loader.NightCrickets.Name}: {loader.NightCricketsInstance.Volume}"
-                    + $"\n{loader.EveningCrickets.Name}: {loader.EveningCricketsInstance.Volume}"
-                    + $"\n{loader.CavesAmbience.Name}: {loader.CavesAmbienceInstance.Volume}"
-                    + $"\n{loader.CrimsonRumbles.Name}: {loader.CrimsonRumblesInstance.Volume}"
-                    + $"\n{loader.CorruptionRoars.Name}: {loader.CorruptionRoarsInstance.Volume}"
-                    + $"\n{loader.DayJungle.Name}: {loader.DaytimeJungleInstance}"
-                    + $"\n{loader.NightJungle.Name}: {loader.NightJungleInstance.Volume}"
-                    + $"\n{loader.DesertAmbience.Name}: {loader.DesertAmbienceInstance.Volume}"
-                    + $"\n{loader.HellRumble.Name}: {loader.HellRumbleInstance.Volume}"
-                    + $"\n{loader.Rain.Name}: {loader.RainInstance.Volume}"
-                    + $"\n{loader.Breeze.Name}: {loader.BreezeInstance.Volume}"
-                    + $"\nFootsteps:\nGrass: {aPlayer.soundInstanceGrassStep.State}"
-                    + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
-                    + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
-                    + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
-                    + $"\nTiles Near -> {Main.LocalPlayer.TilesAround(20, true)}"
-                    + $"\nSand: {aPlayer.soundInstanceSandStep.State}\nModded Sounds:";
-
-
-                int index = 0;
-                foreach (ModAmbience ambient in ModAmbience.modAmbienceList)
-                {
-                    if (ambient != null)
-                    {
-                        if (ModAmbience.modAmbienceList.Count > 0)
-                        {
-                            index = ModAmbience.allAmbiences.Count;
-                            displayable += $"\n{ambient.Name}: {ambient.Volume}";
-                        }
-                    }
-                }
-                foreach (ModAmbience ambient in ModAmbience.allAmbiences)
-                {
-                    if (ambient != null)
-                    {
-                        if (ModAmbience.allAmbiences.Count > 0)
-                        {
-                            index = ModAmbience.allAmbiences.Count;
-                            displayable = string.Concat(displayable, $"\n{ambient.Name}: {ambient.Volume}");
-                        }
-                    }
-                }
+                    + $"\nTiles Near -> {Main.LocalPlayer.TilesAround(20, true)}";
             }
 
             if (ModContent.GetInstance<AmbientConfigClient>().volVals)
@@ -237,6 +189,7 @@ namespace TerrariaAmbience.Core
                     1);
             }
         }
+        #region Shameless Variable Naming
         private static float posX;
         private static float posY;
         private static bool active;
@@ -254,12 +207,6 @@ namespace TerrariaAmbience.Core
         private static float buttonScale10;
         private static float buttonScale11;
         private static float buttonScale12;
-        private static float buttonScale13;
-        private static float buttonScale14;
-        private static float buttonScale15;
-        private static float buttonScale16;
-        private static float buttonScale17;
-        private static float buttonScale18;
 
         private static float subButtonScale1;
         private static float subButtonScale2;
@@ -279,6 +226,7 @@ namespace TerrariaAmbience.Core
         public static bool attemptingToPlayTracks;
 
         private static int unequalDisplayTimer;
+        #endregion
         public static void HaltAllMenuAmbient()
         {
             var aLoader = Ambience.Instance;
@@ -309,35 +257,43 @@ namespace TerrariaAmbience.Core
         private static float supposedMousePosY;
         public static void DrawAmbienceMenu()
         {
+            string genericError = "recievedFileBytes was null or a custom ambience track is loaded and/or replaced a normal one. Could not save file!";
             string info = "<< INFORMATION >>\n\nThese sounds are under the PUBLIC DOMAIN / CREATIVE COMMONS.\n" +
                                 "Since these sounds were made with various other creative commons sounds, they cannot be used under the Attribution license.\n" +
                                 "But please, if you use them, be sure to give credit to the mod and Tika, the person behind the sounds of this mod.\n\n<< This file was generated by Terraria Ambience, a Terraria mod supported by tModLoader >>";
             string path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\TA Ambient";
             Mod mod = ModContent.GetInstance<TerrariaAmbience>();
-            bool KeyPress(Keys key)
-            {
-                return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
-            }
-            float y = 0.1f;
-            // Terraria.Utils.DrawBorderString(Main.spriteBatch, $"{Path.Combine(path, "crimson_rumbles.ogg")}", Main.MouseScreen + new Vector2(25, 25), Color.White);
+            // string thing = $"help";
+            // Terraria.Utils.DrawBorderString(Main.spriteBatch, $"{thing}", Main.MouseScreen + new Vector2(25, 25), Color.White);
             if (Main.menuMode == 999)
             {
                 Rectangle toPlay = new Rectangle(208, 74, 26, 16);
                 Rectangle toOpen = new Rectangle(40, 96, 26, 16);
-                Terraria.Utils.DrawBorderString(Main.spriteBatch, $"Left click the buttons to listen to the various ambience tracks from this mod!\nSome have different sounds based on the time of day.\nRight click the buttons to download the tracks to your desktop!\nIf it cannot save, you will hear\nClick      to view the folder the sounds export to.", new Vector2(6, 6), Color.White, 0.8f);
+                Rectangle toOpen2 = new Rectangle(290, 118, 26, 16);
+                Terraria.Utils.DrawBorderString(Main.spriteBatch, $"Left click the buttons to listen to the various ambience tracks from this mod!\nSome have different sounds based on the time of day.\nRight click the buttons to download the tracks to your desktop!\nIf it cannot save, you will hear\nClick      to view the folder the sounds export to.\nFor sound replacements (soundpacks), click\nTo reload all sounds, press the R key.", new Vector2(6, 6), Color.White, 0.8f);
                 Terraria.Utils.DrawBorderString(Main.spriteBatch, $"[c/FFFF00:this].", new Vector2(208, 74), Color.White, 0.8f);
-                Terraria.Utils.DrawBorderString(Main.spriteBatch, $"[c/FFFF00:here]", new Vector2(40, 96), Color.White, 0.8f);
+                for (int u = 0; u < 3; u++)
+                {
+                    var pos = u == 1 ? new Vector2(40, 96) : new Vector2(290, 118);
+                    Terraria.Utils.DrawBorderString(Main.spriteBatch, u == 2 ? $"[c/FFFF00:here]." : "[c/FFFF00:here]", pos, Color.White, 0.8f);
+                }
 
                 if (toPlay.Contains(Main.MouseScreen.ToPoint()) && Main.mouseLeft && Main.mouseLeftRelease)
                 {
                     Main.PlaySound(SoundID.Unlock);
                 }
+                if (toOpen2.Contains(Main.MouseScreen.ToPoint()) && Main.mouseLeft && Main.mouseLeftRelease)
+                {
+                    Main.PlaySound(SoundID.MenuOpen);
+                    System.Diagnostics.Process.Start(Ambience.SFXReplacePath);
+                }
                 if (toOpen.Contains(Main.MouseScreen.ToPoint()) && Main.mouseLeft && Main.mouseLeftRelease)
                 {
                     Main.PlaySound(SoundID.MenuOpen);
-                    System.Diagnostics.Process.Start(path);
+					if (Directory.Exists(path))
+						System.Diagnostics.Process.Start(path);
                 }
-                if (KeyPress(Keys.Down) || KeyPress(Keys.S))
+                if (Utils.KeyPress(Keys.Down) || Utils.KeyPress(Keys.S))
                 {
                     if (supposedMousePosY == 0)
                     {
@@ -345,15 +301,15 @@ namespace TerrariaAmbience.Core
                     }
                     supposedMousePosY += 42;
                 }
-                if (KeyPress(Keys.Up) || KeyPress(Keys.W))
+                if (Utils.KeyPress(Keys.Up) || Utils.KeyPress(Keys.W))
                 {
-                    if (supposedMousePosY == 0)
-                    {
-
-                    }
                     supposedMousePosY -= 42;
                 }
-
+                if (Utils.KeyPress(Keys.R))
+                {
+                    Main.PlaySound(SoundID.MenuOpen);
+                    Utils.ReloadMods();
+                }
 
                 int offY = 42;
                 float defaultAlpha = 0.9f;
@@ -392,7 +348,7 @@ namespace TerrariaAmbience.Core
                             else 
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         });
@@ -428,7 +384,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -469,7 +425,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         });
@@ -506,7 +462,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -548,7 +504,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -589,7 +545,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -628,7 +584,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -666,7 +622,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -702,7 +658,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -739,7 +695,7 @@ namespace TerrariaAmbience.Core
                             else
                             {
                                 Main.PlaySound(SoundID.Unlock);
-                                mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                                mod.Logger.Error(genericError);
                             }
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
@@ -790,7 +746,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -839,7 +795,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -871,7 +827,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -908,7 +864,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -947,7 +903,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -973,7 +929,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -1001,7 +957,7 @@ namespace TerrariaAmbience.Core
                         else
                         {
                             Main.PlaySound(SoundID.Unlock);
-                            mod.Logger.Error("recievedFileBytes was null. Could not save file!");
+                            mod.Logger.Error(genericError);
                         }
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
@@ -1033,30 +989,6 @@ namespace TerrariaAmbience.Core
         {
             DrawAmbienceMenu();
             Mod mod = ModContent.GetInstance<TerrariaAmbience>();
-
-            // Echcode.tm
-            /*int i = 0;
-            int j = 1;
-            int z = 0;
-            foreach (Mod mod in ModLoader.Mods)
-            {
-                if (mod != null && mod.TextureExists("icon"))
-                {
-                    i++;
-                    if (((100 * i) + 95) < Main.screenHeight)
-                    {
-                        Main.spriteBatch.SafeDraw(mod.GetTexture("icon"), new Vector2(80, 100 * i), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
-                        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, mod.DisplayName, new Vector2(120, (100 * i) + 95), Color.LightGray, 0f, Main.fontDeathText.MeasureString(mod.DisplayName) / 2, new Vector2(0.35f, 0.35f), 0, 1);
-                    }
-                    else
-                    {
-                        j++;
-                        z++;
-                        Main.spriteBatch.Draw(mod.GetTexture("icon"), new Vector2(100 * j, (100 * i) - (z * 900)), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1f);
-                        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, mod.DisplayName, new Vector2(120 * j, ((100 * i) + 95) - (z * 900)), Color.LightGray, 0f, Main.fontDeathText.MeasureString(mod.DisplayName) / 2, new Vector2(0.35f, 0.35f), 0, 1);
-                    }
-                }
-            }*/
 
             posX = MathHelper.Clamp(posX, -450, -16);
             var sb = Main.spriteBatch;
@@ -1110,7 +1042,7 @@ namespace TerrariaAmbience.Core
                 {
                     Ambience.TAAmbient += 0.5f;
                 }
-                if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemPeriod))
+                if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
                 {
                     Ambience.TAAmbient -= 0.5f;
                 }

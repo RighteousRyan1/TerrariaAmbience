@@ -61,19 +61,19 @@ namespace TerrariaAmbience.Content
             {
                 Main.soundRun = mod.GetSound("Sounds/Custom/nothingness");
 
-                Main.soundDrip[0] = loader.Drip1;
-                Main.soundDrip[1] = loader.Drip2;
-                Main.soundDrip[2] = loader.Drip3;
+                Main.soundDrip[0] = Ambience.Drip1;
+                Main.soundDrip[1] = Ambience.Drip2;
+                Main.soundDrip[2] = Ambience.Drip3;
 
-                Main.soundLiquid[0] = loader.WaterStream;
-                Main.soundLiquid[1] = loader.LavaStream;
+                Main.soundLiquid[0] = Ambience.WaterStream;
+                Main.soundLiquid[1] = Ambience.LavaStream;
 
-                Main.soundInstanceDrip[0] = loader.Drip1Instance;
-                Main.soundInstanceDrip[1] = loader.Drip2Instance;
-                Main.soundInstanceDrip[2] = loader.Drip3Instance;
+                Main.soundInstanceDrip[0] = Ambience.Drip1Instance;
+                Main.soundInstanceDrip[1] = Ambience.Drip2Instance;
+                Main.soundInstanceDrip[2] = Ambience.Drip3Instance;
 
-                Main.soundInstanceLiquid[0] = loader.WaterStreamInstance;
-                Main.soundInstanceLiquid[1] = loader.LavaStreamInstance;
+                Main.soundInstanceLiquid[0] = Ambience.WaterStreamInstance;
+                Main.soundInstanceLiquid[1] = Ambience.LavaStreamInstance;
 
                 Main.soundZombie[0] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie1");
                 Main.soundZombie[1] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie2");

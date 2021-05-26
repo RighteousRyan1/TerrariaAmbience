@@ -22,11 +22,12 @@ Most Recent Update:
 
 [NOTE] Ambience volume can be separately modified via the In-game Options or the Main Menu by holding either ADD or SUBTRACT.
 
-[BUGFIX] Fixed unload crashing issues (Thanks TJ the HedgeScout and Katona!)
+[NEW FEATURE] You can replace the ambience sounds with your very own (Do note: the changes to the sounds WILL NOT apply to the 'Ambience Menu.' This will also completely all modded ambience tracks that are added.)
+[NEW FEATURE] You can disable as many default ambience tracks as you want with the new config option.
+[IMPROVEMENT] Sounds now are in higher detail!
 
-[NEW FEATURE] New ambience menu! Download and listen to the ambiences that can be heard ingame!
-[NEW FEATURE] Footstep volume. Modify the volume of this mod's footsteps.
-[NEW FEATURE] Reverb footsteps underground. Enjoy! (If you lag underground, be sure to check the mod's configuration menu)
+[BUGFIX] Fixed rain not being properly replaceable with soundpacks.
+[BUGFIX] Fixed "You have an early version!" Message appearing when it should not be. (Thanks Bacterious!)
 
 
 
