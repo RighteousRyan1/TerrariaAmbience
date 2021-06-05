@@ -13,6 +13,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
 using System.Reflection;
+using TerrariaAmbience.Helpers;
+
 
 namespace TerrariaAmbience.Core
 {
@@ -20,7 +22,7 @@ namespace TerrariaAmbience.Core
     {
         public static void DetourAll()
         {
-            ContentInstance.Register(new Utils());
+            ContentInstance.Register(new GeneralHelpers());
 
             On.Terraria.Main.DrawMenu += Main_DrawMenu;
             On.Terraria.Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
@@ -35,7 +37,7 @@ namespace TerrariaAmbience.Core
 
         private static void MenuDetours_On_AddMenuButtons(MenuDetours.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
         {
-            Utils.AddMainMenuButton("Ambience Menu", delegate { Main.menuMode = 999; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
+            Helpers.GeneralHelpers.AddMainMenuButton("Ambience Menu", delegate { Main.menuMode = 999; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
             orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
         }
 
@@ -293,7 +295,7 @@ namespace TerrariaAmbience.Core
 					if (Directory.Exists(path))
 						System.Diagnostics.Process.Start(path);
                 }
-                if (Utils.KeyPress(Keys.Down) || Utils.KeyPress(Keys.S))
+                if (GeneralHelpers.KeyPress(Keys.Down) || GeneralHelpers.KeyPress(Keys.S))
                 {
                     if (supposedMousePosY == 0)
                     {
@@ -301,14 +303,14 @@ namespace TerrariaAmbience.Core
                     }
                     supposedMousePosY += 42;
                 }
-                if (Utils.KeyPress(Keys.Up) || Utils.KeyPress(Keys.W))
+                if (GeneralHelpers.KeyPress(Keys.Up) || GeneralHelpers.KeyPress(Keys.W))
                 {
                     supposedMousePosY -= 42;
                 }
-                if (Utils.KeyPress(Keys.R))
+                if (GeneralHelpers.KeyPress(Keys.R))
                 {
                     Main.PlaySound(SoundID.MenuOpen);
-                    Utils.ReloadMods();
+                    GeneralHelpers.ReloadMods();
                 }
 
                 int offY = 42;
@@ -318,7 +320,7 @@ namespace TerrariaAmbience.Core
                 {
                     if (eOpen)
                     {
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 180, (Main.screenHeight * 0.25f) + offY * 5),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 180, (Main.screenHeight * 0.25f) + offY * 5),
                         Ambience.Instance.crimsonRumblesVolume == 1f ? "Crimson (On)" : "Crimson",
                         delegate
                         {
@@ -353,7 +355,7 @@ namespace TerrariaAmbience.Core
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         });
 
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 180, (Main.screenHeight * 0.25f) + offY * 5),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 180, (Main.screenHeight * 0.25f) + offY * 5),
                         Ambience.Instance.corruptionRoarsVolume == 1f ? "Corruption (On)" : "Corruption",
                         delegate
                         {
@@ -392,7 +394,7 @@ namespace TerrariaAmbience.Core
                     }
                     if (jOpen)
                     {
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 140, (Main.screenHeight * 0.25f) + offY * 3),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 140, (Main.screenHeight * 0.25f) + offY * 3),
                         Ambience.Instance.dayJungleVolume == 1f ? "Day (On)" : "Day",
                         delegate 
                         {
@@ -430,7 +432,7 @@ namespace TerrariaAmbience.Core
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         });
 
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 140, (Main.screenHeight * 0.25f) + offY * 3),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 140, (Main.screenHeight * 0.25f) + offY * 3),
                         Ambience.Instance.nightJungleVolume == 1f ? "Night (On)" : "Night",
                         delegate
                         {
@@ -470,7 +472,7 @@ namespace TerrariaAmbience.Core
                     }
                     if (sOpen)
                     {
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 130, Main.screenHeight * 0.25f + offY * 2),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 130, Main.screenHeight * 0.25f + offY * 2),
                         Ambience.Instance.snowDayVolume == 1f ? "Day (On)" : "Day",
                         delegate
                         {
@@ -510,7 +512,7 @@ namespace TerrariaAmbience.Core
                         }
                         );
 
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 130, Main.screenHeight * 0.25f + offY * 2),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 130, Main.screenHeight * 0.25f + offY * 2),
                         Ambience.Instance.snowNightVolume == 1f ? "Night (On)" : "Night",
                         delegate
                         {
@@ -553,7 +555,7 @@ namespace TerrariaAmbience.Core
                     }
                     if (fOpen)
                     {
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 320, Main.screenHeight * 0.25f),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 320, Main.screenHeight * 0.25f),
                         Ambience.Instance.morningCricketsVolume == 1f ? "Morning (On)" : "Morning",
                         delegate
                         {
@@ -590,7 +592,7 @@ namespace TerrariaAmbience.Core
                         }
                         );
 
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 150, Main.screenHeight * 0.25f + 2),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) - 150, Main.screenHeight * 0.25f + 2),
                         Ambience.Instance.dayCricketsVolume == 1f ? "Midday (On)" : "Midday",
                         delegate
                         {
@@ -627,7 +629,7 @@ namespace TerrariaAmbience.Core
                             File.WriteAllText(Path.Combine(path, "README.info"), info);
                         }
                         );
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 150, Main.screenHeight * 0.25f + 3),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 150, Main.screenHeight * 0.25f + 3),
                         Ambience.Instance.eveningCricketsVolume == 1f ? "Evening (On)" : "Evening",
                         delegate
                         {
@@ -664,7 +666,7 @@ namespace TerrariaAmbience.Core
                         }
                         );
 
-                        Utils.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 320, Main.screenHeight * 0.25f + 4),
+                        GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2((Main.screenWidth / 2) + 320, Main.screenHeight * 0.25f + 4),
                         Ambience.Instance.nightCricketsVolume == 1f ? "Night (On)" : "Night",
                         delegate
                         {
@@ -705,7 +707,7 @@ namespace TerrariaAmbience.Core
 
                 DrawOpens();
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f), 
                     "Forest",
                     delegate 
                     {
@@ -714,7 +716,7 @@ namespace TerrariaAmbience.Core
                     }, 
                     ref buttonScale1, default, 0.015f, delegate { }, fOpen ? Main.highVersionColor : default, defaultAlpha, false);
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY),
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY),
                     Ambience.Instance.desertCricketsVolume == 1f ? "Desert (On)" : "Desert",
                     delegate 
                     {
@@ -752,7 +754,7 @@ namespace TerrariaAmbience.Core
                     }
                     );
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 2), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 2), 
                     "Snow",
                     delegate 
                     {
@@ -761,7 +763,7 @@ namespace TerrariaAmbience.Core
                     }, 
                     ref buttonScale3, default, 0.015f, delegate { }, sOpen ? Main.highVersionColor : default, defaultAlpha, false);
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 3), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 3), 
                     "Jungle",
                     delegate 
                     {
@@ -770,7 +772,7 @@ namespace TerrariaAmbience.Core
                     }, 
                     ref buttonScale4, default, 0.015f, delegate { }, jOpen ? Main.highVersionColor : default, defaultAlpha, false);
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 4),
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 4),
                     Ambience.Instance.beachWavesVolume == 1f ? "Ocean (On)" : "Ocean",
                     delegate 
                     {
@@ -800,7 +802,7 @@ namespace TerrariaAmbience.Core
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
                     );
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 5),
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 5),
                     "Evils",
                     delegate
                     {
@@ -809,7 +811,7 @@ namespace TerrariaAmbience.Core
                     },
                     ref buttonScale11, default, 0.015f, delegate { }, eOpen ? Main.highVersionColor : default, defaultAlpha, false);
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 6), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 6), 
                     Ambience.Instance.crackleVolume == 1f ? "Campfire (On)" : "Campfire",
                     delegate 
                     { 
@@ -833,7 +835,7 @@ namespace TerrariaAmbience.Core
                     }
                     );
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 7), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 7), 
                     Ambience.Instance.ugAmbienceVolume == 1f ? "Cavern Layer (On)" : "Cavern Layer",
                     delegate 
                     {
@@ -870,7 +872,7 @@ namespace TerrariaAmbience.Core
                     }
                     );
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 8), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 8), 
                     Ambience.Instance.hellRumbleVolume == 1f ? "The Underworld (On)" : "The Underworld",
                     delegate 
                     {
@@ -909,7 +911,7 @@ namespace TerrariaAmbience.Core
                     }
                     );
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 9), 
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 9), 
                     Ambience.Instance.breezeVolume == 1f ? "Breeze (On)" : "Breeze",
                     delegate 
                     {
@@ -934,7 +936,7 @@ namespace TerrariaAmbience.Core
                         File.WriteAllText(Path.Combine(path, "README.info"), info);
                     }
                     );
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 10),
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 10),
                     Ambience.Instance.rainVolume == 1f ? "Rain (On)" : "Rain",
                     delegate
                     {
@@ -963,14 +965,14 @@ namespace TerrariaAmbience.Core
                     }
                     );
 
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 11), "Stop All",
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 11), "Stop All",
                     delegate 
                     { 
                         Main.PlaySound(SoundID.MenuClose); 
                         HaltAllMenuAmbient(); 
                     }, 
                     ref buttonScale10, default, 0.015f, delegate { }, default, defaultAlpha, false);
-                Utils.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 12), "Back",
+                GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f + offY * 12), "Back",
                     delegate 
                     { 
                         Main.menuMode = 0; 
@@ -1057,7 +1059,7 @@ namespace TerrariaAmbience.Core
                     }
                 }
             }
-            Utils.MSOld = Utils.MSNew;
+            GeneralHelpers.MSOld = GeneralHelpers.MSNew;
             orig(self, gameTime);
         }
     }

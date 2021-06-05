@@ -48,7 +48,6 @@ namespace TerrariaAmbience.Content
             TileID.Books
         };
         [Obsolete("Do not use for the time being- it is being finalized.")]
-        public static string FurnaceSoundDir { get; }
         public static string WorkBenchesSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_workbenches"; }
         public static string AnvilsSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_anvils"; }
         public static string BooksSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_bookrelated"; }
@@ -72,14 +71,14 @@ namespace TerrariaAmbience.Content
                 aPlayer.playerCraftType = 2;
                 Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, WorkBenchesSoundDir), player.Center).Volume *= .8f;
             }
-            if (craftWithFurnace)
+            /*if (craftWithFurnace)
             {
                 aPlayer.playerCraftType = 3;
                 if (FurnaceSoundDir != default)
                 {
                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, FurnaceSoundDir), player.Center).Volume *= .8f;
                 }
-            }
+            }*/
             if (craftWithBook)
             {
                 aPlayer.playerCraftType = 4;

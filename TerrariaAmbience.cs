@@ -15,16 +15,12 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Microsoft.Xna.Framework.Input;
 using TerrariaAmbience.Content;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience
 {
     public partial class TerrariaAmbience : Mod
 	{
-        public override void PostAddRecipes()
-        {
-            Utils.ChangeLoadProgress();
-            // Recipe Browser but real :ReaL:
-        }
         public override object Call(params object[] args)
         {
             try
@@ -221,7 +217,10 @@ namespace TerrariaAmbience
             if (Directory.Exists(Path.Combine(ModLoader.ModPath, "Cache")))
             {
                 path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
-                File.WriteAllText(path, Ambience.TAAmbient.ToString() + $"\n{Ambience.fStepsVol}\n\nDO NOT CHANGE THESE NUMBERS.");
+                if (File.Exists(path))
+                    File.WriteAllText(path, Ambience.TAAmbient.ToString() + $"\n{Ambience.fStepsVol}\n\nDO NOT CHANGE THESE NUMBERS.");
+                else
+                    Logger.Error("Failed to write save data for TerrariaAmbience volume config.");
             }
             else
             {
@@ -249,6 +248,21 @@ namespace TerrariaAmbience
             aLoader.rainVolume = 0f;
             aLoader.morningCricketsVolume = 0f;
             aLoader.breezeVolume = 0f;
+
+
+            string path = "";
+            if (Directory.Exists(Path.Combine(ModLoader.ModPath, "Cache")))
+            {
+                path = Path.Combine(ModLoader.ModPath, "Cache//ta_secretconfig.txt");
+                if (File.Exists(path))
+                    File.WriteAllText(path, Ambience.TAAmbient.ToString() + $"\n{Ambience.fStepsVol}\n\nDO NOT CHANGE THESE NUMBERS.");
+                else
+                    Logger.Error("Failed to write save data for TerrariaAmbience volume config.");
+            }
+            else
+            {
+                Logger.Error("Failed to write save data for TerrariaAmbience volume config.");
+            }
         }
         public override void Close()
         {
@@ -258,8 +272,8 @@ namespace TerrariaAmbience
         public float delta_lastPos_playerBottom;
         private void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
         {
-            Utils.ClickHandling();
-            Utils.UpdateButtons();
+            GeneralHelpers.ClickHandling();
+            GeneralHelpers.UpdateButtons();
             orig(self, gameTime);
             var aLoader = Ambience.Instance;
 

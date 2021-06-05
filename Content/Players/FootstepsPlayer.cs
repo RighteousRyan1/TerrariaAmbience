@@ -10,6 +10,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content.Players
 {
@@ -129,7 +130,7 @@ namespace TerrariaAmbience.Content.Players
                 }
             }
 
-            bool hasLegArmor = Utils.CheckPlayerArmorSlot(player, Utils.IDs.ArmorSlotID.LegSlot);
+            bool hasLegArmor = GeneralHelpers.CheckPlayerArmorSlot(player, GeneralHelpers.IDs.ArmorSlotID.LegSlot);
 
             legFrameSnapShotNew = player.legFrame.Y / 20;
 
@@ -303,23 +304,24 @@ namespace TerrariaAmbience.Content.Players
             // Main.NewText(hootInstance == null);
             int randX = Main.rand.Next(-1750, 1750);
             int randY = Main.rand.Next(-1750, 1750);
-            string pathToThunder = $"Sounds/Custom/ambient/rain/thunder";
-            int chance3 = Main.rand.Next(3500 * Main.ActivePlayersCount);
-            if (Main.raining && !player.ZoneSnow && !player.ZoneUnderworldHeight && !player.ZoneRockLayerHeight && !player.ZoneDirtLayerHeight)
+            int randC = Main.rand.Next(1, 6);
+            int randD = Main.rand.Next(1, 7);
+            int randF = Main.rand.Next(1, 3);
+            int randM = Main.rand.Next(1, 10);
+
+            string pick = GeneralHelpers.Pick($"close/{randC}", $"distant/{randD}", $"far/{randF}", $"medial/{randM}");
+            string pathToThunder = $"Sounds/Custom/ambient/rain/thunder/{pick}";
+
+            float mafs = 2000 / (Main.maxRaining * 2);// 500 * Main.ActivePlayersCount / (Main.maxRaining / 2);
+            float chance3 = Main.rand.NextFloat(mafs);
+            // Main.NewText($"{mafs} -> rand({chance3}) ({Main.maxRaining})");
+            if (Main.raining && !player.ZoneSnow && player.ZoneOverworldHeight)
             {
-                if (chance3 == 2)
+                if (chance3 < 2)
                 {
+                    // Main.NewText(pathToThunder);
                     thunderInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToThunder), player.Center + new Vector2(randX, randY));
-                    thunderInstance.Volume = Main.ambientVolume * 0.9f;
-                    thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
-                }
-            }
-            else if (player.ZoneDirtLayerHeight)
-            {
-                if (chance3 == 2)
-                {
-                    thunderInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToThunder), player.Center + new Vector2(randX, randY));
-                    thunderInstance.Volume = Main.ambientVolume * 0.45f;
+                    thunderInstance.Volume = Main.ambientVolume * (player.ZoneDirtLayerHeight ? 0.35f : 0.9f);
                     thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
                 }
             }
@@ -329,32 +331,26 @@ namespace TerrariaAmbience.Content.Players
                 string pathToHoot = $"Sounds/Custom/ambient/animals/hoot{rand}";
                 string pathToHowl = $"Sounds/Custom/ambient/animals/howl";
 
-                int chance1 = Main.rand.Next(750 * Main.ActivePlayersCount);
-                int chance2 = Main.rand.Next(1500 * Main.ActivePlayersCount);
+                int chance1 = Main.rand.Next(750 * Main.ActivePlayersCount * 4);
+                int chance2 = Main.rand.Next(1500 * Main.ActivePlayersCount * 4);
                 if (Main.soundVolume > 0f)
                 {
-                    //if (hootInstance.IsStopped())
+                    if (chance1 == 0)
                     {
-                        if (chance1 == 0)
+                        if (player.ZoneForest())
                         {
-                            if (player.ZoneForest())
-                            {
-                                hootInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHoot), player.Center + new Vector2(randX, randY));
-                                hootInstance.Volume = Main.ambientVolume * 0.9f;
-                            }
+                            hootInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHoot), player.Center + new Vector2(randX, randY));
+                            hootInstance.Volume = Main.ambientVolume * 0.9f;
                         }
                     }
-                    //if (howlInstance.IsStopped())
+                }
+                if (player.ZoneSnow && !player.ZoneUnderworldHeight && !player.ZoneRockLayerHeight)
+                {
+                    if (chance2 == 1)
                     {
-                        if (player.ZoneSnow && !player.ZoneUnderworldHeight && !player.ZoneRockLayerHeight)
-                        {
-                            if (chance2 == 1)
-                            {
-                                howlInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHowl), player.Center + new Vector2(randX, randY));
-                                howlInstance.Volume = Main.ambientVolume * 0.1f;
-                                howlInstance.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
-                            }
-                        }
+                        howlInstance = Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, pathToHowl), player.Center + new Vector2(randX, randY));
+                        howlInstance.Volume = Main.ambientVolume * 0.1f;
+                        howlInstance.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
                     }
                 }
             }
@@ -363,29 +359,18 @@ namespace TerrariaAmbience.Content.Players
                 int possibleChance = Main.rand.Next(1000);
                 int randX1 = Main.rand.Next(-2250, 2250);
                 int randY1 = Main.rand.Next(-2250, 2250);
-
                 if (possibleChance == 0)
-                {
                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/ambient/animals/rattling_bones"), player.Center + new Vector2(randX1, randY1)).Volume = Main.ambientVolume * 0.05f;
-                }
             }
             var aLoader = Ambience.Instance;
             if (aLoader.crackleVolume > 1)
-            {
                 aLoader.crackleVolume = 1;
-            }
             if (aLoader.crackleVolume < 0)
-            {
                 aLoader.crackleVolume = 0;
-            }
             if (isNearCampfire && ModContent.GetInstance<AmbientConfigClient>().campfireSounds)
-            {
                 Ambience.Instance.crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceOf / 780;
-            }
             else
-            {
                 Ambience.Instance.crackleVolume = 0f;
-            }
         }
     }
 }

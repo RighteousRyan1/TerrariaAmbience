@@ -12,6 +12,7 @@ using TerrariaAmbience.Content.Players;
 using System.Reflection;
 using Terraria.ID;
 using System.IO;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content
 {
@@ -172,7 +173,7 @@ namespace TerrariaAmbience.Content
         {
             public static bool ExistsInSFXReplace(string sfx)
             {
-                return File.Exists(Path.Combine(SFXReplacePath, sfx.AppendFileExtension(Utils.AudioFileExtension.WAV)));
+                return File.Exists(Path.Combine(SFXReplacePath, sfx.AppendFileExtension(Helpers.GeneralHelpers.AudioFileExtension.WAV)));
             }
 
             public static string ForestMorning => !ExistsInSFXReplace("forest_morning") ? 
@@ -599,7 +600,7 @@ namespace TerrariaAmbience.Content
                 if (Main.gameMenu)
                 {
                     DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.75f * ambVol;
-                    EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.75f * ambVol;
+                    EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.75f;
                     NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.75f * ambVol;
                     DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.75f * ambVol;
                     CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.75f * ambVol;
