@@ -11,10 +11,11 @@ namespace TerrariaAmbience.Core
 {
     public class TileDetection : GlobalTile
     {
+        public static int curTileType;
+
         public static List<int> grassTiles = new List<int>
         {
                 TileID.Grass,
-                TileID.Dirt,
                 TileID.BlueMoss,
                 TileID.BrownMoss,
                 TileID.GreenMoss,
@@ -23,23 +24,27 @@ namespace TerrariaAmbience.Core
                 TileID.PurpleMoss,
                 TileID.RedMoss,
                 TileID.JungleGrass,
-                TileID.Mud,
                 TileID.CorruptGrass,
                 TileID.FleshGrass,
                 TileID.HallowedGrass,
                 TileID.LivingMahoganyLeaves,
                 TileID.LeafBlock,
                 TileID.MushroomGrass,
-                TileID.ClayBlock,
-                TileID.Cloud,
-                TileID.Asphalt,
-                TileID.RainCloud,
                 TileID.HoneyBlock,
                 TileID.CrispyHoneyBlock,
                 TileID.PumpkinBlock,
         };
-        public static List<int> stoneBlocks = new List<int>
+        public static List<int> dirtBlocks = new List<int>
         {
+            TileID.Dirt,
+            TileID.ClayBlock,
+            TileID.Mud,
+            TileID.Silt,
+            TileID.Slush,
+        };
+        public static List<int> stoneBlocks = new List<int>
+        {               
+                TileID.Asphalt,
                 TileID.Stone,
                 TileID.StoneSlab,
                 TileID.ActiveStoneBlock,
@@ -141,16 +146,10 @@ namespace TerrariaAmbience.Core
                 TileID.Sand,
                 TileID.Ebonsand,
                 TileID.Crimsand,
-                TileID.Slush,
-                TileID.Silt,
                 TileID.Ash,
                 TileID.Glass,
                 TileID.Pearlsand
         };
-        /// <summary>
-        /// Blocks that are either snow or are akin to snow. Y
-        /// </summary>
-
         public static List<int> snowyblocks = new List<int>
         {
                 TileID.SnowBlock,
@@ -160,33 +159,39 @@ namespace TerrariaAmbience.Core
         };
         public override void FloorVisuals(int type, Player player)
         {
+            curTileType = type;
 
+            var modPlayer = player.GetModPlayer<FootstepsPlayer>();
             if (grassTiles.Any(x => x == type))
-                player.GetModPlayer<FootstepsPlayer>().isOnGrassyTile = true;
+                modPlayer.isOnGrassyTile = true;
             else
-                player.GetModPlayer<FootstepsPlayer>().isOnGrassyTile = false;
+                modPlayer.isOnGrassyTile = false;
 
             if (snowyblocks.Any(x => x == type))
-                player.GetModPlayer<FootstepsPlayer>().isOnSnowyTile = true;
+                modPlayer.isOnSnowyTile = true;
             else
-                player.GetModPlayer<FootstepsPlayer>().isOnSnowyTile = false;
+                modPlayer.isOnSnowyTile = false;
 
             if (sandBlocks.Any(x => x == type))
-                player.GetModPlayer<FootstepsPlayer>().isOnSandyTile = true;
+                modPlayer.isOnSandyTile = true;
             else
-                player.GetModPlayer<FootstepsPlayer>().isOnSandyTile = false;
+                modPlayer.isOnSandyTile = false;
 
             // TODO: Include ore bricks later, as well as the ore themselves
-            if (stoneBlocks.Any(x => x == type) || (type == TileID.FishingCrate && Main.tile[(int)player.Bottom.X / 16, (int)player.Bottom.Y / 16 + 1].frameX > 32))
-                player.GetModPlayer<FootstepsPlayer>().isOnStoneTile = true;
+            if (stoneBlocks.Any(x => x == type))
+                modPlayer.isOnStoneTile = true;
             else
-                player.GetModPlayer<FootstepsPlayer>().isOnStoneTile = false;
+                modPlayer.isOnStoneTile = false;
 
-            if (!player.GetModPlayer<FootstepsPlayer>().isOnStoneTile && !player.GetModPlayer<FootstepsPlayer>().isOnGrassyTile && !player.GetModPlayer<FootstepsPlayer>().isOnSandyTile && !player.GetModPlayer<FootstepsPlayer>().isOnSnowyTile
-                || (type == TileID.FishingCrate && Main.tile[(int)player.Bottom.X / 16, (int)player.Bottom.Y / 16 + 1].frameX <= 32))
-                player.GetModPlayer<FootstepsPlayer>().isOnWoodTile = true;
+            if (!modPlayer.isOnStoneTile && !modPlayer.isOnGrassyTile && !modPlayer.isOnSandyTile && !modPlayer.isOnSnowyTile && !modPlayer.isOnDirtyTile)
+                modPlayer.isOnWoodTile = true;
             else
-                player.GetModPlayer<FootstepsPlayer>().isOnWoodTile = false;
+                modPlayer.isOnWoodTile = false;
+
+            if (dirtBlocks.Any(x => x == type))
+                modPlayer.isOnDirtyTile = true;
+            else
+                modPlayer.isOnDirtyTile = false;
         }
         /// <summary>
         /// Access this for when you want to add a modded tile to the valid tiles list. Use the ID for the tile.

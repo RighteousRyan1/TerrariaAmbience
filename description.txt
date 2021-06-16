@@ -7,27 +7,13 @@ Hopefully you can relax a bit more with this mod!
 Developers:
 
 - RighteousRyan#8008 (Programmer)
-- Tika#6542 (Sound Designer)
+- Tika#6542 (Sound Designer) (Left)
 - William#9010 (Mod Icon Artist)
-
-
-
-
-Upcoming Features:
-
-Rain Indoors
-Echoed underground steps
 
 Most Recent Update:
 
-[NOTE] Ambience volume can be separately modified via the In-game Options or the Main Menu by holding either ADD or SUBTRACT.
-
-[NEW FEATURE] You can replace the ambience sounds with your very own (Do note: the changes to the sounds WILL NOT apply to the 'Ambience Menu.' This will also completely all modded ambience tracks that are added.)
-
-
-[NEW FEATURE] Almost all ambient tracks replaced!
-[NEW FEATUERE] Part 2: All thunder sounds replaced!
-[HOTFIX] Fix exception throwing.
+[BUGFIX] Fixed wood sounds playing on dirt tiles, and wood sounds not playing for landing for the first time.
+[NEW FEATURE / DEBUG] Added debug log for what tile the player is standing on. Hopefully, bug reports can be sent to my discord server.
 
 
 

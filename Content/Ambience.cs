@@ -646,7 +646,7 @@ namespace TerrariaAmbience.Content
                         EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.75f * ambVol;
                         NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.75f * ambVol;
                         DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.75f * ambVol;
-                        CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.75f * ambVol;
+                        CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.35f * ambVol;
                         CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.7f * ambVol;
                         CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.7f * ambVol;
                         MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.9f * ambVol;
@@ -673,7 +673,7 @@ namespace TerrariaAmbience.Content
                         EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.4f * ambVol;
                         NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.4f * ambVol;
                         DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.4f * ambVol;
-                        CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.4f * ambVol;
+                        CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.175f * ambVol;
                         CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.3f * ambVol;
                         CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.3f * ambVol;
 

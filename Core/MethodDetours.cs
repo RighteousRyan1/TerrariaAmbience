@@ -14,8 +14,6 @@ using System.Linq;
 using Microsoft.Xna.Framework.Input;
 using System.Reflection;
 using TerrariaAmbience.Helpers;
-
-
 namespace TerrariaAmbience.Core
 {
     internal class MethodDetours
@@ -132,8 +130,9 @@ namespace TerrariaAmbience.Core
             var loader = Ambience.Instance;
 
             var aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
-            if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null)
+            if (aPlayer.soundInstanceSnowStep != null && aPlayer.soundInstanceWoodStep != null && aPlayer.soundInstanceStoneStep != null && aPlayer.soundInstanceGrassStep != null && aPlayer.soundInstanceSandStep != null && aPlayer.soundInstanceDirtStep != null)
             {
+                bool getName = TileID.Search.TryGetName(TileDetection.curTileType, out string name);
                 displayable =
                     $"{Ambience.BeachWaves.Name}: {Ambience.BeachWavesInstance.Volume}"
                     + $"\n{Ambience.CampfireCrackle.Name}: {loader.crackleVolume}"
@@ -152,11 +151,13 @@ namespace TerrariaAmbience.Core
                     + $"\n{Ambience.HellRumble.Name}: {Ambience.HellRumbleInstance.Volume}"
                     + $"\n{Ambience.Rain.Name}: {Ambience.RainInstance.Volume}"
                     + $"\n{Ambience.Breeze.Name}: {Ambience.BreezeInstance.Volume}"
-                    + $"\nFootsteps:\nGrass: {aPlayer.soundInstanceGrassStep.State}"
-                    + $"\nStone: {aPlayer.soundInstanceStoneStep.State}"
-                    + $"\nWood: {aPlayer.soundInstanceWoodStep.State}"
-                    + $"\nSnow: {aPlayer.soundInstanceSnowStep.State}"
-                    + $"\nSand: {aPlayer.soundInstanceSandStep.State}"
+                    + $"\nFootsteps:\nGrass: {aPlayer.soundInstanceGrassStep.State} (isOn: {aPlayer.isOnGrassyTile})"
+                    + $"\nStone: {aPlayer.soundInstanceStoneStep.State} (isOn: {aPlayer.isOnStoneTile})"
+                    + $"\nWood: {aPlayer.soundInstanceWoodStep.State} (isOn: {aPlayer.isOnWoodTile})"
+                    + $"\nSnow: {aPlayer.soundInstanceSnowStep.State} (isOn: {aPlayer.isOnSnowyTile})"
+                    + $"\nSand: {aPlayer.soundInstanceSandStep.State} (isOn: {aPlayer.isOnSandyTile})"
+                    + $"\nDirt: {aPlayer.soundInstanceDirtStep.State} (isOn: {aPlayer.isOnDirtyTile})"
+                    + $"\nCurTile: " + (getName ? name + " (Terraria)" : TileLoader.GetTile(TileDetection.curTileType).Name + $" ({TileLoader.GetTile(TileDetection.curTileType).mod.Name})")
                     + $"\nTiles Near -> {Main.LocalPlayer.TilesAround(20, true)}";
             }
 
@@ -179,6 +180,7 @@ namespace TerrariaAmbience.Core
                     drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 175);
                 }
 
+                Main.spriteBatch.Draw(Main.magicPixel, new Rectangle((int)drawPos.X - 6, (int)drawPos.Y - 6, (int)(Main.fontDeathText.MeasureString(displayable).X * 0.27f), 476), Color.SkyBlue * 0.6f);
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, 
                     Main.fontDeathText, 
                     displayable != default ? displayable : "Sounds not valid", 
@@ -707,6 +709,7 @@ namespace TerrariaAmbience.Core
 
                 DrawOpens();
 
+                #region Not My Proudest Code
                 GeneralHelpers.Utility.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, Main.screenHeight * 0.25f), 
                     "Forest",
                     delegate 
@@ -985,6 +988,7 @@ namespace TerrariaAmbience.Core
                     Main.PlaySound(SoundID.MenuTick);
                 }
                 unequalDisplayTimer--;
+                #endregion
             }
         }
         private static void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
@@ -992,16 +996,20 @@ namespace TerrariaAmbience.Core
             DrawAmbienceMenu();
             Mod mod = ModContent.GetInstance<TerrariaAmbience>();
 
-            posX = MathHelper.Clamp(posX, -450, -16);
+            posX = MathHelper.Clamp(posX, -325, -16);
             var sb = Main.spriteBatch;
-            string viewPost = "View the Terraria Ambience forums post here:";
-            string forums = $"Forums Post";
+            string viewPost = "Visit the Terraria Ambience";
+            string forums = $"Discord Server";
 
-            var click2Activate = new Rectangle((int)posX + 455, (int)posY, 12, 20);
+            var click2Activate = new Rectangle((int)posX + 330, (int)posY, 12, 20);
 
-            if (Main.menuMode == 0 && mod.TextureExists("Content/UI/UIButtonRight")) Main.spriteBatch.SafeDraw(mod.GetTexture("Content/UI/UIButtonRight"), new Vector2(posX + 455, posY), null, Color.White, 0f, Vector2.Zero, 0.6f, !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
-            var rect = new Rectangle((int)posX + 350, (int)posY, (int)(Main.fontDeathText.MeasureString(forums).X * 0.35f), (int)(Main.fontDeathText.MeasureString(forums).Y * 0.25f));
-            // Main.spriteBatch.Draw(Main.magicPixel, click2Activate, Color.White * 0.35f);
+            if (Main.menuMode == 0 && mod.TextureExists("Content/UI/UIButtonRight")) 
+                Main.spriteBatch.SafeDraw(mod.GetTexture("Content/UI/UIButtonRight"), 
+                    new Vector2(posX + 330, posY), null, Color.White, 0f, Vector2.Zero, 0.6f, 
+                    !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
+            var rect = new Rectangle((int)posX + 223, (int)posY, (int)(Main.fontDeathText.MeasureString(forums).X * 0.35f), 
+                (int)(Main.fontDeathText.MeasureString(forums).Y * 0.25f));
+            Main.spriteBatch.Draw(Main.magicPixel, click2Activate, Color.White * 0.35f);
             bool hovering = rect.Contains(Main.MouseScreen.ToPoint());
             bool hoverAct = click2Activate.Contains(Main.MouseScreen.ToPoint());
 
@@ -1022,6 +1030,16 @@ namespace TerrariaAmbience.Core
                         active = !active;
                     }
                 }
+                if (hovering)
+                {
+                    if (Main.mouseLeft && Main.mouseLeftRelease)
+                    {
+                        if (active)
+                        {
+                            System.Diagnostics.Process.Start("https://discord.gg/pT2BzSG");
+                        }
+                    }
+                }
             }
             posX += active ? 20f : -20f;
 
@@ -1029,34 +1047,52 @@ namespace TerrariaAmbience.Core
             if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, forums, new Vector2(posX + (int)(Main.fontDeathText.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
 
             var svol = (float)Math.Round(Ambience.TAAmbient);
+            var mvol = (float)Math.Round(Ambience.fStepsVol);
             svol = MathHelper.Clamp(svol, 0f, 100f);
+            mvol = MathHelper.Clamp(mvol, 0f, 100f);
             Ambience.TAAmbient = MathHelper.Clamp(Ambience.TAAmbient, 0f, 100f);
-            string percent = $"TA Ambient: {svol}%";
+            Ambience.fStepsVol = MathHelper.Clamp(Ambience.fStepsVol, 0f, 100f);
+            string percent1 = $"TA Ambient: {svol}%";
+            string percent2 = $"Footsteps: {mvol}%";
 
             var pos = new Vector2(Main.screenWidth / 2, 435);
             if (Main.menuMode == 26)
             {
-                sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract (or period or comma) to change the volume of Terraria Ambience or footsteps volume!", new Vector2(6, 22), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
+                sb.DrawString(Main.fontMouseText, $"Hold Add or Subtract (or period or comma) to change the volume of Terraria Ambience or footsteps volume!\nPress Left or Right Arrow to switch.", new Vector2(6, 6), Color.White, 0f, Vector2.Zero, 0.75f, SpriteEffects.None, 1f);
 
-                ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, percent, pos, Color.LightGray, 0f, Main.fontDeathText.MeasureString(percent) / 2, new Vector2(0.6f, 0.6f), 0, 2);
+                ChatManager.DrawColorCodedStringWithShadow(sb, Main.fontDeathText, !_mode ? percent1 : percent2, pos, Color.LightGray, 0f, Main.fontDeathText.MeasureString(!_mode ? percent1 : percent2) / 2, new Vector2(0.6f, 0.6f), 0, 2);
 
-                if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
+                if (!_mode)
                 {
-                    Ambience.TAAmbient += 0.5f;
-                }
-                if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
-                {
-                    Ambience.TAAmbient -= 0.5f;
-                }
-            }
-            if (hovering)
-            {
-                if (Main.mouseLeft && Main.mouseLeftRelease)
-                {
-                    if (active)
+                    if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
                     {
-                        System.Diagnostics.Process.Start("https://forums.terraria.org/index.php?threads/terraria-ambience-mod.104161/");
+                        Ambience.TAAmbient += 0.5f;
                     }
+                    if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
+                    {
+                        Ambience.TAAmbient -= 0.5f;
+                    }
+                }
+                else
+                {
+                    if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
+                    {
+                        Ambience.fStepsVol += 0.5f;
+                    }
+                    if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
+                    {
+                        Ambience.fStepsVol -= 0.5f;
+                    }
+                }
+                if (Main.keyState.IsKeyDown(Keys.Right) && Main.oldKeyState.IsKeyUp(Keys.Right))
+                {
+                    Main.PlaySound(SoundID.MenuTick);
+                    _mode = true;
+                }
+                else if (Main.keyState.IsKeyDown(Keys.Left) && Main.oldKeyState.IsKeyUp(Keys.Left))
+                {
+                    Main.PlaySound(SoundID.MenuTick);
+                    _mode = false;
                 }
             }
             GeneralHelpers.MSOld = GeneralHelpers.MSNew;

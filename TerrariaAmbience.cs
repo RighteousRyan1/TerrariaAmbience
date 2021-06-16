@@ -29,7 +29,7 @@ namespace TerrariaAmbience
                 if (message == "AddTilesToList")
                 {
                     Mod mod = args[1] as Mod;
-                    string listName = args[2] as string; // Can be Stone, Grass, Sand, or Snow (FOR NOW, OR EVER)
+                    string listName = args[2] as string; // Can be Stone, Grass, Sand, Snow, or Dirt (FOR NOW, OR EVER)
                     string[] nameStringList = args[3] as string[];
                     int[] tiles = args[4] as int[];
                     if (!Main.dedServ)
@@ -43,6 +43,8 @@ namespace TerrariaAmbience
                                 TileDetection.AddTilesToList(mod, TileDetection.sandBlocks, nameStringList);
                             else if (listName == "Snow")
                                 TileDetection.AddTilesToList(mod, TileDetection.snowyblocks, nameStringList);
+                            else if (listName == "Dirt")
+                                TileDetection.AddTilesToList(mod, TileDetection.dirtBlocks, nameStringList);
                         }
                         else if (mod == null)
                         {
@@ -54,6 +56,8 @@ namespace TerrariaAmbience
                                 TileDetection.AddTilesToList(TileDetection.sandBlocks, tiles);
                             else if (listName == "Snow")
                                 TileDetection.AddTilesToList(TileDetection.snowyblocks, tiles);
+                            else if (listName == "Dirt")
+                                TileDetection.AddTilesToList(TileDetection.dirtBlocks, tiles);
                         }
                     return "Tiles added successfully!";
                 }
@@ -70,43 +74,6 @@ namespace TerrariaAmbience
         }
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
-            /*int pktType = reader.ReadInt32();
-            Player player = Main.player[Main.myPlayer].GetModPlayer<AmbiencePlayer>().player;
-            if (Main.netMode == NetmodeID.Server)
-            {
-                var nPacket = GetPacket();
-
-                nPacket.Write(pktType);
-                nPacket.Send();
-
-                Main.NewText($"packetType: {pktType}, whoAmI: {whoAmI}");
-            }
-            else
-            {
-                switch (pktType)
-                {
-                    case 1:
-                        Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, CraftSounds.AnvilsSoundDir), player.Center).Volume *= .8f;
-                        break;
-                    case 2:
-                        Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, CraftSounds.WorkBenchesSoundDir), player.Center).Volume *= .8f;
-                        break;
-                    case 3:
-                        Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, CraftSounds.FurnaceSoundDir), player.Center).Volume *= .8f;
-                        break;
-                    case 4:
-                        Main.PlaySound(GetLegacySoundSlot(SoundType.Custom, CraftSounds.BooksSoundDir), player.Center).Volume *= .8f;
-                        break;
-                }
-                Main.NewText(pktType);
-            }*/
-
-            var pkt = GetPacket();
-            pkt.Write(Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().playerCraftType);
-
-            pkt.Send();
-
-            reader.Read();
         }
         public override void Load()
         {
@@ -151,6 +118,7 @@ namespace TerrariaAmbience
 
             Ambience.PlayAllAmbience();
             var aLoader = Ambience.Instance;
+
             aLoader.dayCricketsVolume = 0f;
             aLoader.nightCricketsVolume = 0f;
             aLoader.eveningCricketsVolume = 0f;
