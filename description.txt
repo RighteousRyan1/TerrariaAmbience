@@ -12,97 +12,13 @@ Developers:
 
 Most Recent Update:
 
-[BUGFIX] Fixed wood sounds playing on dirt tiles, and wood sounds not playing for landing for the first time.
-[NEW FEATURE / DEBUG] Added debug log for what tile the player is standing on. Hopefully, bug reports can be sent to my discord server.
+[DEVELOPER'S NOTE]:
 
+Since this is the final update for this mod on the 1.3 version of tModLoader, I must point you over to my discord server (this mod's homepage, technically).
+I have already essentially finished my 1.4 port of this mod, for the 1.4_mergedtesting branch. You can join my server and install it from the #terraria-ambience announcements channel.
+You can go to https://github.com/tModLoader/tModLoader/actions and install the latest nightly build. You then place the .tmod file in your 'Terraria/ModLoader/Beta/Mods' folder. Boom! Done.
+Enjoy 1.4 Terraria Ambience! (By the way, there are more features, like dynamic reverb, sound occlusion, and underwater dampening, along with a few other features on the 1.4 port!)
 
+Anyway, thanks for playing the mod.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Samples for all Sounds put together by Tika:
-
-S: Metal.wav by Lauren_Wilson | License: Attribution
-S: rocks falling in cave.wav by 150134 | License: Attribution
-S: water_in_a_cave.wav by system_fm | License: Attribution Noncommercial
-S: Water Cave by Klangkobold | License: Creative Commons 0
-S: flames sizzling of a bonfire - FIRE by florianreichelt | License: Creative Commons 0
-S: Fire Crackling 01.wav by kingsrow | License: Creative Commons 0
-S: Fire Crackle and Flames 002 by FractalStudios | License: Creative Commons 0
-S: Crows fly by by Cinetony | License: Creative Commons 0
-S: 20060824.forest03.wav by dobroide | License: Attribution
-S: Insects by the River by Suncord_Audiolab | License: Attribution
-S: 160712_FX_Flies buzzing on Weird Mushroom M-RX.wav by _pdw_ | License: Attribution
-S: ForestDay_BW.66.wav by sonidosreales245 | License: Creative Commons 0
-S: summer evening.WAV by inchadney | License: Attribution
-S: Grillen - viele Grillen, Tag.wav by BockelSound | License: Attribution
-S: forest summer Roond 020 200619_0186.wav by klankbeeld | License: Attribution
-S: summer evening.WAV by inchadney | License: Attribution
-S: frogs at summer night by trouby | License: Attribution
-S: Night close to a river, crickets and frogs, bird sometimes. by felix.blume | License: Creative Commons 0
-S: Ambience, Night Wildlife, A.wav by InspectorJ | License: Attribution
-S: frogs at summer night by trouby  -- License: Attribution
-S: Night close to a river, crickets and frogs, bird sometimes. by felix.blume -- License: Creative Commons 0
-S: Ambience, Night Wildlife, A.wav by InspectorJ -- License: Attribution
-S: Steps on snow by ILJah -- License: Creative Commons 0
-S: Rain, Moderate, C.wav by InspectorJ -- License: Attribution
-S: The rain falls against the parasol by straget  -- License: Attribution
-S: Ambience, Seaside Waves, Close, A.wav by InspectorJ  -- License: Attribution
-S: Ambience, Florida Frogs Gathering, A by InspectorJ - -- License: Attribution
-S: Frogs Forever by magixmusic -- License: Attribution Noncommercial
-S: 190155_MeatTearing.wav by GaelanW -- License: Attribution
-S: Wind Through Trees 3b by spoonbender -- License: Attribution
-S: Ambiance-Eerie_Wind-002.wav by DWOBoyle -- License: Attribution
-S: strange creepy ambiance by Audio_Dread -- License: Attribution Noncommercial
-S: jungle.Parrot.Tambopata.m4a by dedakoo -- License: Creative Commons 0
-S: Thailand Phangan Jungle Waterfall 1 by Archos -- License: Creative Commons 0
-S: ambience scary jungle.mp3 by marchon11 -- License: Attribution
-S: howler_monkey_jungle_4.wav by itsmrjack -- License: Creative Commons 0
-S: Village jungle morning.wav by aurelien.leveque -- License: Creative Commons 0
-S: Ethereal Crying 2 by antiprotector  -- License: Creative Commons 0
-S: Crying newborn baby child 3.WAV by the_yura -- License: Creative Commons 0
-S: Footsteps, Muddy, E.wav by InspectorJ -- License: Attribution
-S: Deep Cinematic Rumble Stereo by PatrickLieberkind -- License: Attribution
-S: SlowStepsOnGrass03 by falcospizaetus -- License: Creative Commons 0
-S: steps-on-stone01.ogg by Erdie -- License: Attribution
-S: Wood Steps by Phil25 -- License: Creative Commons 0
-S: Desert Owl by claytron3000 -- License: Attribution Noncommercial
-S: Desert at Night by kangaroovindaloo -- License: Attribution
-S: Metal.wav by Lauren_Wilson -- License: Attribution
-S: rocks falling in cave.wav by 150134 -- License: Attribution
-S: water_in_a_cave.wav by system_fm -- License: Attribution Noncommercial
-S: Water Cave by Klangkobold -- License: Creative Commons 0
-S: flames sizzling of a bonfire - FIRE by florianreichelt -- License: Creative Commons 0
-S: Fire Crackling 01.wav by kingsrow -- License: Creative Commons 0
-S: Fire Crackle and Flames 002 by FractalStudios -- License: Creative Commons 0
-S: Crows fly by by Cinetony -- License: Creative Commons 0
-S: 20060824.forest03.wav by dobroide -- License: Attribution
-S: Insects by the River by Suncord_Audiolab -- License: Attribution
-S: 160712_FX_Flies buzzing on Weird Mushroom M-RX.wav by _pdw_ -- License: Attribution
-S: ForestDay_BW.66.wav by sonidosreales245 -- License: Creative Commons 0
-S: summer evening.WAV by inchadney -- License: Attribution
-S: Grillen - viele Grillen, Tag.wav by BockelSound -- License: Attribution
-S: forest summer Roond 020 200619_0186.wav by klankbeeld  -- License: Attribution
-S: summer evening.WAV by inchadney  -- License: Attribution
-S: Water Swirl, Small, 14.wav by InspectorJ -- Licence: Attribution
-S: Page turn.wav by InspectorJ -- Liscence: Attribution
+Please do note all of the sounds used in this mod have been slightly modified from their originals off of freesound.com for the sake usage.

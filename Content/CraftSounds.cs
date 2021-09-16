@@ -53,8 +53,8 @@ namespace TerrariaAmbience.Content
         public static string BooksSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_bookrelated"; }
         public override void OnCraft(Item item, Recipe recipe)
         {
-            Player player = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().player;
-            FootstepsPlayer aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
+            Player player = Main.LocalPlayer;
+            FootstepsPlayer aPlayer = player.GetModPlayer<FootstepsPlayer>();
             // var pket = mod.GetPacket();
             bool craftWithAnvil = anvils.Intersect(recipe.requiredTile).Any();
             bool craftWithWB = workBenches.Intersect(recipe.requiredTile).Any();

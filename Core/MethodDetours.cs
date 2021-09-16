@@ -1009,7 +1009,6 @@ namespace TerrariaAmbience.Core
                     !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
             var rect = new Rectangle((int)posX + 223, (int)posY, (int)(Main.fontDeathText.MeasureString(forums).X * 0.35f), 
                 (int)(Main.fontDeathText.MeasureString(forums).Y * 0.25f));
-            Main.spriteBatch.Draw(Main.magicPixel, click2Activate, Color.White * 0.35f);
             bool hovering = rect.Contains(Main.MouseScreen.ToPoint());
             bool hoverAct = click2Activate.Contains(Main.MouseScreen.ToPoint());
 
