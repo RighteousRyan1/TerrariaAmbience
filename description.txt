@@ -12,97 +12,20 @@ Developers:
 
 Most Recent Update:
 
-[BUGFIX] Fixed wood sounds playing on dirt tiles, and wood sounds not playing for landing for the first time.
-[NEW FEATURE / DEBUG] Added debug log for what tile the player is standing on. Hopefully, bug reports can be sent to my discord server.
+SO MANY NEW THINGS!
 
+[NEW FEATURE] Reverb! You can enter enclosed spaces and hear your beautiful items in reverberated audio! Can be disabled.
+[NEW FEATURE] Sound occlusion! If you can't "see" a sound, it will sound muffled or blocked out. Can be disabled.
+[NEW FEATURE] Audio dampening! Going underwater makes everything sound dampened! Can be disabled.
 
+[NEW FEATURE] A WHOLE lot of new footstep sounds! (Metal, Marble/Granite, Smooth Stones, Leaves, Ice, Glass, and more!), a lot of the sounds were just outright replaced.
+[NEW FEATURE] Slimes now make sounds when jumping and landing. Can be disabled.
 
+[NEW FEATURE] There are now 2D positional audios that update as you go around the world, these consist of crickets, owls, and other forest critters.
+[NEW FEATURE] Sounds now play when sliding on ice.
 
+[MAJOR NEW FEATURE] Soundpacks!
+You can now create a folder in your ModLoader/Beta/Mods/TASoundReplace folder and it will auto-detect in the 'Ambient Menu,' under Sound Packs. 
+Be sure to read the README.md in the base folder.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Samples for all Sounds put together by Tika:
-
-S: Metal.wav by Lauren_Wilson | License: Attribution
-S: rocks falling in cave.wav by 150134 | License: Attribution
-S: water_in_a_cave.wav by system_fm | License: Attribution Noncommercial
-S: Water Cave by Klangkobold | License: Creative Commons 0
-S: flames sizzling of a bonfire - FIRE by florianreichelt | License: Creative Commons 0
-S: Fire Crackling 01.wav by kingsrow | License: Creative Commons 0
-S: Fire Crackle and Flames 002 by FractalStudios | License: Creative Commons 0
-S: Crows fly by by Cinetony | License: Creative Commons 0
-S: 20060824.forest03.wav by dobroide | License: Attribution
-S: Insects by the River by Suncord_Audiolab | License: Attribution
-S: 160712_FX_Flies buzzing on Weird Mushroom M-RX.wav by _pdw_ | License: Attribution
-S: ForestDay_BW.66.wav by sonidosreales245 | License: Creative Commons 0
-S: summer evening.WAV by inchadney | License: Attribution
-S: Grillen - viele Grillen, Tag.wav by BockelSound | License: Attribution
-S: forest summer Roond 020 200619_0186.wav by klankbeeld | License: Attribution
-S: summer evening.WAV by inchadney | License: Attribution
-S: frogs at summer night by trouby | License: Attribution
-S: Night close to a river, crickets and frogs, bird sometimes. by felix.blume | License: Creative Commons 0
-S: Ambience, Night Wildlife, A.wav by InspectorJ | License: Attribution
-S: frogs at summer night by trouby  -- License: Attribution
-S: Night close to a river, crickets and frogs, bird sometimes. by felix.blume -- License: Creative Commons 0
-S: Ambience, Night Wildlife, A.wav by InspectorJ -- License: Attribution
-S: Steps on snow by ILJah -- License: Creative Commons 0
-S: Rain, Moderate, C.wav by InspectorJ -- License: Attribution
-S: The rain falls against the parasol by straget  -- License: Attribution
-S: Ambience, Seaside Waves, Close, A.wav by InspectorJ  -- License: Attribution
-S: Ambience, Florida Frogs Gathering, A by InspectorJ - -- License: Attribution
-S: Frogs Forever by magixmusic -- License: Attribution Noncommercial
-S: 190155_MeatTearing.wav by GaelanW -- License: Attribution
-S: Wind Through Trees 3b by spoonbender -- License: Attribution
-S: Ambiance-Eerie_Wind-002.wav by DWOBoyle -- License: Attribution
-S: strange creepy ambiance by Audio_Dread -- License: Attribution Noncommercial
-S: jungle.Parrot.Tambopata.m4a by dedakoo -- License: Creative Commons 0
-S: Thailand Phangan Jungle Waterfall 1 by Archos -- License: Creative Commons 0
-S: ambience scary jungle.mp3 by marchon11 -- License: Attribution
-S: howler_monkey_jungle_4.wav by itsmrjack -- License: Creative Commons 0
-S: Village jungle morning.wav by aurelien.leveque -- License: Creative Commons 0
-S: Ethereal Crying 2 by antiprotector  -- License: Creative Commons 0
-S: Crying newborn baby child 3.WAV by the_yura -- License: Creative Commons 0
-S: Footsteps, Muddy, E.wav by InspectorJ -- License: Attribution
-S: Deep Cinematic Rumble Stereo by PatrickLieberkind -- License: Attribution
-S: SlowStepsOnGrass03 by falcospizaetus -- License: Creative Commons 0
-S: steps-on-stone01.ogg by Erdie -- License: Attribution
-S: Wood Steps by Phil25 -- License: Creative Commons 0
-S: Desert Owl by claytron3000 -- License: Attribution Noncommercial
-S: Desert at Night by kangaroovindaloo -- License: Attribution
-S: Metal.wav by Lauren_Wilson -- License: Attribution
-S: rocks falling in cave.wav by 150134 -- License: Attribution
-S: water_in_a_cave.wav by system_fm -- License: Attribution Noncommercial
-S: Water Cave by Klangkobold -- License: Creative Commons 0
-S: flames sizzling of a bonfire - FIRE by florianreichelt -- License: Creative Commons 0
-S: Fire Crackling 01.wav by kingsrow -- License: Creative Commons 0
-S: Fire Crackle and Flames 002 by FractalStudios -- License: Creative Commons 0
-S: Crows fly by by Cinetony -- License: Creative Commons 0
-S: 20060824.forest03.wav by dobroide -- License: Attribution
-S: Insects by the River by Suncord_Audiolab -- License: Attribution
-S: 160712_FX_Flies buzzing on Weird Mushroom M-RX.wav by _pdw_ -- License: Attribution
-S: ForestDay_BW.66.wav by sonidosreales245 -- License: Creative Commons 0
-S: summer evening.WAV by inchadney -- License: Attribution
-S: Grillen - viele Grillen, Tag.wav by BockelSound -- License: Attribution
-S: forest summer Roond 020 200619_0186.wav by klankbeeld  -- License: Attribution
-S: summer evening.WAV by inchadney  -- License: Attribution
-S: Water Swirl, Small, 14.wav by InspectorJ -- Licence: Attribution
-S: Page turn.wav by InspectorJ -- Liscence: Attribution
+[NEW FEATURE] Audio smooth-transition. As you get closer to space, ambient tracks will get more quieter. As you go into the underground, the sound of caves gets louder.

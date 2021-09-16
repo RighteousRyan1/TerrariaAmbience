@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -12,8 +12,9 @@ namespace TerrariaAmbience.Core
     public class TileDetection : GlobalTile
     {
         public static int curTileType;
-
-        public static List<int> grassTiles = new List<int>
+        // TileID.GreenCandyCaneBlock,
+        // TileID.CandyCaneBlock,
+        public static List<int> GrassBlocks { get; private set; } = new()
         {
                 TileID.Grass,
                 TileID.BlueMoss,
@@ -25,16 +26,16 @@ namespace TerrariaAmbience.Core
                 TileID.RedMoss,
                 TileID.JungleGrass,
                 TileID.CorruptGrass,
-                TileID.FleshGrass,
+                TileID.CrimsonGrass,
                 TileID.HallowedGrass,
-                TileID.LivingMahoganyLeaves,
-                TileID.LeafBlock,
                 TileID.MushroomGrass,
-                TileID.HoneyBlock,
-                TileID.CrispyHoneyBlock,
-                TileID.PumpkinBlock,
+                TileID.ArgonMoss,
+                TileID.XenonMoss,
+                TileID.KryptonMoss,
+                TileID.GolfGrass,
+                TileID.GolfGrassHallowed
         };
-        public static List<int> dirtBlocks = new List<int>
+        public static List<int> DirtBlocks { get; private set; } = new()
         {
             TileID.Dirt,
             TileID.ClayBlock,
@@ -42,24 +43,11 @@ namespace TerrariaAmbience.Core
             TileID.Silt,
             TileID.Slush,
         };
-        public static List<int> stoneBlocks = new List<int>
+        public static List<int> StoneBlocks { get; private set; } = new()
         {               
                 TileID.Asphalt,
                 TileID.Stone,
-                TileID.StoneSlab,
                 TileID.ActiveStoneBlock,
-                TileID.GrayBrick,
-                TileID.IceBlock,
-                TileID.HallowedIce,
-                TileID.CorruptIce,
-                TileID.FleshIce,
-                TileID.PinkDungeonBrick,
-                TileID.GreenDungeonBrick,
-                TileID.BlueDungeonBrick,
-                TileID.Granite,
-                TileID.Marble,
-                TileID.MarbleBlock,
-                TileID.GraniteBlock,
                 TileID.Diamond,
                 TileID.DiamondGemspark,
                 TileID.DiamondGemsparkOff,
@@ -80,9 +68,7 @@ namespace TerrariaAmbience.Core
                 TileID.EmeraldGemsparkOff,
                 TileID.AmberGemspark,
                 TileID.AmberGemsparkOff,
-                TileID.LihzahrdBrick,
                 TileID.Ebonstone,
-                TileID.EbonstoneBrick,
                 TileID.FleshBlock,
                 TileID.Crimstone,
                 TileID.CrimsonSandstone,
@@ -92,17 +78,11 @@ namespace TerrariaAmbience.Core
                 TileID.HardenedSand,
                 TileID.Sandstone,
                 TileID.HallowSandstone,
-                TileID.SandstoneBrick,
-                TileID.SandStoneSlab,
                 TileID.HallowHardenedSand,
                 TileID.Sunplate,
                 TileID.Obsidian,
                 TileID.Pearlstone,
-                TileID.PearlstoneBrick,
                 TileID.Mudstone,
-                TileID.IridescentBrick,
-                TileID.CobaltBrick,
-                TileID.MythrilBrick,
                 TileID.MythrilAnvil,
                 TileID.Adamantite,
                 TileID.Mythril,
@@ -110,88 +90,226 @@ namespace TerrariaAmbience.Core
                 TileID.Titanium,
                 TileID.Titanstone,
                 TileID.Palladium,
-                TileID.MetalBars,
                 TileID.LunarOre,
-                TileID.ObsidianBrick,
-                TileID.SnowBrick,
-                TileID.GreenCandyCaneBlock,
-                TileID.CandyCaneBlock,
-                TileID.GrayStucco,
-                TileID.GreenStucco,
-                TileID.RedStucco,
-                TileID.YellowStucco,
                 TileID.Copper,
-                TileID.CopperBrick,
                 TileID.Tin,
-                TileID.TinBrick,
                 TileID.Silver,
-                TileID.SilverBrick,
                 TileID.Tungsten,
-                TileID.TungstenBrick,
                 TileID.Iron,
                 TileID.Lead,
                 TileID.Gold,
-                TileID.GoldBrick,
                 TileID.Platinum,
-                TileID.PlatinumBrick,
                 TileID.Hellstone,
-                TileID.HellstoneBrick,
-                TileID.Asphalt,
                 TileID.FossilOre,
                 TileID.DesertFossil,
-                TileID.RedBrick
+                TileID.ShellPile,
+				TileID.Meteorite
         };
-        public static List<int> sandBlocks = new List<int>
+        public static List<int> SandBlocks { get; set; } = new()
         {
                 TileID.Sand,
                 TileID.Ebonsand,
                 TileID.Crimsand,
                 TileID.Ash,
-                TileID.Glass,
                 TileID.Pearlsand
         };
-        public static List<int> snowyblocks = new List<int>
+        public static List<int> SnowyBlocks { get; private set; } = new()
         {
-                TileID.SnowBlock,
-                TileID.SnowCloud,
-                TileID.RainCloud,
-                TileID.Cloud,
+            TileID.SnowBlock,
+            TileID.SnowCloud,
+            TileID.RainCloud,
+            TileID.Cloud,
+        };
+        public static List<int> IcyBlocks { get; private set; } = new()
+        {
+            TileID.IceBlock,
+            TileID.BreakableIce,
+            TileID.HallowedIce,
+            TileID.CorruptIce,
+            TileID.FleshIce,
+            TileID.MagicalIceBlock,
+            TileID.FrozenSlimeBlock
+        };
+        public static List<int> SmoothStones { get; private set; } = new()
+        {
+            TileID.Titanstone,
+            TileID.Sunplate,
+            TileID.PearlstoneBrick,
+            TileID.IridescentBrick,
+            TileID.AdamantiteBeam,
+            TileID.GraniteColumn,
+            TileID.MarbleColumn,
+            TileID.PalladiumColumn,
+            TileID.SandstoneColumn,
+            TileID.SandStoneSlab,
+            TileID.SmoothSandstone,
+            TileID.ObsidianBrick,
+            TileID.Asphalt,
+            TileID.StoneSlab,
+            TileID.SandStoneSlab,
+            TileID.Coralstone,
+            TileID.CrimstoneBrick,
+            TileID.EbonstoneBrick,
+            TileID.CrackedPinkDungeonBrick,
+            TileID.CrackedGreenDungeonBrick,
+            TileID.CrackedBlueDungeonBrick,
+            TileID.SandstoneBrick,
+            TileID.RedMossBrick,
+            TileID.RedBrick,
+            TileID.RainbowBrick,
+            TileID.PurpleMossBrick,
+            TileID.ArgonMossBrick,
+            TileID.XenonMossBrick,
+            TileID.KryptonMossBrick,
+            TileID.LavaMossBrick,
+            TileID.GreenMossBrick,
+            TileID.BlueMossBrick,
+            TileID.BlueDungeonBrick,
+            TileID.GreenDungeonBrick,
+            TileID.PinkDungeonBrick,
+            TileID.SnowBrick,
+            TileID.SolarBrick,
+            TileID.StardustBrick,
+            TileID.TungstenBrick,
+            TileID.VortexBrick,
+            TileID.NebulaBrick,
+            TileID.GrayBrick,
+            TileID.GrayStucco,
+            TileID.GreenStucco,
+            TileID.RedStucco,
+            TileID.YellowStucco,
+            TileID.MarbleBlock,
+            TileID.GraniteBlock,
+            TileID.LihzahrdBrick,
+			TileID.MeteoriteBrick,
+            TileID.IceBrick
+        };
+        public static List<int> Metals { get; private set; } = new()
+        {
+            TileID.MetalBars,
+            TileID.Anvils,
+            TileID.MythrilAnvil,
+            TileID.MythrilBrick,
+            TileID.CobaltBrick,
+            TileID.LunarBrick,
+            TileID.IronBrick,
+            TileID.GoldBrick,
+            TileID.PlatinumBrick,
+            TileID.CopperBrick,
+            TileID.TinBrick,
+            TileID.SilverBrick,
+            TileID.DemoniteBrick,
+            TileID.CrimtaneBrick,
+            TileID.HellstoneBrick,
+            TileID.LeadBrick,
+            TileID.MartianConduitPlating
+        };
+        public static List<int> GraniteAndMarbles { get; private set; } = new()
+        {
+            TileID.Granite,
+            TileID.GraniteBlock,
+            TileID.GraniteColumn,
+            TileID.Marble,
+            TileID.MarbleBlock,
+            TileID.MarbleColumn,
+        };
+        public static List<int> GlassBlocks { get; private set; } = new()
+        {
+            TileID.Glass,
+            TileID.BlueStarryGlassBlock,
+            TileID.GoldStarryGlassBlock,
+            TileID.Confetti,
+            TileID.ConfettiBlack,
+            TileID.Waterfall,
+            TileID.Lavafall,
+            TileID.Honeyfall,
+        };
+        public static List<int> LeafBlocks { get; private set; } = new()
+        {
+            TileID.LivingMahoganyLeaves,
+            TileID.LeafBlock,
+        };
+        internal static List<List<int>> AllTileLists = new()
+        {
+            GrassBlocks,
+            DirtBlocks,
+            IcyBlocks,
+            LeafBlocks,
+            SmoothStones,
+            SnowyBlocks,
+            SandBlocks,
+            StoneBlocks,
+            GraniteAndMarbles,
+            Metals,
+            GlassBlocks
         };
         public override void FloorVisuals(int type, Player player)
         {
             curTileType = type;
 
-            var modPlayer = player.GetModPlayer<FootstepsPlayer>();
-            if (grassTiles.Any(x => x == type))
+            var modPlayer = player.GetModPlayer<AmbientPlayer>();
+            if (GrassBlocks.Any(x => x == type))
                 modPlayer.isOnGrassyTile = true;
             else
                 modPlayer.isOnGrassyTile = false;
 
-            if (snowyblocks.Any(x => x == type))
+            if (SnowyBlocks.Any(x => x == type))
                 modPlayer.isOnSnowyTile = true;
             else
                 modPlayer.isOnSnowyTile = false;
 
-            if (sandBlocks.Any(x => x == type))
+            if (SandBlocks.Any(x => x == type))
                 modPlayer.isOnSandyTile = true;
             else
                 modPlayer.isOnSandyTile = false;
 
             // TODO: Include ore bricks later, as well as the ore themselves
-            if (stoneBlocks.Any(x => x == type))
+            if (StoneBlocks.Any(x => x == type))
                 modPlayer.isOnStoneTile = true;
             else
                 modPlayer.isOnStoneTile = false;
 
-            if (!modPlayer.isOnStoneTile && !modPlayer.isOnGrassyTile && !modPlayer.isOnSandyTile && !modPlayer.isOnSnowyTile && !modPlayer.isOnDirtyTile)
-                modPlayer.isOnWoodTile = true;
-            else
-                modPlayer.isOnWoodTile = false;
-
-            if (dirtBlocks.Any(x => x == type))
+            if (DirtBlocks.Any(x => x == type))
                 modPlayer.isOnDirtyTile = true;
             else
                 modPlayer.isOnDirtyTile = false;
+
+            if (IcyBlocks.Any(x => x == type))
+                modPlayer.isOnIcyTile = true;
+            else
+                modPlayer.isOnIcyTile = false;
+
+            if (Metals.Any(x => x == type))
+                modPlayer.isOnMetalTile = true;
+            else
+                modPlayer.isOnMetalTile = false;
+
+            if (SmoothStones.Any(x => x == type))
+                modPlayer.isOnSmoothTile = true;
+            else
+                modPlayer.isOnSmoothTile = false;
+
+            if (GraniteAndMarbles.Any(x => x == type))
+                modPlayer.isOnMarbleOrGraniteTile = true;
+            else
+                modPlayer.isOnMarbleOrGraniteTile = false;
+
+            if (LeafBlocks.Any(x => x == type))
+                modPlayer.isOnLeafTile = true;
+            else
+                modPlayer.isOnLeafTile = false;
+
+            if (GlassBlocks.Any(x => x == type))
+                modPlayer.isOnGlassTile = true;
+            else
+                modPlayer.isOnGlassTile = false;
+
+            if (!modPlayer.isOnStoneTile && !modPlayer.isOnGrassyTile && !modPlayer.isOnSandyTile && !modPlayer.isOnSnowyTile && !modPlayer.isOnDirtyTile
+                  && !modPlayer.isOnIcyTile && !modPlayer.isOnMetalTile && !modPlayer.isOnSmoothTile && !modPlayer.isOnMarbleOrGraniteTile
+                    && !modPlayer.isOnLeafTile && !modPlayer.isOnGlassTile)
+                modPlayer.isOnWoodTile = true;
+            else
+                modPlayer.isOnWoodTile = false;
         }
         /// <summary>
         /// Access this for when you want to add a modded tile to the valid tiles list. Use the ID for the tile.
@@ -214,7 +332,7 @@ namespace TerrariaAmbience.Core
         {
             foreach (string tile in name)
             {
-                listToAddTo.Add(mod.TileType(tile));
+                listToAddTo.Add(mod.Find<ModTile>(tile).Type);
             }
         }
     }

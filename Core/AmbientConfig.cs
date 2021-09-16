@@ -6,8 +6,8 @@ using static TerrariaAmbience.Content.Ambience;
 
 namespace TerrariaAmbience.Core
 {
-    [Label("Clientside Config")]
-    public class AmbientConfigClient : ModConfig
+    [Label("General")]
+    public class GeneralConfig : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ClientSide;
         #region Ambience and Sounds
@@ -27,6 +27,11 @@ namespace TerrariaAmbience.Core
             + "\nMaking it go too low can cause issues or make things a bit unwanted. Choose the value at your own risk!\nDISCLAIMER: Making this input a non-floating-point numeric type will cause the value to default to 0.01.")]
         [DefaultValue("0.01")]
         public string transitionHarshness;
+
+        [Label("Armor/Vanity Shakiness Sounds")]
+        [Tooltip("Determines whether or not the extra sounds that having armor / vanity equipped play when walking around.")]
+        [DefaultValue(true)]
+        public bool areArmorAndVanitySoundsEnabled;
         #endregion
 
         #region Debug
@@ -34,7 +39,7 @@ namespace TerrariaAmbience.Core
         [Label("Toggle Debug Values (Vanilla Ambiences)")]
         [Tooltip("Toggle volume debugging values, such as snow, crickets, and more.")]
         [DefaultValue(false)]
-        public bool volVals;
+        public bool debugInterface;
         #endregion
 
         #region ToggleSounds
@@ -82,7 +87,26 @@ namespace TerrariaAmbience.Core
         #endregion
 
     }
-    [Label("Server Config")]
+    [Label("Audio Additions")]
+    public class AudioAdditionsConfig : ModConfig
+    {
+        public override ConfigScope Mode => ConfigScope.ClientSide;
+        [Label("Slimy Sounds")]
+        [Tooltip("Toggle the sounds that slimes create when jumping and landing.")]
+        [DefaultValue(true)]
+        public bool slimySounds;
+
+        [Label("Wood Creaks")]
+        [Tooltip("Toggle the sounds that slightly unsupported wood make.\nDo note that this can potentially increase FPS, as this can be a hefty process.")]
+        [DefaultValue(true)]
+        public bool woodCreaks;
+
+        [Label("Various Animal Sounds")]
+        [Tooltip("Toggle the (somewhat loud) sounds that play and have dynamic sound updating based on location-to-player panning.")]
+        [DefaultValue(true)]
+        public bool dynamicAnimalSounds;
+    }
+    [Label("SFX / Sound Filters")]
     public class AmbientConfigServer : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ServerSide;
@@ -93,16 +117,28 @@ namespace TerrariaAmbience.Core
         [DefaultValue(true)]
         public bool chestSounds;
 
-        [Label("Toggle New Splash Sounds")]
-        [Tooltip("Toggle on to turn new splash sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.\n\nReload Required.")]
-        [DefaultValue(true)]
-        [ReloadRequired]
-        public bool newSplashes;
-
-        [Label("FPS Stabilizer")]
-        [Tooltip("Enable this if you have FPS issues underground. This is caused by the system that determines the reverb sounds of steps.\nSince the math required for this operation is hefty, it can cause FPS issues.\nEnable to have reverberated footsteps when underground at all times.\nDisable to have reverberated steps based on your underground environment.")]
+        [Label("Disable Reverb")]
+        [Tooltip("Enable this if you have FPS issues, especially while underground. This is caused by the system that determines the reverb sounds of all sounds in the game." +
+            "\nSince the math required for this operation is hefty, it can cause FPS issues." +
+            "\nDisable to have reverberated sound effects based on your environment.")]
         [DefaultValue(false)]
         public bool noReverbMath;
+
+        [Label("Enhanced Reverb Calculation (Underground)")]
+        [Tooltip("In the cavern layer, the math for calculating reverb is changed a little bit." +
+            "\nHaving this enabled can lead to major FPS drops.")]
+        [DefaultValue(true)]
+        public bool ugReverbCalculation;
+
+        [Label("Enhanced Reverb Calculation (Surface)")]
+        [Tooltip("Toggle surface audio reverb calculations.")]
+        [DefaultValue(true)]
+        public bool surfaceReverbCalculation;
+
+        [Label("Advanced reverb calculation")]
+        [Tooltip("Toggle advanced audio reverb calculation algorythms.\nDisabling this will increase your reverb factor by how deep you are into the world.")]
+        [DefaultValue(true)]
+        public bool advancedReverbCalculation;
         #endregion
     }
 }

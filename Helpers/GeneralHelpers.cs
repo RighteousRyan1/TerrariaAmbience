@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,9 @@ using MonoMod.RuntimeDetour.HookGen;
 using System.Reflection;
 using Terraria.ID;
 using TerrariaAmbience.Core;
+using Terraria.Audio;
+using Terraria.GameContent;
+using ReLogic.Content;
 
 namespace TerrariaAmbience.Helpers
 {
@@ -38,6 +41,17 @@ namespace TerrariaAmbience.Helpers
     }
     public class GeneralHelpers
     {
+        public static Rectangle GetRectOf(Vector2 position) => new((int)position.X, (int)position.Y, 1, 1);
+        public static Rectangle GetRectOf(Point position) => new(position.X, position.Y, 1, 1);
+        public static T GetAssetValue<T>(Mod mod, string path) where T : class
+        {
+            return mod.Assets.Request<T>(path, AssetRequestMode.ImmediateLoad).Value;
+        }
+        public static void SavePlayer()
+        {
+            Player.SavePlayer(Main.ActivePlayerFileData);
+            Main.NewText("[c/00FF00:Console] >> Player saved. You are free to exit.");
+        }
         public static T Pick<T>(params T[] values)
         {
             return Main.rand.Next(values);
@@ -50,7 +64,7 @@ namespace TerrariaAmbience.Helpers
         {
             return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
         }
-        public static GeneralHelpers Utility => ModContent.GetInstance<GeneralHelpers>();
+        public static GeneralHelpers Instance => ModContent.GetInstance<GeneralHelpers>();
         public enum AudioFileExtension
         {
             MP3,
@@ -66,7 +80,7 @@ namespace TerrariaAmbience.Helpers
 
             if (selectedMenu == buttonIndex)
             {
-                Main.PlaySound(SoundID.MenuOpen);
+                SoundEngine.PlaySound(SoundID.MenuOpen);
                 act();
             }
 
@@ -92,7 +106,7 @@ namespace TerrariaAmbience.Helpers
         {
             if (Main.dayTime)
             {
-                if (def < 210)
+                if (def < 150)
                     def++;
             }
             else
@@ -133,23 +147,16 @@ namespace TerrariaAmbience.Helpers
             }
             if (nonHoverColor == default)
             {
-                // nonHoverColor = Main.dayTime ? new Color(200, 200, 200) : new Color(86, 86, 86);
                 nonHoverColor = new Color(def, def, def);
             }
             useScale = MathHelper.Clamp(useScale, 0.65f, 0.85f);
 
-            var bounds = Main.fontDeathText.MeasureString(text);
+            var bounds = FontAssets.DeathText.Value.MeasureString(text);
             var rectHoverable = new Rectangle((int)position.X - (int)(bounds.X / 2 * useScale), (int)(position.Y - bounds.Y / 2 + 10), (int)(bounds.X * useScale), (int)bounds.Y - 30);
 
             hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
-            // hoverNewNew = !hovering && !hoverOld; // False False
-            /*if (!hoverNewNew && hoverOldOld) //  true true, false true, or true false >> false false
-            {
-                Main.PlaySound(SoundID.MenuTick);
-            }*/
 
-            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, Main.fontDeathText, text, position, hovering ? colorWhenHovered * alpha : nonHoverColor * alpha, 0f, bounds / 2, new Vector2(useScale), -1, 2);
-            // Main.spriteBatch.Draw(mod.GetTexture("Assets/Debug/WhitePixel"), rectHoverable, Color.White * 0.1f);
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.DeathText.Value, text, position, hovering ? colorWhenHovered * alpha : nonHoverColor * alpha, 0f, bounds / 2, new Vector2(useScale), -1, 2);
             if (!waitUntilClickEnd)
             {
                 if (Main.mouseLeft && Main.mouseLeftRelease && hovering && whatToDo != null)
@@ -176,18 +183,15 @@ namespace TerrariaAmbience.Helpers
                 }
             }
             useScale += hovering ? scaleMultiplier : -scaleMultiplier;
-
-            // hoverOld = hovering;
-            // hoverOldOld = hoverNewNew;
             return rectHoverable;
         }
-        public static bool CheckPlayerArmorSlot(Player player, int slot)
+        public static bool CheckPlayerArmorSlot(Player player, int slot, out Item item)
         {
+            item = new Item();
+            if (!player.armor[slot].IsAir)
+                item = player.armor[slot];
+
             return !player.armor[slot].IsAir;
-        }
-        public static Item GetItemFromArmorSlot(Player player, int slot)
-        {
-            return player.armor[slot];
         }
 
         public static int GetAllUsedAccSlots(Player player)
@@ -222,6 +226,7 @@ namespace TerrariaAmbience.Helpers
         {
             public struct ArmorSlotID
             {
+                public static ReLogic.Reflection.IdDictionary Search = ReLogic.Reflection.IdDictionary.Create<short, short>();
                 public const short HeadSlot = 0;
                 public const short ChestSlot = 1;
                 public const short LegSlot = 2;
@@ -230,24 +235,90 @@ namespace TerrariaAmbience.Helpers
                 public const short AccSlot3 = 4;
                 public const short AccSlot4 = 5;
                 public const short AccSlot5 = 6;
+
+                public const short VanityHeadSlot = 10;
+                public const short VanityChestSlot = 11;
+                public const short VanityLegSlot = 12;
+
+                public const short VanityAccSlot1 = 3;
+                public const short VanityAccSlot2 = 4;
+                public const short VanityAccSlot3 = 4;
+                public const short VanityAccSlot4 = 5;
+                public const short VanityAccSlot5 = 6;
             }
         }
-        // Also thank you, mirsario
+        public static List<Tile> GetTileSquare(int i, int j, int width, int height)
+        {
+            var tilesInSquare = new List<Tile>();
+            for (int n = i - width / 2; n < i + width / 2; n++)
+            {
+                for (int m = j - height / 2; m < j + height / 2; m++)
+                {
+                    Tile tile = Framing.GetTileSafely(n, m);
+                    tilesInSquare.Add(tile);
+                }
+            }
+            return tilesInSquare;
+        }
+        public static List<Point> GetTileSquareCoordinates(int i, int j, int width, int height)
+        {
+            var coordsPerTile = new List<Point>();
+            for (int n = i - width / 2; n < i + width / 2; n++)
+            {
+                for (int m = j - height / 2; m < j + height / 2; m++)
+                {
+                    coordsPerTile.Add(new Point(n, m));
+                }
+            }
+
+            return coordsPerTile;
+        }
+
+        public static Tile GetTileAt(Vector2 coordinates)
+        {
+            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? Framing.GetTileSafely(coordinates.ToPoint()) : new Tile();
+        }
+        public static string GetTileNameAt(Vector2 coordinates)
+        {
+            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? TileID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).type) : "Empty";
+        }
+        public static string GetWallNameAt(Vector2 coordinates)
+        {
+            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? WallID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).wall) : "Empty";
+        }
+    }
+    public static class MathUtils
+    {
+        public static float InverseLerp(float begin, float end, float value, bool clamped = false)
+        {
+            if (clamped)
+            {
+                if (begin < end)
+                {
+                    if (value < begin)
+                        return 0f;
+                    if (value > end)
+                        return 1f;
+                }
+                else
+                {
+                    if (value < end)
+                        return 1f;
+                    if (value > begin)
+                        return 0f;
+                }
+            }
+            return (value - begin) / (end - begin);
+        }
     }
     public static class ExtensionMethods
     {
         public static Mod mod => ModContent.GetInstance<TerrariaAmbience>();
+        public static bool Underwater(this Vector2 drowningPosition) => Collision.DrownCollision(drowningPosition, 1, 1);
+        public static bool Underwater(this Player player) => Collision.DrownCollision(player.position, player.width, player.height, player.gravDir); // how did i not know this existed before
         public static string AppendFileExtension(this string str, GeneralHelpers.AudioFileExtension extension)
         {
             return $"{str}.{extension.ToString().ToLower()}";
-        }
-        public static void InitializeSoundEffect(this SoundEffect toInit, ref SoundEffectInstance toBindTo, string path, string name)
-        {
-            var mod = ModContent.GetInstance<TerrariaAmbience>();
-            toInit = mod.GetSound(path);
-            toBindTo = toInit.CreateInstance();
-
-            toInit.Name = name;
         }
         public static void ModifyRGB(this Color color, byte amount, bool subract = false)
         {
@@ -356,48 +427,29 @@ namespace TerrariaAmbience.Helpers
 
             return false;
         }
-        public static bool ZoneForest(this Player player)
-        {
-            return !player.ZoneJungle
-                   && !player.ZoneDungeon
-                   && !player.ZoneCorrupt
-                   && !player.ZoneCrimson
-                   && !player.ZoneHoly
-                   && !player.ZoneSnow
-                   && !player.ZoneUndergroundDesert
-                   && !player.ZoneGlowshroom
-                   && !player.ZoneMeteor
-                   && !player.ZoneBeach
-                   && !player.ZoneDesert
-                   && player.ZoneOverworldHeight;
-        }
-        public static bool ZoneUnderground(this Player player)
-        {
-            return player.ZoneRockLayerHeight;
-        }
         public static bool HeadWet(this Player player)
         {
             Vector2 v = new Vector2(player.Top.X, player.Top.Y - 1.4f).RotatedBy(player.fullRotation, player.Center);
-            return Main.tile[(int)v.X / 16, (int)v.Y / 16].liquid > 0;
+            return Main.tile[(int)v.X / 16, (int)v.Y / 16].LiquidAmount > 0;
         }
         /// <summary>
         /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
         /// </summary>
-        /// <param name="player">The player</param>
+        /// <param name="position">The position to check around.</param>
         /// <param name="dist">The distance from the player</param>
-        /// <returns></returns>
-        public static int TilesAround(this Player player, int dist, bool condition)
+        /// <returns>The amount of tiles in dist around the player.</returns>
+        public static int TilesAround(this Vector2 position, int dist, bool condition)
         {
             int index = 0;
             if (condition)
             {
-                for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++)
+                for (int i = (int)position.X / 16 - dist; i < (int)position.X / 16 + dist; i++)
                 {
-                    for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++)
+                    for (int j = (int)position.Y / 16 - dist; j < (int)position.Y / 16 + dist; j++)
                     {
                         Tile tile = Main.tile[i, j];
 
-                        if (tile.active() && tile.collisionType == 1)
+                        if (tile.IsActive && tile.CollisionType == 1)
                         {
                             index++;
                         }
@@ -426,7 +478,7 @@ namespace TerrariaAmbience.Helpers
                     {
                         leTile = Main.tile[i, j];
 
-                        if (leTile.active() && leTile.collisionType == 1)
+                        if (leTile.IsActive && leTile.CollisionType == 1)
                         {
                             index++;
                         }

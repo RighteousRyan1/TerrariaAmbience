@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,13 +7,13 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaAmbience.Content.Players;
+using Terraria.Audio;
 
 namespace TerrariaAmbience.Content
 {
     public class CraftSounds : GlobalItem
     {
         public override bool InstancePerEntity => true;
-        public override bool CloneNewInstances => true;
         /// <summary>
         /// A list containing all ANVILS. Add to this if you wish, mods out there.
         /// </summary>
@@ -51,9 +51,9 @@ namespace TerrariaAmbience.Content
         public static string WorkBenchesSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_workbenches"; }
         public static string AnvilsSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_anvils"; }
         public static string BooksSoundDir { get => $"{Ambience.AmbientPath}/player/crafting_bookrelated"; }
-        public override void OnCraft(Item item, Recipe recipe)
+        /*public override void OnCreate(Item item, ItemCreationContext context)
         {
-            Player player = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().player;
+            Player player = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>().Player;
             FootstepsPlayer aPlayer = Main.player[Main.myPlayer].GetModPlayer<FootstepsPlayer>();
             // var pket = mod.GetPacket();
             bool craftWithAnvil = anvils.Intersect(recipe.requiredTile).Any();
@@ -64,12 +64,12 @@ namespace TerrariaAmbience.Content
             if (craftWithAnvil)
             {
                 aPlayer.playerCraftType = 1;
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, AnvilsSoundDir), player.Center).Volume *= .8f;
+                SoundEngine.PlaySound(new ModSoundStyle(AnvilsSoundDir), player.Center).Volume *= .8f;
             }
             if (craftWithWB)
             {
                 aPlayer.playerCraftType = 2;
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, WorkBenchesSoundDir), player.Center).Volume *= .8f;
+                SoundEngine.PlaySound(new ModSoundStyle(WorkBenchesSoundDir), player.Center).Volume *= .8f;
             }
             /*if (craftWithFurnace)
             {
@@ -78,21 +78,17 @@ namespace TerrariaAmbience.Content
                 {
                     Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, FurnaceSoundDir), player.Center).Volume *= .8f;
                 }
-            }*/
+            }
             if (craftWithBook)
             {
                 aPlayer.playerCraftType = 4;
-                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, BooksSoundDir), player.Center).Volume *= .8f;
+                SoundEngine.PlaySound(new ModSoundStyle(BooksSoundDir), player.Center).Volume *= .8f;
             }
             if (recipe.needWater || recipe.needHoney)
             {
-                Main.PlaySound(SoundID.Splash, player.Center);
+                SoundEngine.PlaySound(SoundID.Splash, player.Center);
             }
-            if (craftWithFurnace || craftWithBook || craftWithWB || craftWithAnvil)
-            {
-                // pket.Send();
-            }
-        }
+        }*/
         public static void AddCraftingStationsToList(List<int> stationType, params int[] stations)
         {
             foreach (int station in stations)
