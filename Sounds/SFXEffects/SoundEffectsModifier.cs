@@ -23,96 +23,26 @@ namespace TerrariaAmbience.Sounds
 		public override void Load()
 		{
 			AudioModifier.CacheReflection();
-            On.Terraria.Audio.SoundEngine.PlaySound_int_int_int_int_float_float += ApplySoundFilters;
-            On.Terraria.Audio.SoundEngine.PlaySound_ISoundStyle_int_int += ApplySoundFilters;
-            On.Terraria.Audio.SoundEngine.PlaySound_ISoundStyle_Vector2 += ApplySoundFilters;
+            On.Terraria.Audio.ActiveSound.Play += ActiveSound_Play;
 		}
 
-        private SoundEffectInstance ApplySoundFilters(On.Terraria.Audio.SoundEngine.orig_PlaySound_ISoundStyle_Vector2 orig, ISoundStyle type, Vector2 position)
-        {
-			if (type is ModSoundStyle)
-			{
-				ReverbAudioSystem.CreateAudioFX(position, out float gain, out float occ, out float damp, out bool sDamp);
-
-				if (Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-					gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-				if (sDamp)
-				{
-					return orig(type, position).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
-				}
-				return orig(type, position).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
-			}
-			else
-			{
-				LegacySoundStyle style = (LegacySoundStyle)type;
-
-				bool containsIgnoreablePos = stylesToIgnorePosition.Contains(style.SoundId);
-				ReverbAudioSystem.CreateAudioFX(position, out float gain, out float occ, out float damp, out bool sDamp);
-
-				if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-					gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-				if (sDamp)
-				{
-					if (!listNoAffect.Contains(style.SoundId))
-						return orig(type, position).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
-				}
-				if (!listNoAffect.Contains(style.SoundId))
-					return orig(type, position).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
-				return orig(type, position);
-			}
-		}
-
-        private SoundEffectInstance ApplySoundFilters(On.Terraria.Audio.SoundEngine.orig_PlaySound_ISoundStyle_int_int orig, ISoundStyle type, int x, int y)
-        {
-			// x and y being -1 means no location, just for client
-			if (type is ModSoundStyle mss)
-			{
-				ReverbAudioSystem.CreateAudioFX(new(x, y), out float gain, out float occ, out float damp, out bool sDamp);
-
-				if (Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-					gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-				if (sDamp)
-				{
-					return orig(type, x, y).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
-				}
-				return orig(type, x, y).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
-			}
-			else
-            {
-				LegacySoundStyle style = (LegacySoundStyle)type;
-
-				bool containsIgnoreablePos = stylesToIgnorePosition.Contains(style.SoundId);
-				ReverbAudioSystem.CreateAudioFX(new(x, y), out float gain, out float occ, out float damp, out bool sDamp);
-
-				if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-					gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-				if (sDamp)
-				{
-					if (!listNoAffect.Contains(style.SoundId))
-						return orig(type, x, y).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
-				}
-				if (!listNoAffect.Contains(style.SoundId))
-					return orig(type, x, y).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
-				return orig(type, x, y);
-			}
-		}
-
-        private SoundEffectInstance ApplySoundFilters(On.Terraria.Audio.SoundEngine.orig_PlaySound_int_int_int_int_float_float orig, int type, int x, int y, int Style, float volumeScale, float pitchOffset)
-        {
-			// CombatText.NewText(new(x, y, 1, 1), Color.White, $"{Style}");
-			bool containsIgnoreablePos = stylesToIgnorePosition.Contains(type);
-			ReverbAudioSystem.CreateAudioFX(new Vector2(x, y), out float gain, out float occ, out float damp, out bool sDamp);
+		private void ActiveSound_Play(On.Terraria.Audio.ActiveSound.orig_Play orig, ActiveSound self)
+		{
+			orig(self);
+			bool containsIgnoreablePos = badStyles.Contains(self.Style);
+			ReverbAudioSystem.CreateAudioFX(self.Position, out float gain, out float occ, out float damp, out bool sDamp);
 
 			if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
 				gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
 			if (sDamp)
 			{
-				if (!listNoAffect.Contains(type))
-					return orig(type, x, y, Style, volumeScale, pitchOffset).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
+				if (!badStyles.Contains(self.Style))
+					self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
+				return;
 			}
-			if (!listNoAffect.Contains(type))
-				return orig(type, x, y, Style, volumeScale, pitchOffset).ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
-			return orig(type, x, y, Style, volumeScale, pitchOffset);
+			if (!badStyles.Contains(self.Style))
+				self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
+			return;
 		}
 
 		public static List<ISoundStyle> badStyles = new()
@@ -124,11 +54,6 @@ namespace TerrariaAmbience.Sounds
 			new LegacySoundStyle(SoundID.Chat, -1),
 			new LegacySoundStyle(SoundID.Research, -1),
 			new LegacySoundStyle(SoundID.ResearchComplete, -1),
-		};
-		public static List<int> stylesToIgnorePosition = new()
-		{
-			SoundID.Dig,
-			SoundID.Tink
 		};
 		public static float occludeAmount;
         public static float reverbActual;

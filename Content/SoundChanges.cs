@@ -14,35 +14,20 @@ namespace TerrariaAmbience.Content
 {
     internal class SoundChanges
     {
-        internal SoundEffect[] splashCashe = new SoundEffect[] { };
-        private SoundEffect[] zombieCashe = new SoundEffect[] { };
+        private static Asset<SoundEffect>[] newZombieArr;
 
-        public static SoundChanges Instance
-        {
-            get
-            {
-                return ModContent.GetInstance<SoundChanges>();
-            }
-        }
+        private static Asset<SoundEffect>[] zombieCache;
 
         public static void Init()
         {
-            // 45 in MusicID is the wind ambience
-            /*ContentInstance.Register(new SoundChanges());
+            zombieCache = SoundEngine.LegacySoundPlayer.SoundZombie;
             var mod = ModContent.GetInstance<TerrariaAmbience>();
-            var lsp = SoundEngine.LegacySoundPlayer;
-            var changes = Instance;
-            var loader = Ambience.Instance;
-
-            #region SFX Changes
-            changes.runSFX_Cashe = lsp.SoundRun.Value;
-            changes.runSFX_Cashe = Main.soundRun;
-            changes.drip_Cashe = Main.soundDrip;
-            changes.liquid_Cashe = Main.soundLiquid;
-
-            changes.splashCashe = Main.soundSplash;
-            changes.zombieCashe = Main.soundZombie;
-
+            newZombieArr = new Asset<SoundEffect>[] {
+                mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie1", AssetRequestMode.ImmediateLoad),
+                mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie2", AssetRequestMode.ImmediateLoad),
+                mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie3", AssetRequestMode.ImmediateLoad)
+            };
+            // 45 in MusicID is the wind ambience
 
             // loader.splashCashe = Main.soundSplash;
 
@@ -52,41 +37,24 @@ namespace TerrariaAmbience.Content
             // NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
             if (!Main.dedServ)
             {
-                // SetSoundValue(lsp.SoundRun, mod.GetSound("Sounds/Custom/nothingness").Value);
-
-                /*Main.soundDrip[0] = Ambience.Drip1;
-                Main.soundDrip[1] = Ambience.Drip2;
-                Main.soundDrip[2] = Ambience.Drip3;
-
-                Main.soundLiquid[0] = Ambience.WaterStream;
-                Main.soundLiquid[1] = Ambience.LavaStream;
-
-                Main.soundInstanceDrip[0] = Ambience.Drip1Instance;
-                Main.soundInstanceDrip[1] = Ambience.Drip2Instance;
-                Main.soundInstanceDrip[2] = Ambience.Drip3Instance;
-
-                Main.soundInstanceLiquid[0] = Ambience.WaterStreamInstance;
-                Main.soundInstanceLiquid[1] = Ambience.LavaStreamInstance;
-
-                Main.soundZombie[0] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie1");
-                Main.soundZombie[1] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie2");
-                Main.soundZombie[2] = mod.GetSound($"{Ambience.AmbientPath}/npcs/zombie3");
-            }*/
+                SwapArray(ref SoundEngine.LegacySoundPlayer.SoundZombie, ref newZombieArr);
+            }
         }
         public static void Unload()
         {
-            // Main.soundRun = Instance.runSFX_Cashe;
-            /*Main.soundDrip = Instance.drip_Cashe;
-            Main.soundLiquid = Instance.liquid_Cashe;
-
-            Main.soundZombie = Instance.zombieCashe;
-
-            Main.soundSplash = Instance.splashCashe;*/
+            SoundEngine.LegacySoundPlayer.SoundZombie = zombieCache;
         }
 
         public static void Swap<T>(ref Asset<T> swapFrom, ref Asset<T> swapTo) where T : class
         {
             Asset<T> temp;
+            temp = swapFrom;
+            swapFrom = swapTo;
+            swapTo = temp;
+        }
+        public static void SwapArray<T>(ref Asset<T>[] swapFrom, ref Asset<T>[] swapTo) where T : class
+        {
+            Asset<T>[] temp;
             temp = swapFrom;
             swapFrom = swapTo;
             swapTo = temp;

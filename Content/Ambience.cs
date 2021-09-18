@@ -308,12 +308,12 @@ namespace TerrariaAmbience.Content
                 UnderwaterLoopInstance.Volume = 0f;
             }
         }
-        public static float decOrIncRate = 0.0075f;
+        public static float transitionHarshness = 0.0075f;
         public static void UpdateVolume()
         {
             if (float.TryParse(ModContent.GetInstance<GeneralConfig>().transitionHarshness, out float given) && given != 0f)
             {
-                decOrIncRate = float.Parse(ModContent.GetInstance<GeneralConfig>().transitionHarshness);
+                transitionHarshness = float.Parse(ModContent.GetInstance<GeneralConfig>().transitionHarshness);
             }
             else
             {
@@ -329,61 +329,61 @@ namespace TerrariaAmbience.Content
             if (Main.hasFocus)
             {
                 #region GeneralVolumeUpdate
-                aLoader.underwaterLoopVolume += player.Underwater() ? decOrIncRate / 2 : -decOrIncRate * 4;
+                aLoader.underwaterLoopVolume += player.Underwater() ? transitionHarshness / 2 : -transitionHarshness * 4;
                 aLoader.dayCricketsVolume +=
                     (player.ZonePurity || player.ZoneMeteor || (player.ZoneHallow && !player.ZoneDesert)) &&
                     Main.dayTime ?
-                    decOrIncRate : -decOrIncRate;
+                    transitionHarshness : -transitionHarshness;
 
                 if (player.ZoneOverworldHeight && !player.ZoneSkyHeight)
                 {
-                    aLoader.breezeVolume += decOrIncRate;
+                    aLoader.breezeVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.breezeVolume -= decOrIncRate;
+                    aLoader.breezeVolume -= transitionHarshness;
                 }
                 if (!player.ZoneDesert && !player.ZoneSkyHeight)
                 {
-                    aLoader.eveningCricketsVolume += decOrIncRate;
+                    aLoader.eveningCricketsVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.eveningCricketsVolume -= decOrIncRate;
+                    aLoader.eveningCricketsVolume -= transitionHarshness;
                 }
                 if (!player.ZoneDesert && !player.ZoneSkyHeight)
                 {
-                    aLoader.morningCricketsVolume += decOrIncRate;
+                    aLoader.morningCricketsVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.morningCricketsVolume -= decOrIncRate;
+                    aLoader.morningCricketsVolume -= transitionHarshness;
                 }
                 if (player.ZonePurity && !player.ZoneDesert && !Main.dayTime)
                 {
-                    aLoader.nightCricketsVolume += decOrIncRate;
+                    aLoader.nightCricketsVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.nightCricketsVolume -= decOrIncRate;
+                    aLoader.nightCricketsVolume -= transitionHarshness;
                 }
 
                 if (player.Center.Y >= Main.worldSurface * 16)
                 {
-                    aLoader.ugAmbienceVolume += decOrIncRate;
+                    aLoader.ugAmbienceVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.ugAmbienceVolume -= decOrIncRate;
+                    aLoader.ugAmbienceVolume -= transitionHarshness;
                 }
 
                 if (player.ZoneDesert)
                 {
-                    aLoader.desertCricketsVolume += decOrIncRate;
+                    aLoader.desertCricketsVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.desertCricketsVolume -= decOrIncRate;
+                    aLoader.desertCricketsVolume -= transitionHarshness;
                 }
                 if (!Main.dayTime)
                 {
@@ -396,87 +396,87 @@ namespace TerrariaAmbience.Content
 
                 if (player.ZoneSnow && Main.dayTime && !player.ZoneUnderworldHeight)
                 {
-                    aLoader.snowDayVolume += decOrIncRate;
+                    aLoader.snowDayVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.snowDayVolume -= decOrIncRate;
+                    aLoader.snowDayVolume -= transitionHarshness;
                 }
 
                 if (player.ZoneSnow && !Main.dayTime && !player.ZoneUnderworldHeight)
                 {
-                    aLoader.snowNightVolume += decOrIncRate;
+                    aLoader.snowNightVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.snowNightVolume -= decOrIncRate;
+                    aLoader.snowNightVolume -= transitionHarshness;
                 }
                 if (player.ZoneCrimson)
                 {
-                    aLoader.crimsonRumblesVolume += decOrIncRate;
+                    aLoader.crimsonRumblesVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.crimsonRumblesVolume -= decOrIncRate;
+                    aLoader.crimsonRumblesVolume -= transitionHarshness;
                 }
                 if (player.ZoneCorrupt)
                 {
-                    aLoader.corruptionRoarsVolume += decOrIncRate;
+                    aLoader.corruptionRoarsVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.corruptionRoarsVolume -= decOrIncRate;
+                    aLoader.corruptionRoarsVolume -= transitionHarshness;
                 }
 
                 if (player.ZoneJungle && Main.dayTime)
                 {
-                    aLoader.dayJungleVolume += decOrIncRate;
+                    aLoader.dayJungleVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.dayJungleVolume -= decOrIncRate;
+                    aLoader.dayJungleVolume -= transitionHarshness;
                 }
 
                 if (player.ZoneJungle && !Main.dayTime)
                 {
-                    aLoader.nightJungleVolume += decOrIncRate;
+                    aLoader.nightJungleVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.nightJungleVolume -= decOrIncRate;
+                    aLoader.nightJungleVolume -= transitionHarshness;
                 }
 
                 if (player.ZoneBeach && !player.ZoneRockLayerHeight)
                 {
-                    aLoader.beachWavesVolume += decOrIncRate;
+                    aLoader.beachWavesVolume += transitionHarshness;
                 }
                 else
                 {
-                    aLoader.beachWavesVolume -= decOrIncRate;
+                    aLoader.beachWavesVolume -= transitionHarshness;
                 }
-                aLoader.hellRumbleVolume += decOrIncRate;
+                aLoader.hellRumbleVolume += transitionHarshness;
                 #endregion
             }
             if (!Main.hasFocus || Main.gameMenu)
             {
-                aLoader.dayCricketsVolume -= decOrIncRate;
-                aLoader.eveningCricketsVolume -= decOrIncRate;
-                aLoader.nightCricketsVolume -= decOrIncRate;
-                aLoader.crackleVolume -= decOrIncRate;
-                aLoader.desertCricketsVolume -= decOrIncRate;
-                aLoader.ugAmbienceVolume -= decOrIncRate;
-                aLoader.snowDayVolume -= decOrIncRate;
-                aLoader.snowNightVolume -= decOrIncRate;
-                aLoader.crimsonRumblesVolume -= decOrIncRate;
-                aLoader.corruptionRoarsVolume -= decOrIncRate;
-                aLoader.dayJungleVolume -= decOrIncRate;
-                aLoader.nightJungleVolume -= decOrIncRate;
-                aLoader.beachWavesVolume -= decOrIncRate;
-                aLoader.hellRumbleVolume -= decOrIncRate;
-                aLoader.rainVolume -= decOrIncRate;
-                aLoader.morningCricketsVolume -= decOrIncRate;
-                aLoader.breezeVolume -= decOrIncRate;
-                aLoader.underwaterLoopVolume -= decOrIncRate;
+                aLoader.dayCricketsVolume -= transitionHarshness;
+                aLoader.eveningCricketsVolume -= transitionHarshness;
+                aLoader.nightCricketsVolume -= transitionHarshness;
+                aLoader.crackleVolume -= transitionHarshness;
+                aLoader.desertCricketsVolume -= transitionHarshness;
+                aLoader.ugAmbienceVolume -= transitionHarshness;
+                aLoader.snowDayVolume -= transitionHarshness;
+                aLoader.snowNightVolume -= transitionHarshness;
+                aLoader.crimsonRumblesVolume -= transitionHarshness;
+                aLoader.corruptionRoarsVolume -= transitionHarshness;
+                aLoader.dayJungleVolume -= transitionHarshness;
+                aLoader.nightJungleVolume -= transitionHarshness;
+                aLoader.beachWavesVolume -= transitionHarshness;
+                aLoader.hellRumbleVolume -= transitionHarshness;
+                aLoader.rainVolume -= transitionHarshness;
+                aLoader.morningCricketsVolume -= transitionHarshness;
+                aLoader.breezeVolume -= transitionHarshness;
+                aLoader.underwaterLoopVolume -= transitionHarshness;
             }
         }
         /// <summary>
