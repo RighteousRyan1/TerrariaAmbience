@@ -28,6 +28,7 @@ namespace TerrariaAmbience.Sounds
 
 		private void ActiveSound_Play(On.Terraria.Audio.ActiveSound.orig_Play orig, ActiveSound self)
 		{
+			orig(self);
 			bool containsIgnoreablePos = badStyles.Contains(self.Style);
 			ReverbAudioSystem.CreateAudioFX(self.Position, out float gain, out float occ, out float damp, out bool sDamp);
 
@@ -41,8 +42,6 @@ namespace TerrariaAmbience.Sounds
 			}
 			if (!badStyles.Contains(self.Style))
 				self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
-			orig(self);
-			return;
 		}
 
 		public static List<ISoundStyle> badStyles = new()

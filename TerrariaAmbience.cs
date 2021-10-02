@@ -32,7 +32,7 @@ namespace TerrariaAmbience
                 if (message == "AddTilesToList")
                 {
                     Mod mod = args[1] as Mod;
-                    string listName = args[2] as string; // Can be Stone, Grass, Sand, Snow, or Dirt (FOR NOW, OR EVER) (UPDATE THIS
+                    string listName = args[2] as string; // Can be Stone, Grass, Sand, Snow, or Dirt (FOR NOW, OR EVER) (UPDATE THIS)
                     string[] nameStringList = args[3] as string[];
                     int[] tiles = args[4] as int[];
                     if (!Main.dedServ)
@@ -118,7 +118,8 @@ namespace TerrariaAmbience
 
             Ambience.DoUpdate_Ambience();
             Ambience.UpdateVolume();
-            if (Main.gameMenu) return;
+            if (Main.gameMenu) 
+                return;
             Ambience.ClampAll();
         }
 
@@ -169,7 +170,8 @@ namespace TerrariaAmbience
         public override void Unload()
         {
             Main.versionNumber = "1.4.2.3";
-            SoundChanges.Unload();
+			if (!Main.dedServ)
+				SoundChanges.Unload();
         }
         public override void Close()
         {

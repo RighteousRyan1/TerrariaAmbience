@@ -20,25 +20,25 @@ namespace TerrariaAmbience.Content
 
         public static void Init()
         {
-            zombieCache = SoundEngine.LegacySoundPlayer.SoundZombie;
-            var mod = ModContent.GetInstance<TerrariaAmbience>();
-            newZombieArr = new Asset<SoundEffect>[] {
-                mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie1", AssetRequestMode.ImmediateLoad),
-                mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie2", AssetRequestMode.ImmediateLoad),
-                mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie3", AssetRequestMode.ImmediateLoad)
-            };
-            // 45 in MusicID is the wind ambience
+			if (!Main.dedServ)
+			{
+				zombieCache = SoundEngine.LegacySoundPlayer.SoundZombie;
+				var mod = ModContent.GetInstance<TerrariaAmbience>();
+				// 45 in MusicID is the wind ambience
 
-            // loader.splashCashe = Main.soundSplash;
+				// loader.splashCashe = Main.soundSplash;
 
-            // Now change the sound (Main.soundX = y)
+				// Now change the sound (Main.soundX = y)
 
-            // NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
-            // NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
-            if (!Main.dedServ)
-            {
-                SwapArray(ref SoundEngine.LegacySoundPlayer.SoundZombie, ref newZombieArr);
-            }
+				// NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
+				// NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
+				if (!Main.dedServ)
+				{
+                    SoundEngine.LegacySoundPlayer.SoundZombie[0] = mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie1", AssetRequestMode.ImmediateLoad);
+                    SoundEngine.LegacySoundPlayer.SoundZombie[1] = mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie2", AssetRequestMode.ImmediateLoad);
+                    SoundEngine.LegacySoundPlayer.SoundZombie[2] = mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie3", AssetRequestMode.ImmediateLoad);
+                }
+			}
         }
         public static void Unload()
         {

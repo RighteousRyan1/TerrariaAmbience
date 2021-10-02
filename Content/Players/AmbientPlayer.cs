@@ -13,6 +13,7 @@ using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using TerrariaAmbience.Sounds;
+using TerrariaAmbience.Common.Enums;
 
 namespace TerrariaAmbience.Content.Players
 {
@@ -152,7 +153,7 @@ namespace TerrariaAmbience.Content.Players
             {
                 int wallCount = 0;
                 int tileCount = 0;
-                if (Main.GameUpdateCount % 30 == 0)
+                if (Main.GameUpdateCount % 10 == 0)
                 {
                     if (Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight)
                     {
@@ -169,7 +170,7 @@ namespace TerrariaAmbience.Content.Players
                                 || ReverbAudioSystem.CanRaycastTo(Player.Center, up.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, down.ToVector2() * 16))
                             {
                                 tileCount++;
-                                if (Main.GameUpdateCount % 30 == 0)
+                                if (Main.GameUpdateCount % 10 == 0)
                                 {
                                     Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
                                 }
@@ -180,13 +181,13 @@ namespace TerrariaAmbience.Content.Players
                             if (ReverbAudioSystem.CanRaycastTo(Player.Center, wallPos.ToVector2() * 16))
                             {
                                 wallCount++;
-                                if (Main.GameUpdateCount % 30 == 0)
+                                if (Main.GameUpdateCount % 10 == 0)
                                 {
                                     Dust.QuickBox(wallPos.ToVector2() * 16, wallPos.ToVector2() * 16 + new Vector2(16), 0, Color.Red, null);
                                 }
                             }
                         }
-                        Mod.Logger.Info($"wall: {wallCount} | tile: {tileCount}");
+                        Console.WriteLine($"wall: {wallCount} | tile: {tileCount}");
                     }
                 }
             }
@@ -306,6 +307,17 @@ namespace TerrariaAmbience.Content.Players
             }
 
             // this is left in because my reverb system thinks that the sound originates from within a tile.
+            #endregion
+            if (ModContent.GetInstance<GeneralConfig>().footsteps)
+            {
+                bool stepping = (legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25);
+                bool landing = legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14;
+                if (stepping)
+                    GetFootstepSound(false);
+                else if (landing)
+                    GetFootstepSound(true);
+            }
+            // HandleContainerOpenings(ContainerContext.Chest, out var opened);
             chestStateNew = Player.chest;
             if (Main.soundVolume > 0f)
             {
@@ -317,35 +329,88 @@ namespace TerrariaAmbience.Content.Players
                         {
                             if ((chestStateNew != chestStateOld) && chestStateNew > -1)
                             {
-                                SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open", 0, default, 0.25f), Player.Center).ApplyReverbReturnInstance(reverbActual);
+                                SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open", 0, default, 0.25f), Player.Center);
                             }
                             if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1)
                             {
-                                SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close", 0, default, 0.55f), Player.Center).ApplyReverbReturnInstance(reverbActual);
+                                SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close", 0, default, 0.55f), Player.Center);
                             }
                             else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
                             {
-                                SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close", 0, default, 0.55f), Player.Center);//.ApplyReverbReturnInstance(reverbActual);
+                                SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close", 0, default, 0.55f), Player.Center);
                             }
                         }
                     }
                 }
             }
-            #endregion
-
-            if (ModContent.GetInstance<GeneralConfig>().footsteps)
-            {
-                bool stepping = (legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25);
-                bool landing = legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14;
-                if (stepping)
-                    GetFootstepSound(false);
-                else if (landing)
-                    GetFootstepSound(true);
-            }
-            legFrameSnapShotOld = legFrameSnapShotNew;
             chestStateOld = chestStateNew;
+            legFrameSnapShotOld = legFrameSnapShotNew;
             Player.runSoundDelay = 100;
         }
+        public override void PostUpdate()
+        {
+            HandleIceScraping();
+            int randX = Main.rand.Next(-1750, 1750);
+            int randY = Main.rand.Next(-1750, 1750);
+            int randC = Main.rand.Next(1, 6);
+            int randD = Main.rand.Next(1, 7);
+            int randF = Main.rand.Next(1, 3);
+            int randM = Main.rand.Next(1, 10);
+
+            string pick = GeneralHelpers.Pick($"close/{randC}", $"distant/{randD}", $"far/{randF}", $"medial/{randM}");
+            string pathToThunder = $"TerrariaAmbience/Sounds/Custom/ambient/rain/thunder/{pick}";
+
+            float mafs = 2000 / (Main.maxRaining * 2);
+            float chance3 = Main.rand.NextFloat(mafs);
+            int activePlayers = 0;
+            foreach (Player p in Main.player)
+            {
+                if (p.active)
+                    activePlayers++;
+            }
+            if (Main.raining && !Player.ZoneSnow && Player.ZoneOverworldHeight)
+            {
+                if (chance3 < 2)
+                {
+                    thunderInstance = SoundEngine.PlaySound(new ModSoundStyle(pathToThunder, 0, SoundType.Ambient), Player.Center + new Vector2(randX, randY));
+                    thunderInstance.Volume = Main.ambientVolume * (Player.ZoneDirtLayerHeight ? 0.35f : 0.9f);
+                    thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
+                }
+            }
+            if (!Main.dayTime)
+            {
+                string pathToHowl = $"TerrariaAmbience/Sounds/Custom/ambient/animals/howl";
+
+                int chance = Main.rand.Next(1500 * activePlayers * 4);
+                if (Player.ZoneSnow && !Player.ZoneUnderworldHeight && !Player.ZoneRockLayerHeight)
+                {
+                    if (chance == 1)
+                    {
+                        howlInstance = SoundEngine.PlaySound(new ModSoundStyle(pathToHowl), Player.Center + new Vector2(randX, randY));
+                        howlInstance.Volume = Main.ambientVolume * 0.1f;
+                        howlInstance.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
+                    }
+                }
+            }
+            if (Player.ZoneDungeon)
+            {
+                int possibleChance = Main.rand.Next(1000);
+                int randX1 = Main.rand.Next(-2250, 2250);
+                int randY1 = Main.rand.Next(-2250, 2250);
+                if (possibleChance == 0)
+                    SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/animals/rattling_bones"), Player.Center + new Vector2(randX1, randY1)).Volume = Main.ambientVolume * 0.05f; ;
+            }
+            var aLoader = Ambience.Instance;
+            if (aLoader.crackleVolume > 1)
+                aLoader.crackleVolume = 1;
+            if (aLoader.crackleVolume < 0)
+                aLoader.crackleVolume = 0;
+            if (isNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds)
+                Ambience.Instance.crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceToCampfire / 780;
+            else
+                Ambience.Instance.crackleVolume = 0f;
+        }
+
         /// <summary>
         /// Get the player's footstep sound.
         /// </summary>
@@ -496,69 +561,6 @@ namespace TerrariaAmbience.Content.Players
             }
             return sound;
         }
-        public override void PostUpdate()
-        {
-            HandleIceScraping();
-            int randX = Main.rand.Next(-1750, 1750);
-            int randY = Main.rand.Next(-1750, 1750);
-            int randC = Main.rand.Next(1, 6);
-            int randD = Main.rand.Next(1, 7);
-            int randF = Main.rand.Next(1, 3);
-            int randM = Main.rand.Next(1, 10);
-
-            string pick = GeneralHelpers.Pick($"close/{randC}", $"distant/{randD}", $"far/{randF}", $"medial/{randM}");
-            string pathToThunder = $"TerrariaAmbience/Sounds/Custom/ambient/rain/thunder/{pick}";
-
-            float mafs = 2000 / (Main.maxRaining * 2);
-            float chance3 = Main.rand.NextFloat(mafs);
-            int activePlayers = 0;
-            foreach (Player p in Main.player)
-            {
-                if (p.active)
-                    activePlayers++;
-            }
-            if (Main.raining && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-            {
-                if (chance3 < 2)
-                {
-                    thunderInstance = SoundEngine.PlaySound(new ModSoundStyle(pathToThunder, 0, SoundType.Ambient), Player.Center + new Vector2(randX, randY));
-                    thunderInstance.Volume = Main.ambientVolume * (Player.ZoneDirtLayerHeight ? 0.35f : 0.9f);
-                    thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
-                }
-            }
-            if (!Main.dayTime)
-            {
-                string pathToHowl = $"TerrariaAmbience/Sounds/Custom/ambient/animals/howl";
-
-                int chance = Main.rand.Next(1500 * activePlayers * 4);
-                if (Player.ZoneSnow && !Player.ZoneUnderworldHeight && !Player.ZoneRockLayerHeight)
-                {
-                    if (chance == 1)
-                    {
-                        howlInstance = SoundEngine.PlaySound(new ModSoundStyle(pathToHowl), Player.Center + new Vector2(randX, randY));
-                        howlInstance.Volume = Main.ambientVolume * 0.1f;
-                        howlInstance.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
-                    }
-                }
-            }
-            if (Player.ZoneDungeon)
-            {
-                int possibleChance = Main.rand.Next(1000);
-                int randX1 = Main.rand.Next(-2250, 2250);
-                int randY1 = Main.rand.Next(-2250, 2250);
-                if (possibleChance == 0)
-                    SoundEngine.PlaySound(new ModSoundStyle("TerrariaAmbience/Sounds/Custom/ambient/animals/rattling_bones"), Player.Center + new Vector2(randX1, randY1)).Volume = Main.ambientVolume * 0.05f; ;
-            }
-            var aLoader = Ambience.Instance;
-            if (aLoader.crackleVolume > 1)
-                aLoader.crackleVolume = 1;
-            if (aLoader.crackleVolume < 0)
-                aLoader.crackleVolume = 0;
-            if (isNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds)
-                Ambience.Instance.crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceToCampfire / 780;
-            else
-                Ambience.Instance.crackleVolume = 0f;
-        }
 
         public float GetArmorStepVolume()
         {
@@ -659,6 +661,46 @@ namespace TerrariaAmbience.Content.Players
             return determinedValue;
         }
 
+        public void HandleContainerOpenings(ContainerContext context, out bool opened)
+        {
+            opened = false;
+            chestStateNew = Player.chest;
+            if (timerUntilValidChestStateChange > 10)
+            {
+                // Main.NewText($"{chestStateNew} : {chestStateOld}");
+                switch (context)
+                {
+                    case ContainerContext.Chest:
+                        // > -1
+                        if (chestStateNew >= -1)
+                        {
+                            if ((chestStateNew != chestStateOld) && chestStateNew > -1)
+                            {
+                                opened = true;
+                            }
+                            // orignal closed, none other opened
+                            if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1)
+                            {
+                                opened = false;
+                            }
+                            // original closed, new opened
+                            else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
+                            {
+                                opened = false;
+                            }
+                        }
+                        break;
+                    case ContainerContext.PiggyBank:
+                        // -2
+                        break;
+                    case ContainerContext.Safe:
+                        // -3
+                        break;
+                }
+            }
+            chestStateOld = chestStateNew;
+        }
+
         public SoundEffect soundSlippyRough;
         public SoundEffectInstance soundSlippyRoughInst;
 
@@ -717,26 +759,29 @@ namespace TerrariaAmbience.Content.Players
             originOfCampfire.Y = j * 16;
             Player player = Main.player[Main.myPlayer].GetModPlayer<AmbientPlayer>().Player;
 
-            if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire))
+            if (ModContent.GetInstance<GeneralConfig>().campfireSounds)
             {
-                /*var t = Main.tile[i, j];
-                var orig = new Vector2(i * 16, j * 16);
-                Main.NewText(t.frameY);*/
-                //if (t.frameY <= 18 && t.frameY >= 0)
+                if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire))
                 {
-                    distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
-                    player.GetModPlayer<AmbientPlayer>().isNearCampfire = true;
+                    /*var t = Main.tile[i, j];
+                    var orig = new Vector2(i * 16, j * 16);
+                    Main.NewText(t.frameY);*/
+                    //if (t.frameY <= 18 && t.frameY >= 0)
+                    {
+                        distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
+                        player.GetModPlayer<AmbientPlayer>().isNearCampfire = true;
+                    }
                 }
-            }
-            if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
-            {
-                /*var t = Main.tile[i, j];
-                var orig = new Vector2(i * 16, j * 16);
-                Main.NewText(t.frameY);*/
-                //if (t.frameY <= 54 && t.frameY >= 36)
+                if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
                 {
-                    Ambience.CampfireCrackleInstance.Volume = 0f;
-                    player.GetModPlayer<AmbientPlayer>().isNearCampfire = false;
+                    /*var t = Main.tile[i, j];
+                    var orig = new Vector2(i * 16, j * 16);
+                    Main.NewText(t.frameY);*/
+                    //if (t.frameY <= 54 && t.frameY >= 36)
+                    {
+                        Ambience.CampfireCrackleInstance.Volume = 0f;
+                        player.GetModPlayer<AmbientPlayer>().isNearCampfire = false;
+                    }
                 }
             }
         }

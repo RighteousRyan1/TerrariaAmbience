@@ -183,9 +183,10 @@ namespace TerrariaAmbience.Core
                     0f,
                     Vector2.Zero,
                     new Vector2(0.225f), -1, 1);
+
                 if (GeneralHelpers.KeyPress(Keys.L))
                 {
-                    SoundEngine.PlaySound(SoundID.Frog, Main.MouseWorld);
+                    var sound = new ActiveSound(new LegacySoundStyle(SoundID.Zombie, Main.rand.Next(0, 3)), Main.MouseWorld);
                 }
                 if (GeneralHelpers.KeyPress(Keys.K))
                 {
