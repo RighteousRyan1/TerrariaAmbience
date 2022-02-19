@@ -32,7 +32,7 @@ namespace TerrariaAmbience.Sounds.TileSounds
                 foreach (var tileCoord in tileList)
                 {
                     var acTile = Framing.GetTileSafely(tileCoord);
-                    if (IsTileTypeWood(acTile.type) && acTile.CollisionType == 1 && !Framing.GetTileSafely(tileCoord.X, tileCoord.Y + 1).IsActive)
+                    if (IsTileTypeWood(acTile.TileType) && acTile.CollisionType() == 1 && !Framing.GetTileSafely(tileCoord.X, tileCoord.Y + 1).HasTile)
                     {
                         int rand = Main.rand.Next(1, 8);
 

@@ -143,10 +143,17 @@ namespace TerrariaAmbience.Content.Players
         public static string pathGlass;
         public static string pathArmor;
         public static string pathVanity;
+
+
+        private bool _wet; // old state of player wet
         public override void PreUpdate()
         {
             var cfg = ModContent.GetInstance<GeneralConfig>();
-            var cfg2 = ModContent.GetInstance<AmbientConfigServer>();
+            var cfg2 = ModContent.GetInstance<AudioAdditionsConfig>();
+            var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
+
+            if (cfg3.newSplashSounds)
+                ManagePlayerSplashes();
 
             #region ShowReverbTiles
             if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && !cfg2.noReverbMath)
@@ -198,12 +205,12 @@ namespace TerrariaAmbience.Content.Players
             Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
             for (int i = (int)Player.Top.X - 1; i < Player.Top.X + 1; i++)
             {
-                for (int j = (int)Player.Top.Y - 1; playerTile.wall <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--)
+                for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--)
                 {
                     if (WorldGen.InWorld(i / 16, j / 16))
                     {
                         Tile tile = Main.tile[i / 16, j / 16];
-                        if (tile.IsActive && tile.CollisionType == 1)
+                        if (tile.HasTile && tile.CollisionType() == 1)
                         {
                             hasTilesAbove = true;
                             break;
@@ -410,6 +417,29 @@ namespace TerrariaAmbience.Content.Players
             else
                 Ambience.Instance.crackleVolume = 0f;
         }
+
+        /// <summary>
+        /// Used for when the "splashes" config is enabled.
+        /// </summary>
+        public void ManagePlayerSplashes()
+        {
+            bool justWet = Player.wet && !_wet;
+            bool justUnwet = !Player.wet && _wet;
+
+            if (justWet || justUnwet)
+            {
+                var vel = Player.velocity.Y;
+
+                var soundSplash = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= 10f ? "heavy" : "light")}");
+
+                SoundEngine.PlaySound(soundSplash, Player.position);
+            }
+
+            // for some reason heavy sounds arent playing
+
+            _wet = Player.wet;
+        }
+
 
         /// <summary>
         /// Get the player's footstep sound.

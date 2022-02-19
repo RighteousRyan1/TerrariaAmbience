@@ -56,7 +56,6 @@ namespace TerrariaAmbience.Sounds
 		};
 		public static float occludeAmount;
         public static float reverbActual;
-		public static bool playingSound;
 		public static int soundX;
 		public static int soundY;
 		public static int showTime;
@@ -73,10 +72,6 @@ namespace TerrariaAmbience.Sounds
     }
 	public class ReverbAudioSystem : ModSystem
 	{
-		public override void PostUpdateEverything()
-		{
-			SoundEffectsModifier.playingSound = false;
-		}
 		public static bool CanFindEscapeRoute(Vector2 position, int dist)
 		{
 			for (int i = (int)position.X / 16 - dist; i < (int)position.X / 16 + dist; i++)
@@ -85,11 +80,11 @@ namespace TerrariaAmbience.Sounds
 				{
 					Tile tile = Framing.GetTileSafely(i, j);
 
-					if (tile.wall > 0 && CanRaycastTo(position, new Vector2(i, j).ToWorldCoordinates()))
+					if (tile.WallType > 0 && CanRaycastTo(position, new Vector2(i, j).ToWorldCoordinates()))
 					{
 						continue;
 					}
-					else if (!tile.IsActive && tile.wall <= 0)
+					else if (!tile.HasTile && tile.WallType <= 0)
 					{
 						return true;
 					}
@@ -107,28 +102,28 @@ namespace TerrariaAmbience.Sounds
 			var tileLeft = Framing.GetTileSafely(position.X - 1, position.Y);
 			var tileRight = Framing.GetTileSafely(position.X + 1, position.Y);
 
-			if (tileUp.wall > 0 && !tileUp.IsActive)
+			if (tileUp.WallType > 0 && !tileUp.HasTile)
 			{
 				if (CanRaycastTo(fromPosition, new Vector2(position.X, position.Y - 1)))
 				{
 					return true;
 				}
 			}
-			if (tileDown.wall > 0 && !tileDown.IsActive)
+			if (tileDown.WallType > 0 && !tileDown.HasTile)
 			{
 				if (CanRaycastTo(fromPosition, new Vector2(position.X, position.Y + 1)))
 				{
 					return true;
 				}
 			}
-			if (tileRight.wall > 0 && !tileRight.IsActive)
+			if (tileRight.WallType > 0 && !tileRight.HasTile)
 			{
 				if (CanRaycastTo(fromPosition, new Vector2(position.X + 1, position.Y)))
 				{
 					return true;
 				}
 			}
-			if (tileLeft.wall > 0 && !tileLeft.IsActive)
+			if (tileLeft.WallType > 0 && !tileLeft.HasTile)
 			{
 				if (CanRaycastTo(fromPosition, new Vector2(position.X - 1, position.Y)))
 				{
@@ -155,8 +150,7 @@ namespace TerrariaAmbience.Sounds
 				for (int j = (int)position.Y / 16 - grid.Y; j < (int)position.Y / 16 + grid.Y; j++)
 				{
 					Tile tile = Framing.GetTileSafely(i, j);
-
-					if (tile.IsActive && tile.CollisionType == 1)
+					if (tile.HasTile && tile.CollisionType() == 1)
 					{
 						index++;
 						tileCoords.Add(new Point(i, j));
@@ -175,7 +169,7 @@ namespace TerrariaAmbience.Sounds
 				{
 					Tile tile = Framing.GetTileSafely(i, j);
 
-					if (tile.IsActive && tile.CollisionType == 1)
+					if (tile.HasTile && tile.CollisionType() == 1)
 					{
 						index++;
 						tiles.Add(tile);
@@ -194,7 +188,7 @@ namespace TerrariaAmbience.Sounds
 				{
 					Tile tile = Framing.GetTileSafely(i, j);
 
-					if (tile.wall > 0 && !tile.IsActive)
+					if (tile.WallType > 0 && !tile.HasTile)
 					{
 						index++;
 						tileCoords.Add(new Point(i, j));
@@ -215,7 +209,7 @@ namespace TerrariaAmbience.Sounds
 					{
 						Tile tile = Framing.GetTileSafely(i, j);
 
-						if (!tile.IsActive)
+						if (!tile.HasTile)
 						{
 							index++;
 							tileCoords.Add(new Point(i, j));
@@ -227,7 +221,7 @@ namespace TerrariaAmbience.Sounds
 		}
 		public static void CreateAudioFX(Vector2 fromV2, out float rvGain, out float occlusion, out float dampening, out bool shouldDampen, Vector2 offset = default)
         {
-			var cfg = ModContent.GetInstance<AmbientConfigServer>();
+			var cfg = ModContent.GetInstance<AudioAdditionsConfig>();
 			shouldDampen = false;
 			dampening = 0f;
 			rvGain = 0;
@@ -246,18 +240,17 @@ namespace TerrariaAmbience.Sounds
 						if (cfg.surfaceReverbCalculation)
 						{
 							int wallsNear = WallsAround(fromV2, new Point(15, 15), out List<Point> wallPoints);
-							foreach (var pt in wallPoints.Where(pt => Framing.GetTileSafely(pt).wall > 0))
+							foreach (var pt in wallPoints.Where(pt => Framing.GetTileSafely(pt).WallType > 0))
 							{
-								var check = !WallID.Search.GetName(Framing.GetTileSafely(pt).wall).ToLower().Contains("fence");
+								var check = !WallID.Search.GetName(Framing.GetTileSafely(pt).WallType).ToLower().Contains("fence");
 								if (check)
 								{
 									if (CanRaycastTo(fromV2, pt.ToVector2() * 16 + offset))
 									{
-										var name = WallID.Search.GetName(Framing.GetTileSafely(pt).wall).ToLower();
-										bool has(string input) => name.Contains(input);
-										if (has("dirt"))
-											reverbActual += 0.0004f;
-										if (has("stone") || has("brick") || has("cave") || has("rock"))
+										var name = WallID.Search.GetName(Framing.GetTileSafely(pt).WallType);
+										bool has(string input) => name.ToLower().Contains(input);
+
+										if (has("stone") || has("brick") || has("cave") || has("rock") || has("dungeon"))
 											reverbActual += 0.001f;
 										if (has("wood") || has("planked"))
 											reverbActual += 0.0001f;
@@ -281,21 +274,41 @@ namespace TerrariaAmbience.Sounds
 								var right = new Point(tilePos.X + 1, tilePos.Y);
 								var up = new Point(tilePos.X, tilePos.Y - 1);
 								var down = new Point(tilePos.X, tilePos.Y + 1);
-								if (CanRaycastTo(fromV2, left.ToVector2() * 16) || CanRaycastTo(fromV2, right.ToVector2() * 16)
-									|| CanRaycastTo(fromV2, up.ToVector2() * 16) || CanRaycastTo(fromV2, down.ToVector2() * 16))
+
+								var tile = Framing.GetTileSafely(tilePos);
+
+								TileID.Search.TryGetName(tile.TileType, out var name);
+
+								bool has(string input) => name.ToLower().Contains(input);
+
+								if (!has("dirt") && !has("sand") && !has("silt") && !has("slush") && !has("grass"))
 								{
-									tileCount++;
-									reverbActual += 0.015f;
+
+									if (CanRaycastTo(fromV2, left.ToVector2() * 16) || CanRaycastTo(fromV2, right.ToVector2() * 16)
+										|| CanRaycastTo(fromV2, up.ToVector2() * 16) || CanRaycastTo(fromV2, down.ToVector2() * 16))
+									{
+										tileCount++;
+										reverbActual += 0.015f;
+									}
 								}
 							}
 							foreach (var wallPos in wallPoints)
 							{
-								if (!WallID.Search.GetName(Framing.GetTileSafely(wallPos).type).ToLower().Contains("fence"))
+								var tile = Framing.GetTileSafely(wallPos);
+
+								TileID.Search.TryGetName(tile.TileType, out var name);
+
+								bool has(string input) => name.ToLower().Contains(input);
+
+								if (!has("dirt") && !has("grass") && !has("flower"))
 								{
-									if (CanRaycastTo(fromV2, wallPos.ToVector2() * 16))
+									if (!WallID.Search.GetName(Framing.GetTileSafely(wallPos).TileType).ToLower().Contains("fence"))
 									{
-										wallCount++;
-										reverbActual += 0.0005f;
+										if (CanRaycastTo(fromV2, wallPos.ToVector2() * 16))
+										{
+											wallCount++;
+											reverbActual += 0.001f;
+										}
 									}
 								}
 							}

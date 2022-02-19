@@ -18,7 +18,6 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
     public class SlimeSounds : GlobalNPC
     {
         public override bool InstancePerEntity => true;
-        public override bool CloneNewInstances => true;
         public ModSoundStyle SlimeLandStyle { get; private set; }
         public ModSoundStyle SlimeJumpStyle { get; private set; }
 
@@ -52,6 +51,36 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
                     oldVelocityReal = vel;
                 }
             }
+        }
+    }
+
+    public class SplashingSounds : GlobalNPC
+    {
+        public override bool InstancePerEntity => true;
+        private bool _wet;
+        public override void PostAI(NPC npc)
+        {
+            var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
+
+            if (cfg3.newSplashSounds)
+                HandleSplashing(npc);
+        }
+
+        public void HandleSplashing(NPC npc)
+        {
+            bool justWet = npc.wet && !_wet;
+            bool justUnwet = !npc.wet && _wet;
+
+            if (justWet || justUnwet)
+            {
+                var vel = npc.velocity.Y;
+
+                var soundSplash = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= 9f ? "heavy" : "light")}");
+
+                SoundEngine.PlaySound(soundSplash, npc.position);
+            }
+
+            _wet = npc.wet;
         }
     }
 }

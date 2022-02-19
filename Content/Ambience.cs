@@ -514,7 +514,7 @@ namespace TerrariaAmbience.Content
             float ambVol = TAAmbient / 100;
             if (!Main.dedServ)
             {
-                if (Main.gameMenu)
+                /*if (Main.gameMenu)
                 {
                     DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.75f * ambVol;
                     EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.75f;
@@ -523,7 +523,7 @@ namespace TerrariaAmbience.Content
                     CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.75f * ambVol;
                     CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.7f * ambVol;
                     CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.7f * ambVol;
-                    MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.9f * ambVol;
+                    MorningCricketsInstance.Volume = Instance.morningCricketsVolume * ambVol;
                     BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol;
 
                     HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.75f * ambVol;
@@ -539,7 +539,7 @@ namespace TerrariaAmbience.Content
                     CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.95f * Main.soundVolume;
 
                     UnderwaterLoopInstance.Volume = Instance.underwaterLoopVolume * 0.8f * ambVol;
-                }
+                }*/
                 if (!Instance.playerBehindWall)
                 {
                     DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.9f * ambVol;
@@ -587,8 +587,6 @@ namespace TerrariaAmbience.Content
                     SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.45f * ambVol;
                     SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.45f * ambVol;
 
-                    UnderwaterLoopInstance.Volume = Instance.underwaterLoopVolume;
-
                     if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
                         CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.8f * Main.soundVolume;
                 }
@@ -600,6 +598,8 @@ namespace TerrariaAmbience.Content
                 {
                     BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol * 0.4f;
                 }
+
+                UnderwaterLoopInstance.Volume = Instance.underwaterLoopVolume * ambVol;
             }
 
             if (Main.gameMenu) return;
@@ -644,7 +644,7 @@ namespace TerrariaAmbience.Content
             var wNear = player.GetModPlayer<AmbientPlayer>().WallsAround;
 
             Vector2 newTop = player.Top + new Vector2(0, 7.5f);
-            if (!WallID.Search.GetName(Main.tile[(int)newTop.X / 16, (int)newTop.Y / 16].wall).ToLower().Contains("fence")
+            if (!WallID.Search.GetName(Main.tile[(int)newTop.X / 16, (int)newTop.Y / 16].WallType).ToLower().Contains("fence")
                 && wNear >= 16 )
             {
                 Instance.playerBehindWall = true;

@@ -280,11 +280,11 @@ namespace TerrariaAmbience.Helpers
         }
         public static string GetTileNameAt(Vector2 coordinates)
         {
-            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? TileID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).type) : "Empty";
+            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? TileID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).TileType) : "Empty";
         }
         public static string GetWallNameAt(Vector2 coordinates)
         {
-            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? WallID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).wall) : "Empty";
+            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? WallID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).WallType) : "Empty";
         }
     }
     public static class MathUtils
@@ -449,7 +449,7 @@ namespace TerrariaAmbience.Helpers
                     {
                         Tile tile = Main.tile[i, j];
 
-                        if (tile.IsActive && tile.CollisionType == 1)
+                        if (tile.HasTile && tile.CollisionType() == 1)
                         {
                             index++;
                         }
@@ -478,7 +478,7 @@ namespace TerrariaAmbience.Helpers
                     {
                         leTile = Main.tile[i, j];
 
-                        if (leTile.IsActive && leTile.CollisionType == 1)
+                        if (leTile.HasTile && leTile.CollisionType() == 1)
                         {
                             index++;
                         }
@@ -487,6 +487,21 @@ namespace TerrariaAmbience.Helpers
             }
             tile = leTile;
             return index;
+        }
+    }
+    public static class TileUtils
+    {
+        public static int CollisionType(this Tile tile)
+        {
+            if (!tile.HasTile)
+                return 0;
+            if (tile.BlockType == BlockType.HalfBlock)
+                return 2;
+            if (tile.Slope != SlopeType.Solid)
+                return 2 * (int)tile.Slope;
+            if (Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType])
+                return 1;
+            return -1;
         }
     }
 }

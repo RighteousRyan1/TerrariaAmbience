@@ -103,7 +103,8 @@ namespace TerrariaAmbience.Core
                 TileID.FossilOre,
                 TileID.DesertFossil,
                 TileID.ShellPile,
-				TileID.Meteorite
+				TileID.Meteorite,
+				TileID.Demonite
         };
         public static List<int> SandBlocks { get; set; } = new()
         {

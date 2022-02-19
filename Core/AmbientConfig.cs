@@ -105,17 +105,8 @@ namespace TerrariaAmbience.Core
         [Tooltip("Toggle the (somewhat loud) sounds that play and have dynamic sound updating based on location-to-player panning.")]
         [DefaultValue(true)]
         public bool dynamicAnimalSounds;
-    }
-    [Label("SFX / Sound Filters")]
-    public class AmbientConfigServer : ModConfig
-    {
-        public override ConfigScope Mode => ConfigScope.ServerSide;
-        #region Ambience and Sounds
-        [Header("Ambience and Sounds")]
-        [Label("Toggle Chest Opening Sounds")]
-        [Tooltip("Toggle on to turn chest sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.")]
-        [DefaultValue(true)]
-        public bool chestSounds;
+
+        [Header("Sound Filters")]
 
         [Label("Disable Reverb")]
         [Tooltip("Enable this if you have FPS issues, especially while underground. This is caused by the system that determines the reverb sounds of all sounds in the game." +
@@ -139,6 +130,24 @@ namespace TerrariaAmbience.Core
         [Tooltip("Toggle advanced audio reverb calculation algorythms.\nDisabling this will increase your reverb factor by how deep you are into the world.")]
         [DefaultValue(true)]
         public bool advancedReverbCalculation;
+    }
+    [Label("SFX / Sound Filters")]
+    public class AmbientConfigServer : ModConfig
+    {
+        public override ConfigScope Mode => ConfigScope.ServerSide;
+        #region Sound Configs
+
+        [Label("Toggle Chest Opening Sounds")]
+        [Tooltip("Toggle on to turn chest sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.")]
+        [DefaultValue(true)]
+        public bool chestSounds;
+
+        [ReloadRequired]
+        [Label("Toggle New Water Sounds")]
+        [Tooltip("Toggle on to turn this mod's new water interaction sounds on. Toggle off to turn them off.\nTurned on by default.\nThis config is shared with everyone in the server.")]
+        [DefaultValue(true)]
+        public bool newSplashSounds;
+
         #endregion
     }
 }
