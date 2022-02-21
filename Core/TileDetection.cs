@@ -39,7 +39,6 @@ namespace TerrariaAmbience.Core
         {
             TileID.Dirt,
             TileID.ClayBlock,
-            TileID.Mud,
             TileID.Silt,
             TileID.Slush,
         };
@@ -129,7 +128,6 @@ namespace TerrariaAmbience.Core
             TileID.CorruptIce,
             TileID.FleshIce,
             TileID.MagicalIceBlock,
-            TileID.FrozenSlimeBlock
         };
         public static List<int> SmoothStones { get; private set; } = new()
         {
@@ -183,7 +181,9 @@ namespace TerrariaAmbience.Core
             TileID.GraniteBlock,
             TileID.LihzahrdBrick,
 			TileID.MeteoriteBrick,
-            TileID.IceBrick
+            TileID.IceBrick,
+            TileID.Teleporter,
+            TileID.HellstoneBrick
         };
         public static List<int> Metals { get; private set; } = new()
         {
@@ -201,9 +201,11 @@ namespace TerrariaAmbience.Core
             TileID.SilverBrick,
             TileID.DemoniteBrick,
             TileID.CrimtaneBrick,
-            TileID.HellstoneBrick,
             TileID.LeadBrick,
-            TileID.MartianConduitPlating
+            TileID.MartianConduitPlating,
+            TileID.TinPlating,
+            TileID.ShroomitePlating,
+            TileID.CopperPlating
         };
         public static List<int> GraniteAndMarbles { get; private set; } = new()
         {
@@ -230,6 +232,15 @@ namespace TerrariaAmbience.Core
             TileID.LivingMahoganyLeaves,
             TileID.LeafBlock,
         };
+
+        public static List<int> StickyBlocks { get; private set; } = new()
+        {
+            TileID.Mud,
+            TileID.SlimeBlock,
+            TileID.PinkSlimeBlock,
+            TileID.FrozenSlimeBlock
+        };
+
         internal static List<List<int>> AllTileLists = new()
         {
             GrassBlocks,
@@ -305,9 +316,14 @@ namespace TerrariaAmbience.Core
             else
                 modPlayer.isOnGlassTile = false;
 
+            if (StickyBlocks.Any(x => x == type))
+                modPlayer.isOnStickyTile = true;
+            else
+                modPlayer.isOnStickyTile = false;
+
             if (!modPlayer.isOnStoneTile && !modPlayer.isOnGrassyTile && !modPlayer.isOnSandyTile && !modPlayer.isOnSnowyTile && !modPlayer.isOnDirtyTile
                   && !modPlayer.isOnIcyTile && !modPlayer.isOnMetalTile && !modPlayer.isOnSmoothTile && !modPlayer.isOnMarbleOrGraniteTile
-                    && !modPlayer.isOnLeafTile && !modPlayer.isOnGlassTile)
+                    && !modPlayer.isOnLeafTile && !modPlayer.isOnGlassTile && !modPlayer.isOnStickyTile)
                 modPlayer.isOnWoodTile = true;
             else
                 modPlayer.isOnWoodTile = false;

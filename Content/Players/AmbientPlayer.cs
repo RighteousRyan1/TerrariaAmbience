@@ -35,6 +35,7 @@ namespace TerrariaAmbience.Content.Players
         public bool isOnMarbleOrGraniteTile;
         public bool isOnGlassTile;
         public bool isOnLeafTile;
+        public bool isOnStickyTile;
 
         public bool isNearCampfire;
 
@@ -53,6 +54,9 @@ namespace TerrariaAmbience.Content.Players
         public SoundEffectInstance soundInstanceGlassStep;
         public SoundEffectInstance soundInstanceArmorStep;
         public SoundEffectInstance soundInstanceVanityStep;
+
+        public SoundEffectInstance soundInstanceStickyStep;
+        public SoundEffectInstance soundInstanceWaterStep;
 
         public SoundEffectInstance thunderInstance;
         public SoundEffectInstance hootInstance;
@@ -112,6 +116,8 @@ namespace TerrariaAmbience.Content.Players
             soundInstanceGlassStep = SoundEngine.LegacySoundPlayer.SoundInstanceRun;
             soundInstanceMetalStep = SoundEngine.LegacySoundPlayer.SoundInstanceRun;
             soundInstanceMarbleGraniteStep = SoundEngine.LegacySoundPlayer.SoundInstanceRun;
+            soundInstanceStickyStep = SoundEngine.LegacySoundPlayer.SoundInstanceRun;
+            soundInstanceWaterStep = SoundEngine.LegacySoundPlayer.SoundInstanceRun;
         }
 
         private int legFrameSnapShotNew; // These 2 variables should never be modified. Ever.
@@ -143,6 +149,9 @@ namespace TerrariaAmbience.Content.Players
         public static string pathGlass;
         public static string pathArmor;
         public static string pathVanity;
+
+        public static string pathWater;
+        public static string pathSticky;
 
 
         private bool _wet; // old state of player wet
@@ -238,6 +247,8 @@ namespace TerrariaAmbience.Content.Players
             int randMetal = Main.rand.Next(1, 7);
             int randArmor = Main.rand.Next(1, 10);
             int randVanity = Main.rand.Next(1, 7);
+            int randWater = Main.rand.Next(1, 7);
+            int randSticky = Main.rand.Next(1, 7);
 
             pathWood = $"TerrariaAmbience/Sounds/Custom/steps/wood/step{randWood}";
             pathSand = $"TerrariaAmbience/Sounds/Custom/steps/sand/step{randSand}";
@@ -254,6 +265,8 @@ namespace TerrariaAmbience.Content.Players
             pathIce = $"TerrariaAmbience/Sounds/Custom/steps/ice/step{randIce}";
             pathArmor = $"TerrariaAmbience/Sounds/Custom/steps/armor/heavy{randArmor}";
             pathVanity = $"TerrariaAmbience/Sounds/Custom/steps/armor/light{randVanity}";
+            pathWater = $"TerrariaAmbience/Sounds/Custom/steps/water/step{randWater}";
+            pathSticky = $"TerrariaAmbience/Sounds/Custom/steps/sticky/step{randSticky}";
 
             if (Player.velocity.Y != 0f)
             {
@@ -269,6 +282,7 @@ namespace TerrariaAmbience.Content.Players
                 isOnMarbleOrGraniteTile = false;
                 isOnGlassTile = false;
                 isOnSmoothTile = false;
+                isOnStickyTile = false;
             }
 
             ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverbActual, out float occ, out float dampening, out bool sOcclude);
@@ -459,134 +473,49 @@ namespace TerrariaAmbience.Content.Players
                     soundInstanceArmorStep = SoundEngine.PlaySound(new ModSoundStyle(pathArmor, 0, SoundType.Sound, GetArmorStepVolume()), Player.Bottom);
                     soundInstanceVanityStep = SoundEngine.PlaySound(new ModSoundStyle(pathVanity, 0, SoundType.Sound, GetVanityStepVolume()), Player.Bottom);
                 }
+                if (!Player.Underwater() && Player.wet && !Player.lavaWet) // is player's head above water and feet in water?
+                {
+                    var clamped = MathF.Abs(MathHelper.Clamp(Player.velocity.X, 0, 4));
+                    soundInstanceWaterStep = SoundEngine.PlaySound(new ModSoundStyle(pathWater, 0, SoundType.Sound, clamped / 4), Player.Bottom);
+                }
 
                 #region Steps Per-tile
-                if (isOnSandyTile && landing)
-                {
-                    sound = soundInstanceSandStep = SoundEngine.PlaySound(new ModSoundStyle(pathSand, 0, SoundType.Sound, 1f), Player.Bottom);
-                }
-                if (isOnGrassyTile && landing)
+                if (isOnSandyTile)
+                    sound = soundInstanceSandStep = SoundEngine.PlaySound(new ModSoundStyle(pathSand, 0, SoundType.Sound, landing ? 1f : 0.9f), Player.Bottom);
+                if (isOnGrassyTile)
                 {
                     if (!Main.raining || hasTilesAbove)
-                    {
-                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGrass, 0, SoundType.Sound, 0.35f), Player.Bottom);
-                    }
+                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGrass, 0, SoundType.Sound, landing ? 0.35f : 0.1f), Player.Bottom);
                     if (!hasTilesAbove && Main.raining && !Player.wet && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-                    {
-                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, 0.55f), Player.Bottom);
-                    }
+                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, landing ? 0.55f : 0.35f), Player.Bottom);
                 }
-                if (isOnDirtyTile && landing)
+                if (isOnDirtyTile)
                 {
                     if (!Main.raining || hasTilesAbove)
-                    {
-                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathDirt, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                    }
+                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathDirt, 0, SoundType.Sound, landing ? 0.45f : 0.15f), Player.Bottom);
                     if (!hasTilesAbove && Main.raining && !Player.wet && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-                    {
-                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                    }
+                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, landing ? 0.55f : 0.35f), Player.Bottom);
                 }
-                if (isOnStoneTile && landing)
-                {
-                    sound = soundInstanceStoneStep = SoundEngine.PlaySound(new ModSoundStyle(pathStone, 0, SoundType.Sound, 0.35f), Player.Bottom);
-                }
-                if (isOnSnowyTile && landing)
-                {
-                    sound = soundInstanceSnowStep = SoundEngine.PlaySound(new ModSoundStyle(pathSnow, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                }
-                if (isOnWoodTile && landing)
-                {
-                    sound = soundInstanceWoodStep = SoundEngine.PlaySound(new ModSoundStyle(pathWood, 0, SoundType.Sound, 0.35f), Player.Bottom);
-                }
-                if (isOnMetalTile && landing)
-                {
-                    sound = soundInstanceMetalStep = SoundEngine.PlaySound(new ModSoundStyle(pathMetal, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                }
-                if (isOnSmoothTile && landing)
-                {
-                    sound = soundInstanceSmoothTileStep = SoundEngine.PlaySound(new ModSoundStyle(pathSmooth, 0, SoundType.Sound, 0.55f), Player.Bottom);
-                }
-                if (isOnMarbleOrGraniteTile && landing)
-                {
-                    sound = soundInstanceMarbleGraniteStep = SoundEngine.PlaySound(new ModSoundStyle(pathMarbleGranite, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                }
-                if (isOnIcyTile && landing)
-                {
-                    sound = soundInstanceIceStep = SoundEngine.PlaySound(new ModSoundStyle(pathIce, 0, SoundType.Sound, 0.175f), Player.Bottom);
-                }
-                if (isOnLeafTile && landing)
-                {
-                    sound = soundInstanceLeafStep = SoundEngine.PlaySound(new ModSoundStyle(pathLeaf, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                }
-                if (isOnGlassTile && landing)
-                {
-                    sound = soundInstanceGlassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGlass, 0, SoundType.Sound, 0.45f), Player.Bottom);
-                }
-                // Top: landing sounds
-                // Bottom: walking sounds
-                if (isOnSandyTile && !landing)
-                {
-                    sound = soundInstanceSandStep = SoundEngine.PlaySound(new ModSoundStyle(pathSand, 0, SoundType.Sound, 0.9f), Player.Bottom);
-                }
-                if (isOnGrassyTile && !landing)
-                {
-                    if (!Main.raining || hasTilesAbove) // rain and no tiles covering said player
-                    {
-                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGrass, 0, SoundType.Sound, 0.1f), Player.Bottom);
-                    }
-                    if (!hasTilesAbove && Main.raining && !Player.wet)
-                    {
-                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, 0.65f), Player.Bottom);
-                    }
-                }
-                if (isOnDirtyTile && !landing)
-                {
-                    if (!Main.raining || hasTilesAbove) // rain and no tiles covering said player
-                    {
-                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathDirt, 0, SoundType.Sound, 0.15f), Player.Bottom);
-                    }
-                    if (!hasTilesAbove && Main.raining && !Player.wet)
-                    {
-                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, 0.65f), Player.Bottom);
-                    }
-                }
-                if (isOnStoneTile && !landing)
-                {
-                    sound = soundInstanceStoneStep = SoundEngine.PlaySound(new ModSoundStyle(pathStone, 0, SoundType.Sound, 0.15f), Player.Bottom);
-                }
-                if (isOnWoodTile && !landing)
-                {
-                    sound = soundInstanceWoodStep = SoundEngine.PlaySound(new ModSoundStyle(pathWood, 0, SoundType.Sound, 0.2f), Player.Bottom);
-                }
-                if (isOnSnowyTile && !landing)
-                {
-                    sound = soundInstanceSnowStep = SoundEngine.PlaySound(new ModSoundStyle(pathSnow, 0, SoundType.Sound, 0.25f), Player.Bottom);
-                }
-                if (isOnMetalTile && !landing)
-                {
-                    sound = soundInstanceMetalStep = SoundEngine.PlaySound(new ModSoundStyle(pathMetal, 0, SoundType.Sound, 0.25f), Player.Bottom);
-                }
-                if (isOnSmoothTile && !landing)
-                {
-                    sound = soundInstanceSmoothTileStep = SoundEngine.PlaySound(new ModSoundStyle(pathSmooth, 0, SoundType.Sound, 0.25f), Player.Bottom);
-                }
-                if (isOnMarbleOrGraniteTile && !landing)
-                {
-                    sound = soundInstanceMarbleGraniteStep = SoundEngine.PlaySound(new ModSoundStyle(pathMarbleGranite, 0, SoundType.Sound, 0.25f), Player.Bottom);
-                }
-                if (isOnIcyTile && !landing)
-                {
-                    sound = soundInstanceIceStep = SoundEngine.PlaySound(new ModSoundStyle(pathIce, 0, SoundType.Sound, 0.075f), Player.Bottom);
-                }
-                if (isOnLeafTile && !landing)
-                {
-                    sound = soundInstanceLeafStep = SoundEngine.PlaySound(new ModSoundStyle(pathLeaf, 0, SoundType.Sound, 0.25f), Player.Bottom);
-                }
-                if (isOnGlassTile && !landing)
-                {
-                    sound = soundInstanceGlassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGlass, 0, SoundType.Sound, 0.25f), Player.Bottom);
-                }
+                if (isOnStoneTile)
+                    sound = soundInstanceStoneStep = SoundEngine.PlaySound(new ModSoundStyle(pathStone, 0, SoundType.Sound, landing ? 0.35f : 0.15f), Player.Bottom);
+                if (isOnSnowyTile)
+                    sound = soundInstanceSnowStep = SoundEngine.PlaySound(new ModSoundStyle(pathSnow, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
+                if (isOnWoodTile)
+                    sound = soundInstanceWoodStep = SoundEngine.PlaySound(new ModSoundStyle(pathWood, 0, SoundType.Sound, landing ? 0.35f : 0.2f), Player.Bottom);
+                if (isOnMetalTile)
+                    sound = soundInstanceMetalStep = SoundEngine.PlaySound(new ModSoundStyle(pathMetal, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
+                if (isOnSmoothTile)
+                    sound = soundInstanceSmoothTileStep = SoundEngine.PlaySound(new ModSoundStyle(pathSmooth, 0, SoundType.Sound, landing ? 0.55f : 0.25f), Player.Bottom);
+                if (isOnMarbleOrGraniteTile)
+                    sound = soundInstanceMarbleGraniteStep = SoundEngine.PlaySound(new ModSoundStyle(pathMarbleGranite, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
+                if (isOnIcyTile)
+                    sound = soundInstanceIceStep = SoundEngine.PlaySound(new ModSoundStyle(pathIce, 0, SoundType.Sound, landing ? 0.175f : 0.075f), Player.Bottom);
+                if (isOnLeafTile)
+                    sound = soundInstanceLeafStep = SoundEngine.PlaySound(new ModSoundStyle(pathLeaf, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
+                if (isOnGlassTile)
+                    sound = soundInstanceGlassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGlass, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
+                if (isOnStickyTile)
+                    sound = soundInstanceStickyStep = SoundEngine.PlaySound(new ModSoundStyle(pathSticky, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
                 #endregion
             }
             return sound;

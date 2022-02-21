@@ -38,7 +38,7 @@ namespace TerrariaAmbience.Sounds.TileSounds
 
                         ReverbAudioSystem.CreateAudioFX(tileCoord.ToVector2().ToWorldCoordinates(), out var r, out var o, out var d, out var sd, new Vector2(0, -16));
                         WoodCreak = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}", 0, SoundType.Sound, 0.04f, 0f, 0.1f);
-                        if (Main.rand.Next(5000) == 0)
+                        if (Main.rand.Next(11000) == 0)
                         {
                             if (sd)
                                 SoundEngine.PlaySound(WoodCreak, tileCoord.ToVector2().ToWorldCoordinates()).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o).ApplyBandPassFilter(d);
