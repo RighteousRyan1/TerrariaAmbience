@@ -306,6 +306,8 @@ namespace TerrariaAmbience.Content.Players
                 soundInstanceLeafStep.ApplyReverb(reverbActual);
                 soundInstanceArmorStep.ApplyReverb(reverbActual);
                 soundInstanceVanityStep.ApplyReverb(reverbActual);
+                soundInstanceStickyStep.ApplyReverb(reverbActual);
+                soundInstanceWaterStep.ApplyReverb(reverbActual);
             }
             else
             {
@@ -325,6 +327,8 @@ namespace TerrariaAmbience.Content.Players
                 soundInstanceLeafStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
                 soundInstanceArmorStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
                 soundInstanceVanityStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
+                soundInstanceStickyStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
+                soundInstanceWaterStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
             }
 
             // this is left in because my reverb system thinks that the sound originates from within a tile.
@@ -475,27 +479,20 @@ namespace TerrariaAmbience.Content.Players
                 }
                 if (!Player.Underwater() && Player.wet && !Player.lavaWet) // is player's head above water and feet in water?
                 {
-                    var clamped = MathF.Abs(MathHelper.Clamp(Player.velocity.X, 0, 4));
-                    soundInstanceWaterStep = SoundEngine.PlaySound(new ModSoundStyle(pathWater, 0, SoundType.Sound, clamped / 4), Player.Bottom);
+                    var clamped = MathHelper.Clamp(Player.velocity.X, -4, 4);
+                    soundInstanceWaterStep = SoundEngine.PlaySound(new ModSoundStyle(pathWater, 0, SoundType.Sound, MathF.Abs(clamped / 8)), Player.Bottom);
                 }
+
+                if (!hasTilesAbove && Main.raining && !Player.wet && !Player.ZoneSnow && Player.ZoneOverworldHeight)
+                    SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, landing ? 0.15f : 0.05f), Player.Bottom);
 
                 #region Steps Per-tile
                 if (isOnSandyTile)
                     sound = soundInstanceSandStep = SoundEngine.PlaySound(new ModSoundStyle(pathSand, 0, SoundType.Sound, landing ? 1f : 0.9f), Player.Bottom);
                 if (isOnGrassyTile)
-                {
-                    if (!Main.raining || hasTilesAbove)
                         sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathGrass, 0, SoundType.Sound, landing ? 0.35f : 0.1f), Player.Bottom);
-                    if (!hasTilesAbove && Main.raining && !Player.wet && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-                        sound = soundInstanceGrassStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, landing ? 0.55f : 0.35f), Player.Bottom);
-                }
                 if (isOnDirtyTile)
-                {
-                    if (!Main.raining || hasTilesAbove)
-                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathDirt, 0, SoundType.Sound, landing ? 0.45f : 0.15f), Player.Bottom);
-                    if (!hasTilesAbove && Main.raining && !Player.wet && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-                        sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathWet, 0, SoundType.Sound, landing ? 0.55f : 0.35f), Player.Bottom);
-                }
+                    sound = soundInstanceDirtStep = SoundEngine.PlaySound(new ModSoundStyle(pathDirt, 0, SoundType.Sound, landing ? 0.45f : 0.15f), Player.Bottom);
                 if (isOnStoneTile)
                     sound = soundInstanceStoneStep = SoundEngine.PlaySound(new ModSoundStyle(pathStone, 0, SoundType.Sound, landing ? 0.35f : 0.15f), Player.Bottom);
                 if (isOnSnowyTile)

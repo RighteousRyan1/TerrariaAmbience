@@ -302,7 +302,7 @@ namespace TerrariaAmbience.Sounds
 
 								if (!has("dirt") && !has("grass") && !has("flower"))
 								{
-									if (!WallID.Search.GetName(Framing.GetTileSafely(wallPos).TileType).ToLower().Contains("fence"))
+									if (!WallID.Search.GetName(Framing.GetTileSafely(wallPos).WallType).ToLower().Contains("fence"))
 									{
 										if (CanRaycastTo(fromV2, wallPos.ToVector2() * 16))
 										{
