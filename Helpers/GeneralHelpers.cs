@@ -41,6 +41,20 @@ namespace TerrariaAmbience.Helpers
     }
     public class GeneralHelpers
     {
+        public static SoundStyle SimpleSoundStyle(string path, int variants, SoundType type = SoundType.Sound, float volume = 1f, float pitch = 0f)
+        {
+            return new(path, variants, type)
+            {
+                Volume = volume,
+                Pitch = pitch,
+            };
+        }
+        public static SoundEffectInstance PlaySound(in SoundStyle style, Vector2? position = null)
+        {
+            var id = SoundEngine.PlaySound(style, position);
+            SoundEngine.TryGetActiveSound(id, out var sound);
+            return sound.Sound;
+        }
         public static Rectangle GetRectOf(Vector2 position) => new((int)position.X, (int)position.Y, 1, 1);
         public static Rectangle GetRectOf(Point position) => new(position.X, position.Y, 1, 1);
         public static T GetAssetValue<T>(Mod mod, string path) where T : class

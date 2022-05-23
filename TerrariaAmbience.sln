@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30413.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TerrariaAmbience", "TerrariaAmbience.csproj", "{3D03FA68-DD64-4E04-A391-178A32BFD223}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TerrariaAmbience", "TerrariaAmbience.csproj", "{9E56A0A5-2831-45B4-8B13-BA51B9BDFA38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3D03FA68-DD64-4E04-A391-178A32BFD223}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D03FA68-DD64-4E04-A391-178A32BFD223}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D03FA68-DD64-4E04-A391-178A32BFD223}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D03FA68-DD64-4E04-A391-178A32BFD223}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E56A0A5-2831-45B4-8B13-BA51B9BDFA38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E56A0A5-2831-45B4-8B13-BA51B9BDFA38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E56A0A5-2831-45B4-8B13-BA51B9BDFA38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E56A0A5-2831-45B4-8B13-BA51B9BDFA38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {945C9BA8-227D-4E26-852B-46A68195862B}
+		SolutionGuid = {A5C0D024-ED29-4CCF-AA3C-8B40523A46C0}
 	EndGlobalSection
 EndGlobal

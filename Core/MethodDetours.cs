@@ -79,7 +79,7 @@ namespace TerrariaAmbience.Core
             {
                 if (i == 3)
                 {
-                    if (Main.FrameSkipMode == 2)
+                    if (Main.FrameSkipMode == Terraria.Enums.FrameSkipMode.Subtle)
                     {
                         txt = "Frame Skip Subtle (WARNING)";
                     }
@@ -185,9 +185,7 @@ namespace TerrariaAmbience.Core
                     new Vector2(0.225f), -1, 1);
 
                 if (GeneralHelpers.KeyPress(Keys.L))
-                {
-                    var sound = new ActiveSound(new LegacySoundStyle(SoundID.Zombie, Main.rand.Next(0, 3)), Main.MouseWorld);
-                }
+                    new ActiveSound(SoundID.ZombieMoan, Main.MouseWorld);
                 if (GeneralHelpers.KeyPress(Keys.K))
                 {
                     int choice = Main.rand.Next(0, 2);
@@ -197,9 +195,7 @@ namespace TerrariaAmbience.Core
                         Common.Systems.AudioLoopsSystem.owls[Main.rand.Next(Common.Systems.AudioLoopsSystem.owls.Length)]?.Play(Main.MouseWorld, 0.75f);
                 }
                 if (GeneralHelpers.KeyPress(Keys.OemOpenBrackets))
-                {
                     Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetFootstepSound(false)?.Play();
-                }
                 #endregion
             }
         }

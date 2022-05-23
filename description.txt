@@ -7,7 +7,6 @@ Hopefully you can relax a bit more with this mod!
 Developers:
 
 - RighteousRyan#8008 (Programmer)
-- Tika#6542 (Sound Designer) (Left)
 - William#9010 (Mod Icon Artist)
 
 Most Recent Update:

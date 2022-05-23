@@ -11,6 +11,7 @@ using Terraria.Audio;
 using Microsoft.Xna.Framework;
 using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content.AddedNPCSounds
 {
@@ -18,8 +19,8 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
     public class SlimeSounds : GlobalNPC
     {
         public override bool InstancePerEntity => true;
-        public ModSoundStyle SlimeLandStyle { get; private set; }
-        public ModSoundStyle SlimeJumpStyle { get; private set; }
+        public SoundStyle SlimeLandStyle { get; private set; }
+        public SoundStyle SlimeJumpStyle { get; private set; }
 
         public Vector2 oldVelocityReal;
         public override void PostAI(NPC npc)
@@ -34,19 +35,27 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
                     if (vel.Y == 0f && oldVelocityReal.Y != 0f)
                     {
                         int oneOrTwo = Main.rand.Next(1, 3);
-                        SlimeLandStyle = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}", 0, default, MathHelper.Clamp(oldVelocityReal.Y, 0f, 1f), Main.rand.NextFloat(-0.1f, 0.1f));
+                        SlimeLandStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}")
+                        {
+                            Volume = MathHelper.Clamp(oldVelocityReal.Y, 0f, 1f),
+                            PitchVariance = Main.rand.NextFloat(-0.1f, 0.1f)
+                        };
                         if (shouldDampen)
-                            SoundEngine.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
+                            GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
                         else
-                            SoundEngine.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
+                            GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
                     }
                     if (oldVelocityReal.Y == 0f && vel.Y != 0f)
                     {
-                        SlimeJumpStyle = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump", 0, default, 0.5f, Main.rand.NextFloat(-0.1f, 0.1f));
+                        SlimeJumpStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump")
+                        {
+                            Volume = 0.5f,
+                            PitchVariance = Main.rand.NextFloat(-0.1f, 0.1f)
+                        };
                         if (shouldDampen)
-                            SoundEngine.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
+                            GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
                         else
-                            SoundEngine.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
+                            GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
                     }
                     oldVelocityReal = vel;
                 }
@@ -75,7 +84,7 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
             {
                 var vel = npc.velocity.Y;
 
-                var soundSplash = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= 9f ? "heavy" : "light")}");
+                var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= 9f ? "heavy" : "light")}");
 
                 SoundEngine.PlaySound(soundSplash, npc.position);
             }

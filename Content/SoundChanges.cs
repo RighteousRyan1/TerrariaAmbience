@@ -2,61 +2,39 @@
 using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
+using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content
 {
     internal class SoundChanges
     {
-        private static Asset<SoundEffect>[] zombieCache;
-
-        private static Asset<SoundEffect>[] splashCache;
-
         public static void Init()
         {
 			if (!Main.dedServ)
 			{
-                splashCache = SoundEngine.LegacySoundPlayer.SoundSplash;
-				zombieCache = SoundEngine.LegacySoundPlayer.SoundZombie;
-
 				var mod = ModContent.GetInstance<TerrariaAmbience>();
-				// 45 in MusicID is the wind ambience
+                // 45 in MusicID is the wind ambience
 
-				// Now change the sound (Main.soundX = y)
-
-				// NOTE: drip.Len = 3 (0, 1 ,2) (3 different variants)
-				// NOTE: liquid.Len = 2 (0, 1) (0 == Water | 1 == Lava)
-                SoundEngine.LegacySoundPlayer.SoundZombie[0] = mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie1", AssetRequestMode.ImmediateLoad);
-                SoundEngine.LegacySoundPlayer.SoundZombie[1] = mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie2", AssetRequestMode.ImmediateLoad);
-                SoundEngine.LegacySoundPlayer.SoundZombie[2] = mod.Assets.Request<SoundEffect>("Sounds/Custom/npcs/zombie3", AssetRequestMode.ImmediateLoad);
-
-                if (ModContent.GetInstance<AmbientConfigServer>().newSplashSounds)
-                {
-                    SoundEngine.LegacySoundPlayer.SoundSplash[0] = mod.Assets.Request<SoundEffect>("Sounds/Custom/nothingness", AssetRequestMode.ImmediateLoad);
-                }
+                // Now change the sound (Main.soundX = y)
+                On.Terraria.Audio.SoundPlayer.Play += Switch;
             }
         }
-        public static void Unload()
-        {
-            SoundEngine.LegacySoundPlayer.SoundZombie = zombieCache;
-        }
 
-        public static void Swap<T>(ref Asset<T> swapFrom, ref Asset<T> swapTo) where T : class
+        private static ReLogic.Utilities.SlotId Switch(On.Terraria.Audio.SoundPlayer.orig_Play orig, SoundPlayer self, ref SoundStyle style, Microsoft.Xna.Framework.Vector2? position)
         {
-            Asset<T> temp;
-            temp = swapFrom;
-            swapFrom = swapTo;
-            swapTo = temp;
+            if (style == SoundID.Splash)
+            {
+                style = GeneralHelpers.SimpleSoundStyle("Sounds/Custom/nothingness", 0);
+            }
+            if (style == SoundID.ZombieMoan)
+            {
+                int rand = Main.rand.Next(1, 4);
+                style = GeneralHelpers.SimpleSoundStyle($"Sounds/Custom/npcs/zombie{rand}", 0);
+            }
+            return orig(self, ref style, position);
         }
-        public static void SwapArray<T>(ref Asset<T>[] swapFrom, ref Asset<T>[] swapTo) where T : class
-        {
-            Asset<T>[] temp;
-            temp = swapFrom;
-            swapFrom = swapTo;
-            swapTo = temp;
-        }
-
-
     }
 }

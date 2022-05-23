@@ -75,9 +75,12 @@ namespace TerrariaAmbience
             }
             return "Call Failed";
         }
+
+        private string _versCache;
         public override void Load()
         {
 
+            _versCache = Main.versionNumber;
             ContentInstance.Register(new Ambience());
             Main.versionNumber += $"\nTerraria Ambience 1.4 Port InDev v{Version}";
 
@@ -169,9 +172,7 @@ namespace TerrariaAmbience
         }
         public override void Unload()
         {
-            Main.versionNumber = "1.4.2.3";
-			if (!Main.dedServ)
-				SoundChanges.Unload();
+            Main.versionNumber = _versCache;
         }
         public override void Close()
         {

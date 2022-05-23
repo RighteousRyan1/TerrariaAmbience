@@ -29,46 +29,40 @@ namespace TerrariaAmbience.Sounds
 		private void ActiveSound_Play(On.Terraria.Audio.ActiveSound.orig_Play orig, ActiveSound self)
 		{
 			orig(self);
-			bool containsIgnoreablePos = badStyles.Contains(self.Style);
-			ReverbAudioSystem.CreateAudioFX(self.Position, out float gain, out float occ, out float damp, out bool sDamp);
 
-			if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-				gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-			if (sDamp)
+			if (self.Position.HasValue)
 			{
+				bool containsIgnoreablePos = badStyles.Contains(self.Style);
+				ReverbAudioSystem.CreateAudioFX(self.Position.Value, out float gain, out float occ, out float damp, out bool sDamp);
+
+				if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
+					gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
+				if (sDamp)
+				{
+					if (!badStyles.Contains(self.Style))
+						self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
+					return;
+				}
 				if (!badStyles.Contains(self.Style))
-					self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
-				return;
+					self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
 			}
-			if (!badStyles.Contains(self.Style))
-				self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
 		}
 
-		public static List<ISoundStyle> badStyles = new()
+		public static List<SoundStyle> badStyles = new()
 		{
-			new LegacySoundStyle(SoundID.Grab, -1),
-			new LegacySoundStyle(SoundID.MenuOpen, -1),
-			new LegacySoundStyle(SoundID.MenuClose, -1),
-			new LegacySoundStyle(SoundID.MenuTick, -1),
-			new LegacySoundStyle(SoundID.Chat, -1),
-			new LegacySoundStyle(SoundID.Research, -1),
-			new LegacySoundStyle(SoundID.ResearchComplete, -1),
+			SoundID.Grab,
+			SoundID.MenuOpen,
+			SoundID.MenuClose,
+			SoundID.MenuTick,
+			SoundID.Chat,
+			SoundID.Research,
+			SoundID.ResearchComplete
 		};
 		public static float occludeAmount;
         public static float reverbActual;
 		public static int soundX;
 		public static int soundY;
 		public static int showTime;
-
-		public static List<int> listNoAffect = new()
-		{
-			SoundID.Grab,
-			SoundID.MenuTick,
-			SoundID.MenuOpen,
-			SoundID.MenuClose,
-			SoundID.Research,
-			SoundID.ResearchComplete
-		};
     }
 	public class ReverbAudioSystem : ModSystem
 	{

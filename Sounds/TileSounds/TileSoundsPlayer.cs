@@ -12,7 +12,7 @@ namespace TerrariaAmbience.Sounds.TileSounds
 {
     public class TileSoundsPlayer : ModPlayer
     {
-        public ModSoundStyle WoodCreak;
+        public SoundStyle WoodCreak;
         public override void PostUpdate()
         {
 			if (ModContent.GetInstance<AudioAdditionsConfig>().woodCreaks)
@@ -37,13 +37,17 @@ namespace TerrariaAmbience.Sounds.TileSounds
                         int rand = Main.rand.Next(1, 8);
 
                         ReverbAudioSystem.CreateAudioFX(tileCoord.ToVector2().ToWorldCoordinates(), out var r, out var o, out var d, out var sd, new Vector2(0, -16));
-                        WoodCreak = new ModSoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}", 0, SoundType.Sound, 0.04f, 0f, 0.1f);
-                        if (Main.rand.Next(11000) == 0)
+                        WoodCreak = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}")
+                        {
+                            PitchVariance = 0.1f,
+                            Volume = 0.04f,
+                        };
+                        if (Main.rand.NextBool(11000))
                         {
                             if (sd)
-                                SoundEngine.PlaySound(WoodCreak, tileCoord.ToVector2().ToWorldCoordinates()).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o).ApplyBandPassFilter(d);
+                                GeneralHelpers.PlaySound(WoodCreak, tileCoord.ToVector2().ToWorldCoordinates()).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o).ApplyBandPassFilter(d);
                             else
-                                SoundEngine.PlaySound(WoodCreak, tileCoord.ToVector2().ToWorldCoordinates()).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o);
+                                GeneralHelpers.PlaySound(WoodCreak, tileCoord.ToVector2().ToWorldCoordinates()).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o);
                         }
                     }
                 }
