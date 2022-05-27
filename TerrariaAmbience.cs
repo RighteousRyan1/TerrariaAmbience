@@ -82,7 +82,7 @@ namespace TerrariaAmbience
 
             _versCache = Main.versionNumber;
             ContentInstance.Register(new Ambience());
-            Main.versionNumber += $"\nTerraria Ambience 1.4 Port InDev v{Version}";
+            Main.versionNumber += $"\nTerraria Ambience v{Version}";
 
             SavingSystem.LoadFromConfig();
             Ambience.Initialize();

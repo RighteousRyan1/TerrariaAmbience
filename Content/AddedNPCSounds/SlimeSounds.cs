@@ -38,7 +38,7 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
                         SlimeLandStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}")
                         {
                             Volume = MathHelper.Clamp(oldVelocityReal.Y, 0f, 1f),
-                            PitchVariance = Main.rand.NextFloat(-0.1f, 0.1f)
+                            PitchVariance = 0.1f
                         };
                         if (shouldDampen)
                             GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
@@ -50,7 +50,7 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
                         SlimeJumpStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump")
                         {
                             Volume = 0.5f,
-                            PitchVariance = Main.rand.NextFloat(-0.1f, 0.1f)
+                            PitchVariance = 0.1f
                         };
                         if (shouldDampen)
                             GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
