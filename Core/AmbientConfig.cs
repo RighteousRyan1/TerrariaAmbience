@@ -43,47 +43,55 @@ namespace TerrariaAmbience.Core
         #endregion
 
         #region ToggleSounds
-        [Header("Disable Ambience Tracks")]
+        [Header("Ambience Track Volumes")]
         // [SeparatePage]
+        [Label("Overall Volume")]
+        [Tooltip("The overall volume of ambience from this mod.")]
+        [DefaultValue(1f)]
+        public float overallVolume;
         [Label("Forest")]
         [Tooltip("Order: Top -> Bottom\n\nMorning\nAfternoon\nEvening\nNight")]
-        [DefaultValue(new bool[] { true, true, true, true })]
-        public bool[] enabledForest = new bool[4];
+        [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
+        public float[] forestVolumes = new float[4];
 
         [Label("Snow")]
         [Tooltip("Order: Top -> Bottom\n\nDay\nNight")]
-        [DefaultValue(new bool[] { true, true })]
-        public bool[] enabledSnow = new bool[2];
+        [DefaultValue(new float[] { 1f, 1f })]
+        public float[] snowVolumes = new float[2];
 
         [Label("Jungle")]
         [Tooltip("Order: Top -> Bottom\n\nDay\nNight")]
-        [DefaultValue(new bool[] { true, true })]
-        public bool[] enabledJungle = new bool[2];
+        [DefaultValue(new float[] { 1f, 1f })]
+        public float[] jungleVolumes = new float[2];
 
         [Label("World Evils")]
         [Tooltip("Order: Top -> Bottom\n\nCorruption\nCrimson")]
-        [DefaultValue(new bool[] { true, true })]
-        public bool[] enabledEvils = new bool[2];
+        [DefaultValue(new float[] { 1f, 1f })]
+        public float[] evilVolumes = new float[2];
 
         [Label("Desert")]
-        [DefaultValue(true)]
-        public bool enabledDesert;
+        [DefaultValue(1f)]
+        public float desertVolume;
 
         [Label("Ocean")]
-        [DefaultValue(true)]
-        public bool enabledOcean;
+        [DefaultValue(1f)]
+        public float oceanVolume;
 
         [Label("Caverns")]
-        [DefaultValue(true)]
-        public bool enabledCavern;
+        [DefaultValue(1f)]
+        public float cavernsVolume;
 
         [Label("Hell")]
-        [DefaultValue(true)]
-        public bool enabledHell;
+        [DefaultValue(1f)]
+        public float hellVolume;
 
         [Label("Breeze")]
-        [DefaultValue(true)]
-        public bool enabledBreeze;
+        [DefaultValue(1f)]
+        public float breezeVolume;
+
+        [Label("Underwater")]
+        [DefaultValue(1f)]
+        public float underwaterVolume;
         #endregion
 
     }

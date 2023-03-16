@@ -238,9 +238,14 @@ namespace TerrariaAmbience.Core
             TileID.Mud,
             TileID.SlimeBlock,
             TileID.PinkSlimeBlock,
-            TileID.FrozenSlimeBlock
+            TileID.FrozenSlimeBlock,
+            TileID.BeeHive,
+            TileID.Hive,
+            TileID.HoneyBlock,
+            TileID.CrispyHoneyBlock
         };
 
+        // VERY IMPORTANT TO ADD ALL ABOVE LISTS HERE.
         internal static List<List<int>> AllTileLists = new()
         {
             GrassBlocks,
@@ -253,7 +258,8 @@ namespace TerrariaAmbience.Core
             StoneBlocks,
             GraniteAndMarbles,
             Metals,
-            GlassBlocks
+            GlassBlocks,
+            StickyBlocks
         };
         public override void FloorVisuals(int type, Player player)
         {

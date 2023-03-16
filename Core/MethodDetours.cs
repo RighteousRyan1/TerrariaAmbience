@@ -51,28 +51,15 @@ namespace TerrariaAmbience.Core
         private static bool hovering;
         private static bool DrawVolumeValues(On.Terraria.IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
         {
-            if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
-                Ambience.TAAmbient += 0.025f;
-            if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
-                Ambience.TAAmbient -= 0.025f;
-            Rectangle hoverPos = new Rectangle((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
+            Rectangle hoverPos = new((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
             if (i == 14)
             {
                 hovering = hoverPos.Contains(Main.MouseScreen.ToPoint());
             }
 
-            var svol = (float)Math.Round(Ambience.TAAmbient);
-            svol = MathHelper.Clamp(svol, 0f, 100f);
-            Ambience.TAAmbient = MathHelper.Clamp(Ambience.TAAmbient, 0f, 100f);
-            string percent = $"TA Ambient: {svol}%";
             if (!oldHover && hovering)
             {
                 SoundEngine.PlaySound(SoundID.MenuTick);
-            }
-            var center = (FontAssets.MouseText.Value.MeasureString(percent) * Main.UIScale) / 2;
-            if (i == 1)
-            {
-                Main.spriteBatch.DrawString(FontAssets.DeathText.Value, percent, new Vector2(8, 50), Color.White, 0f, Vector2.Zero, 0.3f, default, default);
             }
             oldHover = hovering;
             if (IngameOptions.category == 2)
@@ -126,7 +113,7 @@ namespace TerrariaAmbience.Core
                 + (aPlayer.soundInstanceMarbleGraniteStep != null ? $"\nGranMarb: {aPlayer.soundInstanceMarbleGraniteStep.State} (isOn: {aPlayer.isOnMarbleOrGraniteTile})" : "\nGranMarb: Stopped (isOn: False)")
                 + (aPlayer.soundInstanceSmoothTileStep != null ? $"\nSmoothStones: {aPlayer.soundInstanceSmoothTileStep.State} (isOn: {aPlayer.isOnSmoothTile})" : "\nSmoothStones: Stopped (isOn: False)")
                 + (aPlayer.soundInstanceGlassStep != null ? $"\nGlass: {aPlayer.soundInstanceGlassStep.State} (isOn: {aPlayer.isOnGlassTile})" : "\nGlass: Stopped (isOn: False)")
-                + $"\nCurTile: " + (TileDetection.curTileType >= 0 ? (isVanillaTile ? name + " (Terraria)" : TileLoader.GetTile(TileDetection.curTileType).Name + $" ({TileLoader.GetTile(TileDetection.curTileType).Mod.Name})") : "None")
+                + $"\nCurTile: " + (TileDetection.curTileType >= 0 ? (isVanillaTile ? name + $" | ID: {TileDetection.curTileType}" : TileLoader.GetTile(TileDetection.curTileType).Name + $" ({TileLoader.GetTile(TileDetection.curTileType).Mod.Name})") : "None")
                 + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<Sounds.ReverbPlayer>().ReverbFactor}"
                 + $"\nisUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
@@ -163,7 +150,8 @@ namespace TerrariaAmbience.Core
 
                 #region DrawDebuggingKeybinds
 
-                string txt = $"MouseWorld: ({(int)Main.MouseWorld.X}, {(int)Main.MouseWorld.Y})" +
+                string txt = $"Press LeftAlt to toggle reverb info" +
+                    $"\n\nMouseWorld: ({(int)Main.MouseWorld.X}, {(int)Main.MouseWorld.Y})" +
                     $"\nL: Play sound at mouse" +
                     "\nK: Spawn Positional Audio Sound at mouse" +
                     "\nOemOpenBrackets: Play CurTile footstep sound";
@@ -966,12 +954,17 @@ namespace TerrariaAmbience.Core
             }
             if (Main.menuMode == 999 || Main.menuMode == 1001)
             {
-                string pathToPackPath = Path.Combine(ModLoader.ModPath, "TAConfig", "ta_secretconfig.txt");
+                string pathToPack = Path.Combine(ModLoader.ModPath, "TAConfig", "ta_secretconfig.txt");
                 bool reloadNeeded = false;
-                if (File.Exists(pathToPackPath))
+                if (!Directory.Exists(Path.Combine(ModLoader.ModPath, "TAConfig")))
+                    Directory.CreateDirectory(Path.Combine(ModLoader.ModPath, "TAConfig"));
+                if (File.Exists(pathToPack))
                 {
                     string idkWhatToNameThis = soundPack_whoAmI > -1 ? GetSubFolders(Ambience.INTERNAL_CombinedPath)[soundPack_whoAmI] : Ambience.INTERNAL_CombinedPath;
-                    if (File.ReadAllLines(pathToPackPath)[1] != idkWhatToNameThis)
+                    var lines = File.ReadAllLines(pathToPack);
+
+                    var path1 = lines.First(line => line.Contains('/') || line.Contains('\\'));
+                    if (path1 != idkWhatToNameThis)
                         reloadNeeded = true;
                 }
                 string displayPack = $"Current Sound Pack: {(soundPack_whoAmI > -1 ? GetSubFolders(Ambience.INTERNAL_CombinedPath, true)[soundPack_whoAmI] : "Default")}" + (reloadNeeded ? " (Reload Needed!)" : string.Empty);
@@ -1050,6 +1043,8 @@ namespace TerrariaAmbience.Core
 
         private static void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
+            // orig(self, gameTime);
+            //Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
             DrawAmbienceMenu();
             Mod mod = ModContent.GetInstance<TerrariaAmbience>();
 
@@ -1108,29 +1103,9 @@ namespace TerrariaAmbience.Core
             if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
             if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
 
-            var svol = (float)Math.Round(Ambience.TAAmbient);
-            svol = MathHelper.Clamp(svol, 0f, 100f);
-            Ambience.TAAmbient = MathHelper.Clamp(Ambience.TAAmbient, 0f, 100f);
-            string percent1 = $"TA Ambient: {svol}%";
-
-            var pos = new Vector2(Main.screenWidth / 2, 435);
-            if (Main.menuMode == 26)
-            {
-                sb.DrawString(FontAssets.MouseText.Value, $"Hold Add or Subtract (or period or comma) to change the volume of Terraria Ambience!", new Vector2(6, 6), Color.White, 0f, Vector2.Zero, 0.3f, SpriteEffects.None, 1f);
-
-                ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, percent1, pos, Color.LightGray, 0f, FontAssets.DeathText.Value.MeasureString(percent1) / 2, new Vector2(0.6f, 0.6f), 0, 2);
-
-                if (Main.keyState.IsKeyDown(Keys.Add) || Main.keyState.IsKeyDown(Keys.OemPeriod))
-                {
-                    Ambience.TAAmbient += 0.5f;
-                }
-                if (Main.keyState.IsKeyDown(Keys.Subtract) || Main.keyState.IsKeyDown(Keys.OemComma))
-                {
-                    Ambience.TAAmbient -= 0.5f;
-                }
-            }
             GeneralHelpers.MSOld = GeneralHelpers.MSNew;
             orig(self, gameTime);
+            //Main.spriteBatch.End();
         }
         #endregion
     }

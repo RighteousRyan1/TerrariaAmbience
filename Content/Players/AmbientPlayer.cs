@@ -156,6 +156,8 @@ namespace TerrariaAmbience.Content.Players
 
 
         private bool _wet; // old state of player wet
+
+        private bool _showReverbTiles;
         public override void PreUpdate()
         {
             var cfg = ModContent.GetInstance<GeneralConfig>();
@@ -166,45 +168,51 @@ namespace TerrariaAmbience.Content.Players
                 ManagePlayerSplashes();
 
             #region ShowReverbTiles
-            if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && !cfg2.noReverbMath)
+
+            if (GeneralHelpers.KeyPress(Microsoft.Xna.Framework.Input.Keys.LeftAlt))
+                _showReverbTiles = !_showReverbTiles;
+
+            if (_showReverbTiles)
             {
-                int wallCount = 0;
-                int tileCount = 0;
-                if (Main.GameUpdateCount % 10 == 0)
+                if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && !cfg2.noReverbMath)
                 {
-                    if (Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight)
+                    int wallCount = 0;
+                    int tileCount = 0;
+                    if (Main.GameUpdateCount % 10 == 0)
                     {
-                        int wallsNear = ReverbAudioSystem.WallsAround(Player.Center, new Point(15, 15), out List<Point> wallPoints);
-                        int tilesNear = ReverbAudioSystem.TilesAround(Player.Center, new Point(15, 15), out List<Point> tilePoints);
-                        foreach (var tilePos in tilePoints)
+                        if (Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight)
                         {
-                            var worldCoords = tilePos.ToVector2() * 16;
-                            var left = new Point(tilePos.X - 1, tilePos.Y);
-                            var right = new Point(tilePos.X + 1, tilePos.Y);
-                            var up = new Point(tilePos.X, tilePos.Y - 1);
-                            var down = new Point(tilePos.X, tilePos.Y + 1);
-                            if (ReverbAudioSystem.CanRaycastTo(Player.Center, left.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, right.ToVector2() * 16)
-                                || ReverbAudioSystem.CanRaycastTo(Player.Center, up.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, down.ToVector2() * 16))
+                            int wallsNear = ReverbAudioSystem.WallsAround(Player.Center, new Point(15, 15), out List<Point> wallPoints);
+                            int tilesNear = ReverbAudioSystem.TilesAround(Player.Center, new Point(15, 15), out List<Point> tilePoints);
+                            foreach (var tilePos in tilePoints)
                             {
-                                tileCount++;
-                                if (Main.GameUpdateCount % 10 == 0)
+                                var worldCoords = tilePos.ToVector2() * 16;
+                                var left = new Point(tilePos.X - 1, tilePos.Y);
+                                var right = new Point(tilePos.X + 1, tilePos.Y);
+                                var up = new Point(tilePos.X, tilePos.Y - 1);
+                                var down = new Point(tilePos.X, tilePos.Y + 1);
+                                if (ReverbAudioSystem.CanRaycastTo(Player.Center, left.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, right.ToVector2() * 16)
+                                    || ReverbAudioSystem.CanRaycastTo(Player.Center, up.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, down.ToVector2() * 16))
                                 {
-                                    Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
+                                    tileCount++;
+                                    if (Main.GameUpdateCount % 10 == 0)
+                                    {
+                                        Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
+                                    }
+                                }
+                            }
+                            foreach (var wallPos in wallPoints)
+                            {
+                                if (ReverbAudioSystem.CanRaycastTo(Player.Center, wallPos.ToVector2() * 16))
+                                {
+                                    wallCount++;
+                                    if (Main.GameUpdateCount % 10 == 0)
+                                    {
+                                        Dust.QuickBox(wallPos.ToVector2() * 16, wallPos.ToVector2() * 16 + new Vector2(16), 0, Color.Red, null);
+                                    }
                                 }
                             }
                         }
-                        foreach (var wallPos in wallPoints)
-                        {
-                            if (ReverbAudioSystem.CanRaycastTo(Player.Center, wallPos.ToVector2() * 16))
-                            {
-                                wallCount++;
-                                if (Main.GameUpdateCount % 10 == 0)
-                                {
-                                    Dust.QuickBox(wallPos.ToVector2() * 16, wallPos.ToVector2() * 16 + new Vector2(16), 0, Color.Red, null);
-                                }
-                            }
-                        }
-                        Console.WriteLine($"wall: {wallCount} | tile: {tileCount}");
                     }
                 }
             }
@@ -285,9 +293,12 @@ namespace TerrariaAmbience.Content.Players
                 isOnSmoothTile = false;
                 isOnStickyTile = false;
             }
-
-            ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverbActual, out float occ, out float dampening, out bool sOcclude);
-            Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverbActual;
+            if (Main.GameUpdateCount % 8 == 0)
+            {
+                ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
+                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb;
+            }
+            var reverbActual = Player.GetModPlayer<ReverbPlayer>().ReverbFactor;
 
             // reverbActual = ReverbAudioSystem.CanFindEscapeRoute(Player.Bottom - new Vector2(0, 3), 5) ? 0f : reverbActual;
             if (!Player.wet)
@@ -341,7 +352,7 @@ namespace TerrariaAmbience.Content.Players
                 if (stepping)
                     GetFootstepSound(false);
                 else if (landing)
-                    GetFootstepSound(true);
+                    GetFootstepSound(true); // exception?
             }
             // HandleContainerOpenings(ContainerContext.Chest, out var opened);
             chestStateNew = Player.chest;
@@ -451,9 +462,17 @@ namespace TerrariaAmbience.Content.Players
 
             if (justWet || justUnwet)
             {
-                var vel = Player.velocity.Y;
+                var vel = Math.Abs(Player.velocity.Y);
 
-                var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= 10f ? "heavy" : "light")}");
+                const float loud_thresh = 10f;
+
+                var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= loud_thresh ? "heavy" : "light")}");
+
+                if (vel < 10f)
+                    soundSplash.Volume = vel / loud_thresh / 4;
+                if (vel == 0)
+                    soundSplash.Volume = 0.1f;
+                
 
                 GeneralHelpers.PlaySound(soundSplash, Player.position);
             }
@@ -477,6 +496,7 @@ namespace TerrariaAmbience.Content.Players
             {
                 if (ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled)
                 {
+                    // exception?
                     soundInstanceArmorStep = GeneralHelpers.PlaySound(new SoundStyle(pathArmor) { Volume = GetArmorStepVolume() * 1.5f }, Player.Bottom);
                     soundInstanceVanityStep = GeneralHelpers.PlaySound(new SoundStyle(pathVanity) { Volume = GetArmorStepVolume() * 1.5f }, Player.Bottom);
                     soundInstanceArmorStep = GeneralHelpers.PlaySound(new SoundStyle(pathArmor) { Volume = GetArmorStepVolume() }, Player.Bottom);
@@ -716,32 +736,36 @@ namespace TerrariaAmbience.Content.Players
 
         public override void NearbyEffects(int i, int j, int type, bool closer)
         {
-            originOfCampfire.X = i * 16;
-            originOfCampfire.Y = j * 16;
-            Player player = Main.player[Main.myPlayer].GetModPlayer<AmbientPlayer>().Player;
-
-            if (ModContent.GetInstance<GeneralConfig>().campfireSounds)
+            if (!Main.dedServ)
             {
-                if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire))
+                originOfCampfire.X = i * 16;
+                originOfCampfire.Y = j * 16;
+                Player player = Main.player[Main.myPlayer].GetModPlayer<AmbientPlayer>().Player;
+
+                if (ModContent.GetInstance<GeneralConfig>().campfireSounds)
                 {
-                    /*var t = Main.tile[i, j];
-                    var orig = new Vector2(i * 16, j * 16);
-                    Main.NewText(t.frameY);*/
-                    //if (t.frameY <= 18 && t.frameY >= 0)
+                    if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire))
                     {
-                        distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
-                        player.GetModPlayer<AmbientPlayer>().isNearCampfire = true;
+                        /*var t = Main.tile[i, j];
+                        var orig = new Vector2(i * 16, j * 16);
+                        Main.NewText(t.frameY);*/
+                        //if (t.frameY <= 18 && t.frameY >= 0)
+                        {
+                            distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
+                            player.GetModPlayer<AmbientPlayer>().isNearCampfire = true;
+                        }
                     }
-                }
-                if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
-                {
-                    /*var t = Main.tile[i, j];
-                    var orig = new Vector2(i * 16, j * 16);
-                    Main.NewText(t.frameY);*/
-                    //if (t.frameY <= 54 && t.frameY >= 36)
+                    if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
                     {
-                        Ambience.CampfireCrackleInstance.Volume = 0f;
-                        player.GetModPlayer<AmbientPlayer>().isNearCampfire = false;
+                        /*var t = Main.tile[i, j];
+                        var orig = new Vector2(i * 16, j * 16);
+                        Main.NewText(t.frameY);*/
+                        //if (t.frameY <= 54 && t.frameY >= 36)
+                        {
+                            if (Ambience.CampfireCrackleInstance is not null)
+                                Ambience.CampfireCrackleInstance.Volume = 0f;
+                            player.GetModPlayer<AmbientPlayer>().isNearCampfire = false;
+                        }
                     }
                 }
             }

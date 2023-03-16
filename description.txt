@@ -9,6 +9,14 @@ Developers:
 - RighteousRyan#8008 (Programmer)
 - William#9010 (Mod Icon Artist)
 
+Most Recent Small Update:
+
+[MAJOR] Fixed pylons not working in multiplayer.
+[MAJOR] Fixed large lage in some underground areas. If it still happens, please reach out to me.
+[CHANGED FEATURE] Made ambience volumes individually modifiable via the config.
+[MINOR] Moved the "overall ambience" volume to the config screen.
+[BUGFIX] - Fixed "directory not found" bug.
+
 Most Recent Update:
 
 SO MANY NEW THINGS!
@@ -24,7 +32,7 @@ SO MANY NEW THINGS!
 [NEW FEATURE] Sounds now play when sliding on ice.
 
 [MAJOR NEW FEATURE] Soundpacks!
-You can now create a folder in your ModLoader/Beta/Mods/TASoundReplace folder and it will auto-detect in the 'Ambient Menu,' under Sound Packs. 
+You can now create a folder in your Terraria/tModLoader/Mods/TASoundReplace folder and it will auto-detect in the 'Ambient Menu,' under Sound Packs. 
 Be sure to read the README.md in the base folder.
 
 [NEW FEATURE] Audio smooth-transition. As you get closer to space, ambient tracks will get more quieter. As you go into the underground, the sound of caves gets louder.

@@ -25,39 +25,42 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
         public Vector2 oldVelocityReal;
         public override void PostAI(NPC npc)
         {
-            if (ModContent.GetInstance<AudioAdditionsConfig>().slimySounds)
+            if (!Main.dedServ)
             {
-                if (npc.FullName.ToLower().Contains("slime"))
+                if (ModContent.GetInstance<AudioAdditionsConfig>().slimySounds)
                 {
-                    var vel = npc.velocity;
-                    ReverbAudioSystem.CreateAudioFX(npc.Center, out var rv, out var occ, out var dampen, out var shouldDampen);
-                    float volume = oldVelocityReal.Y / 30f;
-                    if (vel.Y == 0f && oldVelocityReal.Y != 0f)
+                    if (npc.FullName.ToLower().Contains("slime"))
                     {
-                        int oneOrTwo = Main.rand.Next(1, 3);
-                        SlimeLandStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}")
+                        var vel = npc.velocity;
+                        ReverbAudioSystem.CreateAudioFX(npc.Center, out var rv, out var occ, out var dampen, out var shouldDampen);
+                        float volume = oldVelocityReal.Y / 30f;
+                        if (vel.Y == 0f && oldVelocityReal.Y != 0f)
                         {
-                            Volume = MathHelper.Clamp(oldVelocityReal.Y, 0f, 1f),
-                            PitchVariance = 0.1f
-                        };
-                        if (shouldDampen)
-                            GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
-                        else
-                            GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
-                    }
-                    if (oldVelocityReal.Y == 0f && vel.Y != 0f)
-                    {
-                        SlimeJumpStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump")
+                            int oneOrTwo = Main.rand.Next(1, 3);
+                            SlimeLandStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}")
+                            {
+                                Volume = MathHelper.Clamp(oldVelocityReal.Y, 0f, 1f),
+                                PitchVariance = 0.1f
+                            };
+                            if (shouldDampen)
+                                GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
+                            else
+                                GeneralHelpers.PlaySound(SlimeLandStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
+                        }
+                        if (oldVelocityReal.Y == 0f && vel.Y != 0f)
                         {
-                            Volume = 0.5f,
-                            PitchVariance = 0.1f
-                        };
-                        if (shouldDampen)
-                            GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
-                        else
-                            GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
+                            SlimeJumpStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump")
+                            {
+                                Volume = 0.5f,
+                                PitchVariance = 0.1f
+                            };
+                            if (shouldDampen)
+                                GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(dampen);
+                            else
+                                GeneralHelpers.PlaySound(SlimeJumpStyle, npc.position).ApplyReverbReturnInstance(rv).ApplyLowPassFilterReturnInstance(occ);
+                        }
+                        oldVelocityReal = vel;
                     }
-                    oldVelocityReal = vel;
                 }
             }
         }
@@ -84,7 +87,14 @@ namespace TerrariaAmbience.Content.AddedNPCSounds
             {
                 var vel = npc.velocity.Y;
 
-                var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= 9f ? "heavy" : "light")}");
+                const float loud_thresh = 10f;
+
+                var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= loud_thresh ? "heavy" : "light")}");
+
+                if (vel < 10f)
+                    soundSplash.Volume = vel / loud_thresh / 4;
+                if (vel == 0)
+                    soundSplash.Volume = 0.1f;
 
                 SoundEngine.PlaySound(soundSplash, npc.position);
             }

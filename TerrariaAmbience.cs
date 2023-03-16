@@ -116,59 +116,79 @@ namespace TerrariaAmbience
         private void Main_Update(On.Terraria.Main.orig_Update orig, Main self, GameTime gameTime)
         {
             orig(self, gameTime);
-            GeneralHelpers.ClickHandling();
-            GeneralHelpers.UpdateButtons();
 
-            Ambience.DoUpdate_Ambience();
-            Ambience.UpdateVolume();
-            if (Main.gameMenu) 
-                return;
-            Ambience.ClampAll();
+            if (!Main.dedServ)
+            {
+                GeneralHelpers.ClickHandling();
+                GeneralHelpers.UpdateButtons();
+
+                Ambience.DoUpdate_Ambience();
+                Ambience.UpdateVolume();
+                if (Main.gameMenu)
+                    return;
+                Ambience.ClampAll();
+            }
         }
 
         public override void PostSetupContent()
         {
-            // Mod calamity = ModLoader.GetMod("CalamityMod");
+            ModLoader.TryGetMod("CalamityMod", out var calamity);
             // Mod thor = ModLoader.GetMod("ThoriumMod");
 
             SoundChanges.Init();
             // TODO: Finish adding these another day...
-            /*
             #region Calamity Adds
+            //if (calamity != null)
             if (calamity != null)
             {
-                TileDetection.AddTilesToList(calamity, TileDetection.snowyblocks, "AstralSnow");
-                TileDetection.AddTilesToList(calamity, TileDetection.sandBlocks,
+                TileDetection.AddTilesToList(calamity, TileDetection.SnowyBlocks, "AstralSnow");
+                TileDetection.AddTilesToList(calamity, TileDetection.SandBlocks,
                     "SulphurousSand",
                     "AstralSand",
                     "EutrophicSand",
-                    "AstralClay");
+                    "AstralClay",
+                    "SulphurousSandNoWater");
 
-                TileDetection.AddTilesToList(calamity, TileDetection.grassTiles,
+                TileDetection.AddTilesToList(calamity, TileDetection.GrassBlocks,
                     "AstralDirt",
-                    "AstralGrass",
+                    "AstralGrass");
+
+                TileDetection.AddTilesToList(calamity, TileDetection.LeafBlocks,
                     "PlantyMush");
 
-                TileDetection.AddTilesToList(calamity, TileDetection.stoneBlocks,
+                TileDetection.AddTilesToList(calamity, TileDetection.DirtBlocks,
+                    "PlantyMush",
+                    "AstralDirt");
+                TileDetection.AddTilesToList(calamity, TileDetection.IcyBlocks,
+                    "AstralIce");
+                TileDetection.AddTilesToList(calamity, TileDetection.GraniteAndMarbles,
+                    "StatigelBlock");
+
+                TileDetection.AddTilesToList(calamity, TileDetection.StoneBlocks,
                     "AstralOre",
                     "AstralStone",
                     "AstralMonolith",
-                    "AstralMonolith", "AbyssGravel", "Tenebris", "ChaoticOre", "SmoothCoal", "Voidstone", "Navystone",
-                    "TableCoral", "SeaPrism", "HazardChevronPanels", "NavyPlate", "LaboratoryPanels", "LaboratoryPlating", "RustedPlating",
-                    "HardenedSulphurousSandstone");
+                    "AstralMonolith", "AbyssGravel", "Tenebris", "ChaoticOre", "Voidstone", "Navystone",
+                    "TableCoral", "SeaPrism", "HazardChevronPanels", "Navyplate", "RustedPlating",
+                    "HardenedSulphurousSandstone", "ChaoticOre",
+                    "HardenedAstralSand",
+                    "SulphurousSandstone",
+                    "HardenedSulphurousSandstone",
+                    "BrimstoneSlag", "CharredOre",
+                    "LaboratoryShelf",
+                    "LaboratoryPanels", "Cinderplate", "SmoothVoidstone");
             }
             #endregion
             #region Thorium Adds
-            if (thor != null)
+            /*if (thor != null)
             {
                 TileDetection.AddTilesToList(thor, TileDetection.stoneBlocks,
                     "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
                     "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
 
                 TileDetection.AddTilesToList(thor, TileDetection.sandBlocks, "Brack", "BrackBare");
-            }
+            }*/
             #endregion
-            */
         }
         public override void Unload()
         {

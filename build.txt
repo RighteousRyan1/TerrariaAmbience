@@ -1,5 +1,5 @@
-displayName = Terraria Ambience - [c/FFDDCC:1.4 Update]
+displayName = Terraria Ambience
 author = RighteousRyan (Ryan)
-version = 0.2.0.1
+version = 0.2.2.7
 homepage = https://forums.terraria.org/index.php?threads/terraria-ambience-mod.104161/
 includePDB = true

@@ -172,6 +172,32 @@ namespace TerrariaAmbience.Sounds
 			}
 			return index;
 		}
+
+		public static int TileObjectsAround(Vector2 position, Point grid, out List<Point> blocks, out List<Point> walls)
+        {
+			blocks = new();
+			walls = new();
+			int num = 0;
+			for (int i = (int)position.X / 16 - grid.X; i < (int)position.X / 16 + grid.X; i++)
+			{
+				for (int j = (int)position.Y / 16 - grid.Y; j < (int)position.Y / 16 + grid.Y; j++)
+				{
+					Tile tile = Framing.GetTileSafely(i, j);
+
+					if (tile.HasTile)
+					{
+						num++;
+						blocks.Add(new(i, j));
+					}
+					else if (tile.WallType > 0)
+                    {
+						num++;
+						walls.Add(new(i, j));
+                    }
+				}
+			}
+			return num;
+		}
 		public static int WallsAround(Vector2 position, Point grid, out List<Point> tileCoords)
 		{
 			tileCoords = new();
@@ -259,9 +285,10 @@ namespace TerrariaAmbience.Sounds
 						{
 							int wallCount = 0;
 							int tileCount = 0;
-							int wallsNear = WallsAround(fromV2, new Point(15, 15), out var wallPoints);
-							int tilesNear = TilesAround(fromV2, new Point(15, 15), out List<Point> tilePoints);
-							foreach (var tilePos in tilePoints)
+							//int wallsNear = WallsAround(fromV2, new Point(15, 15), out var wallPoints);
+							//int tilesNear = TilesAround(fromV2, new Point(15, 15), out List<Point> tilePoints);
+							int tilesObjsNear = TileObjectsAround(fromV2, new Point(15, 15), out var blockPoints, out var wallPoints);
+							foreach (var tilePos in blockPoints)
 							{
 								var worldCoords = tilePos.ToVector2() * 16;
 								var left = new Point(tilePos.X - 1, tilePos.Y);

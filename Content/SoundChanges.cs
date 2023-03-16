@@ -25,14 +25,17 @@ namespace TerrariaAmbience.Content
 
         private static ReLogic.Utilities.SlotId Switch(On.Terraria.Audio.SoundPlayer.orig_Play orig, SoundPlayer self, ref SoundStyle style, Microsoft.Xna.Framework.Vector2? position)
         {
-            if (style == SoundID.Splash)
+            if (!Main.dedServ)
             {
-                style = GeneralHelpers.SimpleSoundStyle("Sounds/Custom/nothingness", 0);
-            }
-            if (style == SoundID.ZombieMoan)
-            {
-                int rand = Main.rand.Next(1, 4);
-                style = GeneralHelpers.SimpleSoundStyle($"Sounds/Custom/npcs/zombie{rand}", 0);
+                if (style == SoundID.Splash)
+                {
+                    style = GeneralHelpers.SimpleSoundStyle($"{nameof(TerrariaAmbience)}/Sounds/Custom/nothingness", 0);
+                }
+                if (style == SoundID.ZombieMoan)
+                {
+                    int rand = Main.rand.Next(1, 4);
+                    style = GeneralHelpers.SimpleSoundStyle($"{nameof(TerrariaAmbience)}/Sounds/Custom/npcs/zombie{rand}", 0);
+                }
             }
             return orig(self, ref style, position);
         }

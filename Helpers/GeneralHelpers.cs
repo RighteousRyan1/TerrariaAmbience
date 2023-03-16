@@ -52,8 +52,10 @@ namespace TerrariaAmbience.Helpers
         public static SoundEffectInstance PlaySound(in SoundStyle style, Vector2? position = null)
         {
             var id = SoundEngine.PlaySound(style, position);
-            SoundEngine.TryGetActiveSound(id, out var sound);
-            return sound.Sound;
+            if (SoundEngine.TryGetActiveSound(id, out var sound))
+                return sound.Sound;
+            else
+                return null;
         }
         public static Rectangle GetRectOf(Vector2 position) => new((int)position.X, (int)position.Y, 1, 1);
         public static Rectangle GetRectOf(Point position) => new(position.X, position.Y, 1, 1);

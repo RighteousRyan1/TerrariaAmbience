@@ -40,7 +40,7 @@ namespace TerrariaAmbience.Content
             Hell,
             Winds
         }
-        public static float TAAmbient;
+        public static float TAAmbient => CFG.overallVolume;
         #region Forest SFX
 
         public static SoundEffect MorningCrickets { get; set; }
@@ -325,7 +325,7 @@ namespace TerrariaAmbience.Content
 
             Player player = ambiencePlayer.Player;
             var aLoader = Instance;
-            UnderwaterLoopInstance.Volume = aLoader.underwaterLoopVolume;
+            UnderwaterLoopInstance.Volume = aLoader.underwaterLoopVolume * CFG.underwaterVolume;
             if (Main.hasFocus)
             {
                 #region GeneralVolumeUpdate
@@ -509,9 +509,8 @@ namespace TerrariaAmbience.Content
         /// </summary>
         internal static void DoUpdate_Ambience()
         {
-            var cfgCl = ModContent.GetInstance<GeneralConfig>();
             var inst = Instance;
-            float ambVol = TAAmbient / 100;
+            float ambVol = TAAmbient;
             if (!Main.dedServ)
             {
                 /*if (Main.gameMenu)
@@ -542,50 +541,50 @@ namespace TerrariaAmbience.Content
                 }*/
                 if (!Instance.playerBehindWall)
                 {
-                    DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.9f * ambVol;
-                    EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.85f * ambVol;
-                    NightCricketsInstance.Volume = Instance.nightCricketsVolume * ambVol;
-                    DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.75f * ambVol;
-                    CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.35f * ambVol;
-                    CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.7f * ambVol;
-                    CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.7f * ambVol;
-                    MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.9f * ambVol;
-                    BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol;
+                    DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.9f * ambVol * CFG.forestVolumes[1];
+                    EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.85f * ambVol * CFG.forestVolumes[2];
+                    NightCricketsInstance.Volume = Instance.nightCricketsVolume * ambVol * CFG.forestVolumes[3];
+                    DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.75f * ambVol * CFG.desertVolume;
+                    CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.35f * ambVol * CFG.cavernsVolume;
+                    CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.7f * ambVol * CFG.evilVolumes[1];
+                    CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.7f * ambVol * CFG.evilVolumes[0];
+                    MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.9f * ambVol * CFG.forestVolumes[0];
+                    BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol * CFG.breezeVolume;
 
-                    HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.75f * ambVol;
+                    HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.75f * ambVol * CFG.hellVolume;
 
-                    BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.8f * ambVol;
+                    BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.8f * ambVol * CFG.oceanVolume;
 
-                    DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.4f * ambVol;
-                    NightJungleInstance.Volume = Instance.nightJungleVolume * 0.4f * ambVol;
+                    DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.4f * ambVol * CFG.jungleVolumes[0];
+                    NightJungleInstance.Volume = Instance.nightJungleVolume * 0.4f * ambVol * CFG.jungleVolumes[1];
 
-                    SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.65f * ambVol;
-                    SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.7f * ambVol;
+                    SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.65f * ambVol * CFG.snowVolumes[0];
+                    SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.7f * ambVol * CFG.snowVolumes[1];
 
                     if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
                         CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.95f * Main.soundVolume;
                 }
                 else
                 {
-                    BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol * 0.8f;
-                    MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.8f * ambVol;
-                    DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.7f * ambVol;
-                    EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.7f * ambVol;
-                    NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.7f * ambVol;
-                    DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.7f * ambVol;
-                    CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.25f * ambVol;
-                    CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.3f * ambVol;
-                    CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.3f * ambVol;
+                    BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol * 0.8f * CFG.breezeVolume;
+                    MorningCricketsInstance.Volume = Instance.morningCricketsVolume * 0.8f * ambVol * CFG.forestVolumes[0];
+                    DayCricketsInstance.Volume = Instance.dayCricketsVolume * 0.7f * ambVol * CFG.forestVolumes[1];
+                    EveningCricketsInstance.Volume = Instance.eveningCricketsVolume * 0.7f * ambVol * CFG.forestVolumes[2];
+                    NightCricketsInstance.Volume = Instance.nightCricketsVolume * 0.7f * ambVol * CFG.forestVolumes[3];
+                    DesertAmbienceInstance.Volume = Instance.desertCricketsVolume * 0.7f * ambVol * CFG.desertVolume;
+                    CavesAmbienceInstance.Volume = Instance.ugAmbienceVolume * 0.25f * ambVol * CFG.cavernsVolume;
+                    CrimsonRumblesInstance.Volume = Instance.crimsonRumblesVolume * 0.3f * ambVol * CFG.evilVolumes[1];
+                    CorruptionRoarsInstance.Volume = Instance.corruptionRoarsVolume * 0.3f * ambVol * CFG.evilVolumes[0];
 
-                    HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.5f * ambVol;
+                    HellRumbleInstance.Volume = Instance.hellRumbleVolume * 0.5f * ambVol * CFG.hellVolume;
 
-                    BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.5f * ambVol;
+                    BeachWavesInstance.Volume = Instance.beachWavesVolume * 0.5f * ambVol * CFG.oceanVolume;
 
-                    DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.35f * ambVol;
-                    NightJungleInstance.Volume = Instance.nightJungleVolume * 0.35f * ambVol;
+                    DaytimeJungleInstance.Volume = Instance.dayJungleVolume * 0.35f * ambVol * CFG.jungleVolumes[0];
+                    NightJungleInstance.Volume = Instance.nightJungleVolume * 0.35f * ambVol * CFG.jungleVolumes[1];
 
-                    SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.45f * ambVol;
-                    SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.45f * ambVol;
+                    SnowBreezeDayInstance.Volume = Instance.snowDayVolume * 0.45f * ambVol * CFG.snowVolumes[0];
+                    SnowBreezeNightInstance.Volume = Instance.snowNightVolume * 0.45f * ambVol * CFG.snowVolumes[1];
 
                     if (Instance.crackleVolume >= 0f && Instance.crackleVolume <= 1f)
                         CampfireCrackleInstance.Volume = Instance.crackleVolume * 0.8f * Main.soundVolume;
@@ -599,7 +598,7 @@ namespace TerrariaAmbience.Content
                     BreezeInstance.Volume = Instance.breezeVolume * Math.Abs(Main.windSpeedCurrent) * ambVol * 0.4f;
                 }
 
-                UnderwaterLoopInstance.Volume = Instance.underwaterLoopVolume * ambVol;
+                UnderwaterLoopInstance.Volume = Instance.underwaterLoopVolume * ambVol * CFG.underwaterVolume;
             }
 
             if (Main.gameMenu) return;
@@ -653,37 +652,6 @@ namespace TerrariaAmbience.Content
                 Instance.playerBehindWall = false;
             // https://i.kym-cdn.com/entries/icons/facebook/000/001/576/Screen_Shot_2021-03-22_at_3.45.30_PM.jpg
             // this code == the link
-            if (!cfgCl.enabledForest[0])
-                inst.morningCricketsVolume = 0f;
-            if (!cfgCl.enabledForest[1])
-                inst.dayCricketsVolume = 0f;
-            if (!cfgCl.enabledForest[2])
-                inst.eveningCricketsVolume = 0f;
-            if (!cfgCl.enabledForest[3])
-                inst.nightCricketsVolume = 0f;
-
-            if (!cfgCl.enabledSnow[0])
-                inst.snowDayVolume = 0f;
-            if (!cfgCl.enabledSnow[1])
-                inst.snowNightVolume = 0f;
-            if (!cfgCl.enabledJungle[0])
-                inst.dayJungleVolume = 0f;
-            if (!cfgCl.enabledJungle[1])
-                inst.nightJungleVolume = 0f;
-            if (!cfgCl.enabledEvils[0])
-                inst.corruptionRoarsVolume = 0f;
-            if (!cfgCl.enabledEvils[1])
-                inst.crimsonRumblesVolume = 0f;
-            if (!cfgCl.enabledHell)
-                inst.hellRumbleVolume = 0f;
-            if (!cfgCl.enabledCavern)
-                inst.ugAmbienceVolume = 0f;
-            if (!cfgCl.enabledBreeze)
-                inst.breezeVolume = 0f;
-            if (!cfgCl.enabledOcean)
-                inst.beachWavesVolume = 0f;
-            if (!cfgCl.enabledDesert)
-                inst.desertCricketsVolume = 0f;
         }
         /// <summary>
         /// Oddly enough, MathHelper.Clamp is completely useless in this case since it works every 2 frames or something akin to that.

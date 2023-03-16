@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using TerrariaAmbience.Core;
 using Terraria.Audio;
 using Microsoft.Xna.Framework;
+using TerrariaAmbience.Content.Players;
 
 namespace TerrariaAmbience.Sounds.TileSounds
 {
@@ -34,16 +35,16 @@ namespace TerrariaAmbience.Sounds.TileSounds
                     var acTile = Framing.GetTileSafely(tileCoord);
                     if (IsTileTypeWood(acTile.TileType) && acTile.CollisionType() == 1 && !Framing.GetTileSafely(tileCoord.X, tileCoord.Y + 1).HasTile)
                     {
-                        int rand = Main.rand.Next(1, 8);
-
-                        ReverbAudioSystem.CreateAudioFX(tileCoord.ToVector2().ToWorldCoordinates(), out var r, out var o, out var d, out var sd, new Vector2(0, -16));
-                        WoodCreak = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}")
-                        {
-                            PitchVariance = 0.1f,
-                            Volume = 0.04f,
-                        };
                         if (Main.rand.NextBool(11000))
                         {
+                            int rand = Main.rand.Next(1, 8);
+
+                            ReverbAudioSystem.CreateAudioFX(tileCoord.ToVector2().ToWorldCoordinates(), out var r, out var o, out var d, out var sd, new Vector2(0, -16));
+                            WoodCreak = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}")
+                            {
+                                PitchVariance = 0.1f,
+                                Volume = 0.04f,
+                            };
                             if (sd)
                                 GeneralHelpers.PlaySound(WoodCreak, tileCoord.ToVector2().ToWorldCoordinates()).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o).ApplyBandPassFilter(d);
                             else
