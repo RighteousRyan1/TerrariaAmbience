@@ -341,9 +341,9 @@ namespace TerrariaAmbience.Core
         /// <param name="tiles"></param>
         public static void AddTilesToList(List<int> listToAddTo, params int[] tiles)
         {
-            foreach (int tile in tiles)
-            {
-                listToAddTo.Add(tile);
+            foreach (int tileType in tiles) {
+                if (tileType > TileID.Search.Count)
+                    listToAddTo.Add(tileType);
             }
         }
         /// <summary>
@@ -355,7 +355,10 @@ namespace TerrariaAmbience.Core
         {
             foreach (string tile in name)
             {
-                listToAddTo.Add(mod.Find<ModTile>(tile).Type);
+                if (mod.TryFind<ModTile>(tile, out var found))
+                    listToAddTo.Add(found.Type);
+                else
+                    ModContent.GetInstance<TerrariaAmbience>().Logger.Error($"Mod Tile '{tile}' not found. Skipping over...");
             }
         }
     }

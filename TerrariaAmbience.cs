@@ -26,51 +26,82 @@ namespace TerrariaAmbience
         // TODO: add all other types to the call
         public override object Call(params object[] args)
         {
-            try
-            {
+            try {
                 string message = args[0] as string;
                 if (message == "AddTilesToList")
                 {
                     Mod mod = args[1] as Mod;
                     string listName = args[2] as string; // Can be Stone, Grass, Sand, Snow, or Dirt (FOR NOW, OR EVER) (UPDATE THIS)
-                    string[] nameStringList = args[3] as string[];
-                    int[] tiles = args[4] as int[];
-                    if (!Main.dedServ)
-                        if (mod != null)
-                        {
+                    // string[] nameStringList = args[3] as string[];
+                    object boxedInstance = args[3];
+
+                    if (!Main.dedServ) {
+                        if (mod != null && boxedInstance is string[] s) {
                             if (listName == "Grass")
-                                TileDetection.AddTilesToList(mod, TileDetection.GrassBlocks, nameStringList);
+                                TileDetection.AddTilesToList(mod, TileDetection.GrassBlocks, s);
                             else if (listName == "Stone")
-                                TileDetection.AddTilesToList(mod, TileDetection.StoneBlocks, nameStringList);
+                                TileDetection.AddTilesToList(mod, TileDetection.StoneBlocks, s);
                             else if (listName == "Sand")
-                                TileDetection.AddTilesToList(mod, TileDetection.SandBlocks, nameStringList);
+                                TileDetection.AddTilesToList(mod, TileDetection.SandBlocks, s);
                             else if (listName == "Snow")
-                                TileDetection.AddTilesToList(mod, TileDetection.SnowyBlocks, nameStringList);
+                                TileDetection.AddTilesToList(mod, TileDetection.SnowyBlocks, s);
                             else if (listName == "Dirt")
-                                TileDetection.AddTilesToList(mod, TileDetection.DirtBlocks, nameStringList);
+                                TileDetection.AddTilesToList(mod, TileDetection.DirtBlocks, s);
+                            else if (listName == "Metal")
+                                TileDetection.AddTilesToList(mod, TileDetection.Metals, s);
+                            else if (listName == "Ice")
+                                TileDetection.AddTilesToList(mod, TileDetection.IcyBlocks, s);
+                            else if (listName == "Leaf")
+                                TileDetection.AddTilesToList(mod, TileDetection.LeafBlocks, s);
+                            else if (listName == "Glass")
+                                TileDetection.AddTilesToList(mod, TileDetection.GlassBlocks, s);
+                            else if (listName == "GraniteMarble")
+                                TileDetection.AddTilesToList(mod, TileDetection.GraniteAndMarbles, s);
+                            else if (listName == "SmoothStone")
+                                TileDetection.AddTilesToList(mod, TileDetection.SmoothStones, s);
+                            else if (listName == "Sticky")
+                                TileDetection.AddTilesToList(mod, TileDetection.StickyBlocks, s);
+                            else {
+                                Logger.Info("Mod.Call failure: Unknown tile list specified.");
+                                return "Unknown tile list specified.";
+                            }
+                            Logger.Info($"Successfully added modded tiles ({string.Join(", ", s)}) to the {listName} tile list.");
                         }
-                        else if (mod == null)
-                        {
+                        else if (mod == null && boxedInstance is int[] i) {
                             if (listName == "Grass")
-                                TileDetection.AddTilesToList(TileDetection.GrassBlocks, tiles);
+                                TileDetection.AddTilesToList(TileDetection.GrassBlocks, i);
                             else if (listName == "Stone")
-                                TileDetection.AddTilesToList(TileDetection.StoneBlocks, tiles);
+                                TileDetection.AddTilesToList(TileDetection.StoneBlocks, i);
                             else if (listName == "Sand")
-                                TileDetection.AddTilesToList(TileDetection.SandBlocks, tiles);
+                                TileDetection.AddTilesToList(TileDetection.SandBlocks, i);
                             else if (listName == "Snow")
-                                TileDetection.AddTilesToList(TileDetection.SnowyBlocks, tiles);
+                                TileDetection.AddTilesToList(TileDetection.SnowyBlocks, i);
                             else if (listName == "Dirt")
-                                TileDetection.AddTilesToList(TileDetection.DirtBlocks, tiles);
+                                TileDetection.AddTilesToList(TileDetection.DirtBlocks, i);
+                            else if (listName == "Metal")
+                                TileDetection.AddTilesToList(TileDetection.Metals, i);
+                            else if (listName == "Ice")
+                                TileDetection.AddTilesToList(TileDetection.IcyBlocks, i);
+                            else if (listName == "Leaf")
+                                TileDetection.AddTilesToList(TileDetection.LeafBlocks, i);
+                            else if (listName == "Glass")
+                                TileDetection.AddTilesToList(TileDetection.GlassBlocks, i);
+                            else if (listName == "GraniteMarble")
+                                TileDetection.AddTilesToList(TileDetection.GraniteAndMarbles, i);
+                            else if (listName == "SmoothStone")
+                                TileDetection.AddTilesToList(TileDetection.SmoothStones, i);
+                            else if (listName == "Sticky")
+                                TileDetection.AddTilesToList(TileDetection.StickyBlocks, i);
+                            Logger.Info($"Successfully added modded tiles ({string.Join(", ", i.Select(id => TileID.Search.GetName(id)))} to the {listName} tile list.");
                         }
+                    }
+
                     return "Tiles added successfully!";
                 }
                 else
-                {
                     Logger.Error("Call Error: Unknown Message: " + message);
-                }
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 Logger.Error("Mod.Call Error: " + e.StackTrace + e.Message);
             }
             return "Call Failed";
@@ -82,7 +113,7 @@ namespace TerrariaAmbience
 
             _versCache = Main.versionNumber;
             ContentInstance.Register(new Ambience());
-            Main.versionNumber += $"\nTerraria Ambience v{Version}";
+            Main.versionNumber += $", Terraria Ambience v{Version}";
 
             SavingSystem.LoadFromConfig();
             Ambience.Initialize();
@@ -132,14 +163,12 @@ namespace TerrariaAmbience
 
         public override void PostSetupContent()
         {
-            ModLoader.TryGetMod("CalamityMod", out var calamity);
             // Mod thor = ModLoader.GetMod("ThoriumMod");
 
             SoundChanges.Init();
             // TODO: Finish adding these another day...
             #region Calamity Adds
-            //if (calamity != null)
-            if (calamity != null)
+            if (ModLoader.TryGetMod("CalamityMod", out var calamity))
             {
                 TileDetection.AddTilesToList(calamity, TileDetection.SnowyBlocks, "AstralSnow");
                 TileDetection.AddTilesToList(calamity, TileDetection.SandBlocks,
@@ -180,14 +209,14 @@ namespace TerrariaAmbience
             }
             #endregion
             #region Thorium Adds
-            /*if (thor != null)
+            if (ModLoader.TryGetMod("ThoriumMod", out var thor))
             {
-                TileDetection.AddTilesToList(thor, TileDetection.stoneBlocks,
+                TileDetection.AddTilesToList(thor, TileDetection.StoneBlocks,
                     "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
                     "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
 
-                TileDetection.AddTilesToList(thor, TileDetection.sandBlocks, "Brack", "BrackBare");
-            }*/
+                TileDetection.AddTilesToList(thor, TileDetection.SandBlocks, "Brack", "BrackBare");
+            }
             #endregion
         }
         public override void Unload()
