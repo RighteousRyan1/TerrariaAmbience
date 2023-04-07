@@ -2,18 +2,9 @@ using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
 using Terraria.ID;
-using Microsoft.Xna.Framework.Audio;
-using System.Collections.Generic;
 using TerrariaAmbience.Core;
 using System.Linq;
-using System.IO;
-using TerrariaAmbience.Content.Players;
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using Terraria.Localization;
-using Terraria.GameContent.UI.Elements;
-using Terraria.UI;
-using Microsoft.Xna.Framework.Input;
 using TerrariaAmbience.Content;
 using TerrariaAmbience.Helpers;
 using Terraria.Audio;
@@ -118,7 +109,7 @@ namespace TerrariaAmbience
             SavingSystem.LoadFromConfig();
             Ambience.Initialize();
 
-            On.Terraria.Main.Update += Main_Update;
+            On_Main.Update += Main_Update;
 
             MethodDetours.DetourAll();
 
@@ -144,7 +135,7 @@ namespace TerrariaAmbience
             aLoader.breezeVolume = 0f;
         }
 
-        private void Main_Update(On.Terraria.Main.orig_Update orig, Main self, GameTime gameTime)
+        private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime)
         {
             orig(self, gameTime);
 
@@ -164,6 +155,8 @@ namespace TerrariaAmbience
         public override void PostSetupContent()
         {
             // Mod thor = ModLoader.GetMod("ThoriumMod");
+
+            MenuDetours.Init();
 
             SoundChanges.Init();
             // TODO: Finish adding these another day...
@@ -221,6 +214,7 @@ namespace TerrariaAmbience
         }
         public override void Unload()
         {
+            MenuDetours.AddMenuButtonsHook = null;
             Main.versionNumber = _versCache;
         }
         public override void Close()

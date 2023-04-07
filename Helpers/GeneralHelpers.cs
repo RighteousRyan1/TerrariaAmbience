@@ -18,6 +18,7 @@ using TerrariaAmbience.Core;
 using Terraria.Audio;
 using Terraria.GameContent;
 using ReLogic.Content;
+using MonoMod.RuntimeDetour;
 
 namespace TerrariaAmbience.Helpers
 {
@@ -27,7 +28,7 @@ namespace TerrariaAmbience.Helpers
 
         public delegate void Hook_AddMenuButtons(Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
 
-        public static event Hook_AddMenuButtons On_AddMenuButtons
+        /*public static event Hook_AddMenuButtons On_AddMenuButtons
         {
             add
             {
@@ -37,6 +38,13 @@ namespace TerrariaAmbience.Helpers
             {
                 HookEndpointManager.Remove<Hook_AddMenuButtons>(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), value);
             }
+        }*/
+
+        public static Hook AddMenuButtonsHook;
+
+        public static void Init() {
+            AddMenuButtonsHook = new(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), 
+                MethodDetours.MenuDetours_On_AddMenuButtons);
         }
     }
     public class GeneralHelpers

@@ -26,30 +26,30 @@ namespace TerrariaAmbience.Core
         {
             ContentInstance.Register(new GeneralHelpers());
 
-            On.Terraria.Main.DrawMenu += Main_DrawMenu;
-            On.Terraria.Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
-            On.Terraria.IngameOptions.DrawRightSide += DrawVolumeValues;
-            On.Terraria.IngameOptions.Draw += DrawTAVolume;
-            MenuDetours.On_AddMenuButtons += MenuDetours_On_AddMenuButtons;
+            On_Main.DrawMenu += Main_DrawMenu;
+            On_Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
+            On_IngameOptions.DrawRightSide += DrawVolumeValues;
+            On_IngameOptions.Draw += DrawTAVolume;
+            // MenuDetours.On_AddMenuButtons += MenuDetours_On_AddMenuButtons;
 
             active = true;
             posY = 4;
         }
 
-        private static void DrawTAVolume(On.Terraria.IngameOptions.orig_Draw orig, Main mainInstance, SpriteBatch sb)
+        private static void DrawTAVolume(On_IngameOptions.orig_Draw orig, Main mainInstance, SpriteBatch sb)
         {
             sb.DrawString(FontAssets.DeathText.Value, $"Hold Add or Subtract (or period or comma) to change the volume of Terraria Ambience!", new Vector2(8, 8), Color.White, 0f, Vector2.Zero, 0.3f, SpriteEffects.None, 1f);
             orig(mainInstance, sb);
         }
 
-        private static void MenuDetours_On_AddMenuButtons(MenuDetours.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
+        public static void MenuDetours_On_AddMenuButtons(MenuDetours.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
         {
             GeneralHelpers.AddMainMenuButton("Ambience Menu", delegate { Main.menuMode = 999; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
             orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
         }
         private static bool oldHover;
         private static bool hovering;
-        private static bool DrawVolumeValues(On.Terraria.IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
+        private static bool DrawVolumeValues(On_IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
         {
             Rectangle hoverPos = new((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
             if (i == 14)
@@ -77,7 +77,7 @@ namespace TerrariaAmbience.Core
         #region Shitcode i will never rework
         private static Vector2 drawPos;
         private static string displayable;
-        private static void Main_DrawInterface_30_Hotbar(On.Terraria.Main.orig_DrawInterface_30_Hotbar orig, Main self)
+        private static void Main_DrawInterface_30_Hotbar(On_Main.orig_DrawInterface_30_Hotbar orig, Main self)
         {
             orig(self);
             var loader = Ambience.Instance;
@@ -1041,7 +1041,7 @@ namespace TerrariaAmbience.Core
             return !getName ? rootGotten : names;
         }
 
-        private static void Main_DrawMenu(On.Terraria.Main.orig_DrawMenu orig, Main self, GameTime gameTime)
+        private static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
             // orig(self, gameTime);
             //Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);

@@ -19,11 +19,11 @@ namespace TerrariaAmbience.Content
                 // 45 in MusicID is the wind ambience
 
                 // Now change the sound (Main.soundX = y)
-                On.Terraria.Audio.SoundPlayer.Play += Switch;
+                On_SoundPlayer.Play += Switch;
             }
         }
 
-        private static ReLogic.Utilities.SlotId Switch(On.Terraria.Audio.SoundPlayer.orig_Play orig, SoundPlayer self, ref SoundStyle style, Microsoft.Xna.Framework.Vector2? position)
+        private static ReLogic.Utilities.SlotId Switch(On_SoundPlayer.orig_Play orig, SoundPlayer self, ref SoundStyle style, Microsoft.Xna.Framework.Vector2? position, SoundUpdateCallback updateCallback)
         {
             if (!Main.dedServ)
             {
@@ -37,7 +37,7 @@ namespace TerrariaAmbience.Content
                     style = GeneralHelpers.SimpleSoundStyle($"{nameof(TerrariaAmbience)}/Sounds/Custom/npcs/zombie{rand}", 0);
                 }
             }
-            return orig(self, ref style, position);
+            return orig(self, ref style, position, updateCallback);
         }
     }
 }

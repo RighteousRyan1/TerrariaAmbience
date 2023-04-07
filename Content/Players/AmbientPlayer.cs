@@ -63,45 +63,43 @@ namespace TerrariaAmbience.Content.Players
         public SoundEffectInstance howlInstance;
 
         internal int timerUntilValidChestStateChange;
-
-        public override void OnEnterWorld(Player player)
-        {
+        public override void OnEnterWorld() {
             /*string Between(string text, string start, string end)
-            {
-                if (text.Contains(start) && text.Contains(end))
-                {
-                    int stringStart;
-                    int stringEnd;
-                    stringStart = text.IndexOf(start, 0) + start.Length;
-                    stringEnd = text.IndexOf(end, stringStart);
-                    return text.Substring(stringStart, stringEnd - stringStart);
-                }
-                return "";
-            }
-            Version GetBrowserVersion()
-            {
-                Version vers;
-                ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                WebClient client = new WebClient();
-                string URL = "https://mirror.sgkoi.dev/Mods/Details/TerrariaAmbience";
-                string htmlCode = client.DownloadString(URL);
+{
+    if (text.Contains(start) && text.Contains(end))
+    {
+        int stringStart;
+        int stringEnd;
+        stringStart = text.IndexOf(start, 0) + start.Length;
+        stringEnd = text.IndexOf(end, stringStart);
+        return text.Substring(stringStart, stringEnd - stringStart);
+    }
+    return "";
+}
+Version GetBrowserVersion()
+{
+    Version vers;
+    ServicePointManager.Expect100Continue = true;
+    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+    WebClient client = new WebClient();
+    string URL = "https://mirror.sgkoi.dev/Mods/Details/TerrariaAmbience";
+    string htmlCode = client.DownloadString(URL);
 
-                htmlCode = Between(htmlCode, "Version", "</dd>");
-                htmlCode = htmlCode.Remove(0, 50).Trim().Remove(0, 1);
-                vers = new Version(htmlCode);
+    htmlCode = Between(htmlCode, "Version", "</dd>");
+    htmlCode = htmlCode.Remove(0, 50).Trim().Remove(0, 1);
+    vers = new Version(htmlCode);
 
-                return vers;
-            }
-            if (Mod.Version < GetBrowserVersion())
-            {
-                if (!Environment.Is64BitProcess)
-                    Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an outdated version of [c/FabcdF:Terraria Ambience].\nYour current version is [c/FFdd00:v{Mod.Version}], the browser version is [c/00dd00:v{GetBrowserVersion()}]. Go to the mod browser and install the latest version!", false, Color.White);
-            }
-            if (Mod.Version > GetBrowserVersion())
-            {
-                Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an early release of [c/FabcdF:Terraria Ambience]. Do not spread this anywhere!", false, Color.White);
-            }*/
+    return vers;
+}
+if (Mod.Version < GetBrowserVersion())
+{
+    if (!Environment.Is64BitProcess)
+        Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an outdated version of [c/FabcdF:Terraria Ambience].\nYour current version is [c/FFdd00:v{Mod.Version}], the browser version is [c/00dd00:v{GetBrowserVersion()}]. Go to the mod browser and install the latest version!", false, Color.White);
+}
+if (Mod.Version > GetBrowserVersion())
+{
+    Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an early release of [c/FabcdF:Terraria Ambience]. Do not spread this anywhere!", false, Color.White);
+}*/
             MethodDetours.attemptingToPlayTracks = false;
             timerUntilValidChestStateChange = 0;
 

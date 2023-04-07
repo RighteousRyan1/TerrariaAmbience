@@ -23,10 +23,10 @@ namespace TerrariaAmbience.Sounds
 		public override void Load()
 		{
 			AudioModifier.CacheReflection();
-            On.Terraria.Audio.ActiveSound.Play += ActiveSound_Play;
+            On_ActiveSound.Play += ActiveSound_Play;
 		}
 
-		private void ActiveSound_Play(On.Terraria.Audio.ActiveSound.orig_Play orig, ActiveSound self)
+		private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self)
 		{
 			orig(self);
 
