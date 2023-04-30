@@ -11,6 +11,8 @@ Developers:
 
 Most Recent Small Update:
 
+[DISCLAIMER] Disclaimer added for SteelSeries users. HEED TO IT.
+
 [MAJOR] Fixed pylons not working in multiplayer.
 [MAJOR] Fixed large lage in some underground areas. If it still happens, please reach out to me.
 [CHANGED FEATURE] Made ambience volumes individually modifiable via the config.

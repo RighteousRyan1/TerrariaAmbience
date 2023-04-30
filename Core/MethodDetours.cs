@@ -17,6 +17,8 @@ using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using Terraria.GameContent;
 using System.Diagnostics;
+using System.Data;
+using NAudio.CoreAudioApi;
 
 namespace TerrariaAmbience.Core
 {
@@ -983,14 +985,11 @@ namespace TerrariaAmbience.Core
             if (Main.menuMode == 1001)
             {
                 int count = 0;
-                foreach (var name in GetSubFolders(Ambience.INTERNAL_CombinedPath, true))
-                {
-                    try
-                    {
+                foreach (var name in GetSubFolders(Ambience.INTERNAL_CombinedPath, true)) {
+                    try {
                         var flt = ButtonScalesPerDir[count];
                         GeneralHelpers.Instance.CreateSimpleUIButton(new Vector2(Main.screenWidth / 2, goodScreenFloat + (offY * count)), name,
-                            delegate
-                            {
+                            delegate {
                                 SoundEngine.PlaySound(SoundID.MenuOpen);
                                 mod.Logger.Info($"Swapped or tried swapping soundpack. {GetSubFolders(Path.Combine(ModLoader.ModPath, "TASoundReplace"))[count] + $" ({GetSubFolders(Path.Combine(ModLoader.ModPath, "TASoundReplace"), true)[count]})" ?? "Was null, failed."}");
                                 Ambience.SFXReplacePath = GetSubFolders(Path.Combine(ModLoader.ModPath, "TASoundReplace"))[count];
@@ -1000,10 +999,7 @@ namespace TerrariaAmbience.Core
 
                         count++;
                     }
-                    catch
-                    {
-
-                    }
+                    catch { }
                 }
                 var flot = 0.5f;
                 var flot2 = 0.5f;
@@ -1100,8 +1096,15 @@ namespace TerrariaAmbience.Core
             }
             posX += active ? 20f : -20f;
 
-            if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
-            if (Main.menuMode == 0) ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+            if (Main.menuMode == 0) {
+                if (TerrariaAmbience.UserHasSteelSeries) {
+                    Vector2 scale = new Vector2(0.5f) * new Vector2(Main.screenWidth / 1920f, Main.screenHeight / 1080f);
+                    var warning = "Warning! You have a SteelSeries headset.\nIf you are using the [c/00FF00:Sonar] audio device, [c/FF0000:DISABLE IT] and [c/FF0000:RESTART].\nOtherwise, it will crash the game due to audio issues.";
+                    ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, warning, new Vector2(10, 60), Color.LightGray, 0f, Vector2.Zero, scale, 0, 1);
+                    ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+                    ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+                }
+            }
 
             GeneralHelpers.MSOld = GeneralHelpers.MSNew;
             orig(self, gameTime);

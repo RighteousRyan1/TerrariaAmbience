@@ -9,6 +9,7 @@ using TerrariaAmbience.Content;
 using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using TerrariaAmbience.Common.Systems;
+using NAudio.CoreAudioApi;
 
 namespace TerrariaAmbience
 {
@@ -151,9 +152,20 @@ namespace TerrariaAmbience
                 Ambience.ClampAll();
             }
         }
-
+        public static bool UserHasSteelSeries;
         public override void PostSetupContent()
         {
+            var enumerator = new MMDeviceEnumerator();
+
+            // Allows you to enumerate rendering devices in certain states
+            var endpoints = enumerator.EnumerateAudioEndPoints(
+                DataFlow.Render,
+                DeviceState.Unplugged | DeviceState.Active);
+
+            var endpointNames = endpoints.Select(x => x.DeviceFriendlyName).ToArray();
+
+            UserHasSteelSeries = endpointNames.Any(endpoint => endpoint.Contains("SteelSeries") 
+            && endpoint.Contains("Sonar"));
             // Mod thor = ModLoader.GetMod("ThoriumMod");
 
             MenuDetours.Init();
