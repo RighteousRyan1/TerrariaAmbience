@@ -60,9 +60,9 @@ namespace TerrariaAmbience.Core
         public float[] snowVolumes = new float[2];
 
         [Label("Jungle")]
-        [Tooltip("Order: Top -> Bottom\n\nDay\nNight")]
-        [DefaultValue(new float[] { 1f, 1f })]
-        public float[] jungleVolumes = new float[2];
+        [Tooltip("Order: Top -> Bottom\n\nSurfaceDay\nSurfaceNight\nUndergroundDay\nUndergroundNight")]
+        [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
+        public float[] jungleVolumes = new float[4];
 
         [Label("World Evils")]
         [Tooltip("Order: Top -> Bottom\n\nCorruption\nCrimson")]

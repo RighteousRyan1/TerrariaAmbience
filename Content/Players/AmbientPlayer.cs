@@ -23,40 +23,7 @@ namespace TerrariaAmbience.Content.Players
 
         public int WallsAround => ReverbAudioSystem.WallsAround(Player.Center, new(4, 4), out var coords);
 
-        public bool isOnWoodTile;
-        public bool isOnStoneTile;
-        public bool isOnGrassyTile;
-        public bool isOnSandyTile;
-        public bool isOnSnowyTile;
-        public bool isOnDirtyTile;
-        public bool isOnIcyTile;
-        public bool isOnSmoothTile;
-        public bool isOnMetalTile;
-        public bool isOnMarbleOrGraniteTile;
-        public bool isOnGlassTile;
-        public bool isOnLeafTile;
-        public bool isOnStickyTile;
-
         public bool isNearCampfire;
-
-        public SoundEffectInstance soundInstanceWoodStep;
-        public SoundEffectInstance soundInstanceSandStep;
-        public SoundEffectInstance soundInstanceStoneStep;
-        public SoundEffectInstance soundInstanceSnowStep;
-        public SoundEffectInstance soundInstanceGrassStep;
-        public SoundEffectInstance soundInstanceDirtStep;
-
-        public SoundEffectInstance soundInstanceIceStep;
-        public SoundEffectInstance soundInstanceMetalStep;
-        public SoundEffectInstance soundInstanceSmoothTileStep;
-        public SoundEffectInstance soundInstanceMarbleGraniteStep;
-        public SoundEffectInstance soundInstanceLeafStep;
-        public SoundEffectInstance soundInstanceGlassStep;
-        public SoundEffectInstance soundInstanceArmorStep;
-        public SoundEffectInstance soundInstanceVanityStep;
-
-        public SoundEffectInstance soundInstanceStickyStep;
-        public SoundEffectInstance soundInstanceWaterStep;
 
         public SoundEffectInstance thunderInstance;
         public SoundEffectInstance hootInstance;
@@ -100,23 +67,6 @@ if (Mod.Version > GetBrowserVersion())
 {
     Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an early release of [c/FabcdF:Terraria Ambience]. Do not spread this anywhere!", false, Color.White);
 }*/
-            MethodDetours.attemptingToPlayTracks = false;
-            timerUntilValidChestStateChange = 0;
-
-            soundInstanceGrassStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceWoodStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceSandStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceSnowStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceStoneStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceDirtStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceIceStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceLeafStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceSmoothTileStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceGlassStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceMetalStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceMarbleGraniteStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceStickyStep = SoundID.Run.GetRandomSound().CreateInstance();
-            soundInstanceWaterStep = SoundID.Run.GetRandomSound().CreateInstance();
         }
 
         private int legFrameSnapShotNew; // These 2 variables should never be modified. Ever.
@@ -131,27 +81,7 @@ if (Mod.Version > GetBrowserVersion())
         /// Checks above the player for about 8 tiles for a ceiling. Used for wet-sounding footsteps.
         /// </para>
         /// </summary>
-        private bool hasTilesAbove;
-
-        public static string pathSand;
-        public static string pathDirt;
-        public static string pathGrass;
-        public static string pathSnow;
-        public static string pathStone;
-        public static string pathWet;
-        public static string pathWood;
-        public static string pathIce;
-        public static string pathLeaf;
-        public static string pathSmooth;
-        public static string pathMetal;
-        public static string pathMarbleGranite;
-        public static string pathGlass;
-        public static string pathArmor;
-        public static string pathVanity;
-
-        public static string pathWater;
-        public static string pathSticky;
-
+        public bool HasTilesAbove;
 
         private bool _wet; // old state of player wet
 
@@ -167,7 +97,7 @@ if (Mod.Version > GetBrowserVersion())
 
             #region ShowReverbTiles
 
-            if (GeneralHelpers.KeyPress(Microsoft.Xna.Framework.Input.Keys.LeftAlt))
+            if (GeneralHelpers.KeyPress(Microsoft.Xna.Framework.Input.Keys.RightAlt))
                 _showReverbTiles = !_showReverbTiles;
 
             if (_showReverbTiles)
@@ -228,130 +158,24 @@ if (Mod.Version > GetBrowserVersion())
                         Tile tile = Main.tile[i / 16, j / 16];
                         if (tile.HasTile && tile.CollisionType() == 1)
                         {
-                            hasTilesAbove = true;
+                            HasTilesAbove = true;
                             break;
                         }
                         else
                         {
-                            hasTilesAbove = false;
+                            HasTilesAbove = false;
                         }
                     }
                 }
             }
-            legFrameSnapShotNew = Player.legFrame.Y / 20;
-            int randWood = Main.rand.Next(1, 8);
-            int randSand = Main.rand.Next(1, 7);
-            int randStone = Main.rand.Next(1, 9);
-            int randGrass = Main.rand.Next(1, 9);
-            int randSnow = Main.rand.Next(1, 12);
-            int randWet = Main.rand.Next(1, 4);
-            int randDirt = Main.rand.Next(1, 7);
-            int randLeaf = Main.rand.Next(1, 8);
-            int randMarbleGranite = Main.rand.Next(1, 8);
-            int randIce = Main.rand.Next(1, 8);
-            int randGlass = Main.rand.Next(1, 7);
-            int randSmooth = Main.rand.Next(1, 8);
-            int randMetal = Main.rand.Next(1, 7);
-            int randArmor = Main.rand.Next(1, 10);
-            int randVanity = Main.rand.Next(1, 7);
-            int randWater = Main.rand.Next(1, 7);
-            int randSticky = Main.rand.Next(1, 7);
-
-            pathWood = $"TerrariaAmbience/Sounds/Custom/steps/wood/step{randWood}";
-            pathSand = $"TerrariaAmbience/Sounds/Custom/steps/sand/step{randSand}";
-            pathStone = $"TerrariaAmbience/Sounds/Custom/steps/stone/step{randStone}";
-            pathGrass = $"TerrariaAmbience/Sounds/Custom/steps/grass/step{randGrass}";
-            pathSnow = $"TerrariaAmbience/Sounds/Custom/steps/snow/step{randSnow}";
-            pathWet = $"TerrariaAmbience/Sounds/Custom/steps/wet/step{randWet}";
-            pathDirt = $"TerrariaAmbience/Sounds/Custom/steps/dirt/step{randDirt}";
-            pathLeaf = $"TerrariaAmbience/Sounds/Custom/steps/leaf/step{randLeaf}";
-            pathMetal = $"TerrariaAmbience/Sounds/Custom/steps/metal/step{randMetal}";
-            pathMarbleGranite = $"TerrariaAmbience/Sounds/Custom/steps/marblegranite/step{randMarbleGranite}";
-            pathSmooth = $"TerrariaAmbience/Sounds/Custom/steps/smoothstones/step{randSmooth}";
-            pathGlass = $"TerrariaAmbience/Sounds/Custom/steps/glass/step{randGlass}";
-            pathIce = $"TerrariaAmbience/Sounds/Custom/steps/ice/step{randIce}";
-            pathArmor = $"TerrariaAmbience/Sounds/Custom/steps/armor/heavy{randArmor}";
-            pathVanity = $"TerrariaAmbience/Sounds/Custom/steps/armor/light{randVanity}";
-            pathWater = $"TerrariaAmbience/Sounds/Custom/steps/water/step{randWater}";
-            pathSticky = $"TerrariaAmbience/Sounds/Custom/steps/sticky/step{randSticky}";
-
-            if (Player.velocity.Y != 0f)
-            {
-                isOnWoodTile = false;
-                isOnDirtyTile = false;
-                isOnSnowyTile = false;
-                isOnStoneTile = false;
-                isOnGrassyTile = false;
-                isOnSandyTile = false;
-                isOnIcyTile = false;
-                isOnLeafTile = false;
-                isOnMetalTile = false;
-                isOnMarbleOrGraniteTile = false;
-                isOnGlassTile = false;
-                isOnSmoothTile = false;
-                isOnStickyTile = false;
-            }
             if (Main.GameUpdateCount % 8 == 0)
             {
                 ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
-                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb;
-            }
-            var reverbActual = Player.GetModPlayer<ReverbPlayer>().ReverbFactor;
-
-            // reverbActual = ReverbAudioSystem.CanFindEscapeRoute(Player.Bottom - new Vector2(0, 3), 5) ? 0f : reverbActual;
-            if (!Player.wet)
-            {
-                soundInstanceDirtStep.ApplyReverb(reverbActual);
-                soundInstanceStoneStep.ApplyReverb(reverbActual);
-                soundInstanceWoodStep.ApplyReverb(reverbActual);
-                soundInstanceGrassStep.ApplyReverb(reverbActual);
-                soundInstanceSnowStep.ApplyReverb(reverbActual);
-                soundInstanceSandStep.ApplyReverb(reverbActual);
-
-                soundInstanceIceStep.ApplyReverb(reverbActual);
-                soundInstanceSmoothTileStep.ApplyReverb(reverbActual);
-                soundInstanceMetalStep.ApplyReverb(reverbActual);
-                soundInstanceGlassStep.ApplyReverb(reverbActual);
-                soundInstanceMarbleGraniteStep.ApplyReverb(reverbActual);
-                soundInstanceLeafStep.ApplyReverb(reverbActual);
-                soundInstanceArmorStep.ApplyReverb(reverbActual);
-                soundInstanceVanityStep.ApplyReverb(reverbActual);
-                soundInstanceStickyStep.ApplyReverb(reverbActual);
-                soundInstanceWaterStep.ApplyReverb(reverbActual);
-            }
-            else
-            {
-                float standardBand = 0.1f;
-                soundInstanceDirtStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceStoneStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceWoodStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceGrassStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceSnowStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceSandStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-
-                soundInstanceIceStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceSmoothTileStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceMetalStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceGlassStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceMarbleGraniteStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceLeafStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceArmorStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceVanityStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceStickyStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
-                soundInstanceWaterStep.ApplyReverbReturnInstance(reverbActual).ApplyBandPassFilter(standardBand);
+                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2;
             }
 
             // this is left in because my reverb system thinks that the sound originates from within a tile.
             #endregion
-            if (ModContent.GetInstance<GeneralConfig>().footsteps)
-            {
-                bool stepping = (legFrameSnapShotNew == 44 && legFrameSnapShotOld != 44) || (legFrameSnapShotNew == 25 && legFrameSnapShotOld != 25);
-                bool landing = legFrameSnapShotNew != 14 && legFrameSnapShotOld == 14;
-                if (stepping)
-                    GetFootstepSound(false);
-                else if (landing)
-                    GetFootstepSound(true); // exception?
-            }
             // HandleContainerOpenings(ContainerContext.Chest, out var opened);
             chestStateNew = Player.chest;
             if (Main.soundVolume > 0f)
@@ -385,6 +209,9 @@ if (Mod.Version > GetBrowserVersion())
         public override void PostUpdate()
         {
             HandleIceScraping();
+
+            if (Player.whoAmI != Main.LocalPlayer.whoAmI)
+                return;
             int randX = Main.rand.Next(-1750, 1750);
             int randY = Main.rand.Next(-1750, 1750);
             int randC = Main.rand.Next(1, 6);
@@ -397,12 +224,7 @@ if (Mod.Version > GetBrowserVersion())
 
             float mafs = 2000 / (Main.maxRaining * 2);
             float chance3 = Main.rand.NextFloat(mafs);
-            int activePlayers = 0;
-            foreach (Player p in Main.player)
-            {
-                if (p.active)
-                    activePlayers++;
-            }
+
             if (Main.raining && !Player.ZoneSnow && Player.ZoneOverworldHeight)
             {
                 if (chance3 < 2)
@@ -418,7 +240,7 @@ if (Mod.Version > GetBrowserVersion())
             {
                 string pathToHowl = $"TerrariaAmbience/Sounds/Custom/ambient/animals/howl";
 
-                int chance = Main.rand.Next(1500 * activePlayers * 4);
+                int chance = Main.rand.Next(1500);
                 if (Player.ZoneSnow && !Player.ZoneUnderworldHeight && !Player.ZoneRockLayerHeight)
                 {
                     if (chance == 1)
@@ -478,67 +300,6 @@ if (Mod.Version > GetBrowserVersion())
             // for some reason heavy sounds arent playing
 
             _wet = Player.wet;
-        }
-
-
-        /// <summary>
-        /// Get the player's footstep sound.
-        /// </summary>
-        /// <param name="landing">If the player is landing. If false, the player is stepping.</param>
-        /// <returns></returns>
-        public SoundEffectInstance GetFootstepSound(bool landing)
-        {
-            SoundEffectInstance sound = null;
-            Player.Bottom.TilesAround(20, Player.ZoneRockLayerHeight || Player.ZoneDirtLayerHeight);
-            if (!Player.mount.Active && Player.velocity.Y == 0 && Main.soundVolume != 0f && !Player.pulley)
-            {
-                if (ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled)
-                {
-                    // exception?
-                    soundInstanceArmorStep = GeneralHelpers.PlaySound(new SoundStyle(pathArmor) { Volume = GetArmorStepVolume() * 1.5f }, Player.Bottom);
-                    soundInstanceVanityStep = GeneralHelpers.PlaySound(new SoundStyle(pathVanity) { Volume = GetArmorStepVolume() * 1.5f }, Player.Bottom);
-                    soundInstanceArmorStep = GeneralHelpers.PlaySound(new SoundStyle(pathArmor) { Volume = GetArmorStepVolume() }, Player.Bottom);
-                    soundInstanceVanityStep = GeneralHelpers.PlaySound(new SoundStyle(pathVanity) { Volume = GetArmorStepVolume() }, Player.Bottom);
-                }
-                if (!Player.Underwater() && Player.wet && !Player.lavaWet) // is player's head above water and feet in water?
-                {
-                    var clamped = MathHelper.Clamp(Player.velocity.X, -4, 4);
-                    soundInstanceWaterStep = GeneralHelpers.PlaySound(new SoundStyle(pathWater) { Volume = MathF.Abs(clamped / 8) }, Player.Bottom);
-                }
-
-                if (!hasTilesAbove && Main.raining && !Player.wet && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-                    GeneralHelpers.PlaySound(new SoundStyle(pathWet) { Volume = landing ? 0.15f : 0.05f }, Player.Bottom);
-
-                #region Steps Per-tile
-                if (isOnSandyTile)
-                    sound = soundInstanceSandStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathSand, 0, SoundType.Sound, landing ? 1f : 0.9f), Player.Bottom);
-                if (isOnGrassyTile)
-                        sound = soundInstanceGrassStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathGrass, 0, SoundType.Sound, landing ? 0.35f : 0.1f), Player.Bottom);
-                if (isOnDirtyTile)
-                    sound = soundInstanceDirtStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathDirt, 0, SoundType.Sound, landing ? 0.45f : 0.15f), Player.Bottom);
-                if (isOnStoneTile)
-                    sound = soundInstanceStoneStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathStone, 0, SoundType.Sound, landing ? 0.35f : 0.15f), Player.Bottom);
-                if (isOnSnowyTile)
-                    sound = soundInstanceSnowStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathSnow, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
-                if (isOnWoodTile)
-                    sound = soundInstanceWoodStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathWood, 0, SoundType.Sound, landing ? 0.35f : 0.2f), Player.Bottom);
-                if (isOnMetalTile)
-                    sound = soundInstanceMetalStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathMetal, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
-                if (isOnSmoothTile)
-                    sound = soundInstanceSmoothTileStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathSmooth, 0, SoundType.Sound, landing ? 0.55f : 0.25f), Player.Bottom);
-                if (isOnMarbleOrGraniteTile)
-                    sound = soundInstanceMarbleGraniteStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathMarbleGranite, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
-                if (isOnIcyTile)
-                    sound = soundInstanceIceStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathIce, 0, SoundType.Sound, landing ? 0.175f : 0.075f), Player.Bottom);
-                if (isOnLeafTile)
-                    sound = soundInstanceLeafStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathLeaf, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
-                if (isOnGlassTile)
-                    sound = soundInstanceGlassStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathGlass, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
-                if (isOnStickyTile)
-                    sound = soundInstanceStickyStep = GeneralHelpers.PlaySound(GeneralHelpers.SimpleSoundStyle(pathSticky, 0, SoundType.Sound, landing ? 0.45f : 0.25f), Player.Bottom);
-                #endregion
-            }
-            return sound;
         }
 
         public float GetArmorStepVolume()
@@ -723,7 +484,7 @@ if (Mod.Version > GetBrowserVersion())
 
         public override void ResetEffects()
         {
-            TileDetection.curTileType = -1;
+            // TileDetection.curTileType = -1;
         }
     }
     public class CampfireDetection : GlobalTile

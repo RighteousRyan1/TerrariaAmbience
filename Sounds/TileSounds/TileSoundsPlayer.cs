@@ -8,6 +8,7 @@ using TerrariaAmbience.Core;
 using Terraria.Audio;
 using Microsoft.Xna.Framework;
 using TerrariaAmbience.Content.Players;
+using TerrariaAmbience.Content.AmbientAndMore;
 
 namespace TerrariaAmbience.Sounds.TileSounds
 {
@@ -22,7 +23,7 @@ namespace TerrariaAmbience.Sounds.TileSounds
 
                 static bool IsTileTypeWood(int type)
                 {
-                    foreach (var tList in TileDetection.AllTileLists)
+                    foreach (var tList in FootstepHandler.AllTileLists)
                     {
                         if (tList.Contains(type))
                             return false;

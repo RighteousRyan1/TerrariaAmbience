@@ -1,6 +1,7 @@
 displayName = Terraria Ambience
 author = RighteousRyan
-version = 0.2.3.2
+version = 0.2.4
 homepage = https://forums.terraria.org/index.php?threads/terraria-ambience-mod.104161/
 includePDB = true
-dllReferences = NAudio.Core, NAudio.Asio, NAudio, NAudio.Wasapi, NAudio.Midi, NAudio.WinMM, TerrariaAmbienceAPI
+dllReferences = NAudio.Core, NAudio.Asio, NAudio, NAudio.Wasapi, NAudio.Midi, NAudio.WinMM
+modReferences = TerrariaAmbienceAPI

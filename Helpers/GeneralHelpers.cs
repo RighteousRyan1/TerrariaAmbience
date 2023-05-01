@@ -28,21 +28,10 @@ namespace TerrariaAmbience.Helpers
 
         public delegate void Hook_AddMenuButtons(Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
 
-        /*public static event Hook_AddMenuButtons On_AddMenuButtons
-        {
-            add
-            {
-                HookEndpointManager.Add<Hook_AddMenuButtons>(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), value);
-            }
-            remove
-            {
-                HookEndpointManager.Remove<Hook_AddMenuButtons>(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), value);
-            }
-        }*/
-
         public static Hook AddMenuButtonsHook;
 
         public static void Init() {
+            // this is useful to have for future notes.
             AddMenuButtonsHook = new(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), 
                 MethodDetours.MenuDetours_On_AddMenuButtons);
         }

@@ -9,32 +9,38 @@ Developers:
 - RighteousRyan#8008 (Programmer)
 - William#9010 (Mod Icon Artist)
 
-Most Recent Small Update:
+Most Recent Update:
+
+CONTENT
+--------------
+
+Added variants to evening and morning ambiences to switch up the potentially dull same-sound every night and morning.
+
+Added underground jungle (day & night) ambient tracks.
+
+
+CHANGES
+--------------
+
+Fixed config-related bugs.
+
+Removed sound packs. Literally no one used them and it made up 1500 lines of painful code.
+Converted codebase to use TerrariaAmbienceAPI. TerrariaAmbienceAPI will now be a mod dependency.
 
 [DISCLAIMER] Disclaimer added for SteelSeries users. HEED TO IT.
 
-[MAJOR] Fixed pylons not working in multiplayer.
-[MAJOR] Fixed large lage in some underground areas. If it still happens, please reach out to me.
-[CHANGED FEATURE] Made ambience volumes individually modifiable via the config.
-[MINOR] Moved the "overall ambience" volume to the config screen.
-[BUGFIX] - Fixed "directory not found" bug.
-
-Most Recent Update:
+1.4 Update:
 
 SO MANY NEW THINGS!
 
-[NEW FEATURE] Reverb! You can enter enclosed spaces and hear your beautiful items in reverberated audio! Can be disabled.
-[NEW FEATURE] Sound occlusion! If you can't "see" a sound, it will sound muffled or blocked out. Can be disabled.
-[NEW FEATURE] Audio dampening! Going underwater makes everything sound dampened! Can be disabled.
+Reverb! You can enter enclosed spaces and hear your beautiful items in reverberated audio! Can be disabled.
+Sound occlusion! If you can't "see" a sound, it will sound muffled or blocked out. Can be disabled.
+Audio dampening! Going underwater makes everything sound dampened! Can be disabled.
 
-[NEW FEATURE] A WHOLE lot of new footstep sounds! (Metal, Marble/Granite, Smooth Stones, Leaves, Ice, Glass, and more!), a lot of the sounds were just outright replaced.
-[NEW FEATURE] Slimes now make sounds when jumping and landing. Can be disabled.
+A WHOLE lot of new footstep sounds! (Metal, Marble/Granite, Smooth Stones, Leaves, Ice, Glass, and more!), a lot of the sounds were just outright replaced.
+Slimes now make sounds when jumping and landing. Can be disabled.
 
-[NEW FEATURE] There are now 2D positional audios that update as you go around the world, these consist of crickets, owls, and other forest critters.
-[NEW FEATURE] Sounds now play when sliding on ice.
+There are now 2D positional audios that update as you go around the world, these consist of crickets, owls, and other forest critters.
+Sounds now play when sliding on ice.
 
-[MAJOR NEW FEATURE] Soundpacks!
-You can now create a folder in your Terraria/tModLoader/Mods/TASoundReplace folder and it will auto-detect in the 'Ambient Menu,' under Sound Packs. 
-Be sure to read the README.md in the base folder.
-
-[NEW FEATURE] Audio smooth-transition. As you get closer to space, ambient tracks will get more quieter. As you go into the underground, the sound of caves gets louder.
+Audio smooth-transition. As you get closer to space, ambient tracks will grow quiet. As you go into the underground, the sound of caves grows louder.

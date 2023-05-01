@@ -509,7 +509,6 @@ namespace TerrariaAmbience.Content
         /// </summary>
         internal static void DoUpdate_Ambience()
         {
-            var inst = Instance;
             float ambVol = TAAmbient;
             if (!Main.dedServ)
             {

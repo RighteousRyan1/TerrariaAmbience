@@ -10,6 +10,7 @@ using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using TerrariaAmbience.Common.Systems;
 using NAudio.CoreAudioApi;
+using TerrariaAmbience.Content.AmbientAndMore;
 
 namespace TerrariaAmbience
 {
@@ -30,29 +31,29 @@ namespace TerrariaAmbience
                     if (!Main.dedServ) {
                         if (mod != null && boxedInstance is string[] s) {
                             if (listName == "Grass")
-                                TileDetection.AddTilesToList(mod, TileDetection.GrassBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.GrassBlocks, s);
                             else if (listName == "Stone")
-                                TileDetection.AddTilesToList(mod, TileDetection.StoneBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.StoneBlocks, s);
                             else if (listName == "Sand")
-                                TileDetection.AddTilesToList(mod, TileDetection.SandBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.SandBlocks, s);
                             else if (listName == "Snow")
-                                TileDetection.AddTilesToList(mod, TileDetection.SnowyBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.SnowBlocks, s);
                             else if (listName == "Dirt")
-                                TileDetection.AddTilesToList(mod, TileDetection.DirtBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.DirtBlocks, s);
                             else if (listName == "Metal")
-                                TileDetection.AddTilesToList(mod, TileDetection.Metals, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.MetalBlocks, s);
                             else if (listName == "Ice")
-                                TileDetection.AddTilesToList(mod, TileDetection.IcyBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.IceBlocks, s);
                             else if (listName == "Leaf")
-                                TileDetection.AddTilesToList(mod, TileDetection.LeafBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.LeafBlocks, s);
                             else if (listName == "Glass")
-                                TileDetection.AddTilesToList(mod, TileDetection.GlassBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.GlassBlocks, s);
                             else if (listName == "GraniteMarble")
-                                TileDetection.AddTilesToList(mod, TileDetection.GraniteAndMarbles, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.MarblesGranites, s);
                             else if (listName == "SmoothStone")
-                                TileDetection.AddTilesToList(mod, TileDetection.SmoothStones, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.SmoothStones, s);
                             else if (listName == "Sticky")
-                                TileDetection.AddTilesToList(mod, TileDetection.StickyBlocks, s);
+                                TileDetection.AddTilesToList(mod, FootstepHandler.StickyBlocks, s);
                             else {
                                 Logger.Info("Mod.Call failure: Unknown tile list specified.");
                                 return "Unknown tile list specified.";
@@ -61,29 +62,29 @@ namespace TerrariaAmbience
                         }
                         else if (mod == null && boxedInstance is int[] i) {
                             if (listName == "Grass")
-                                TileDetection.AddTilesToList(TileDetection.GrassBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.GrassBlocks, i);
                             else if (listName == "Stone")
-                                TileDetection.AddTilesToList(TileDetection.StoneBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.StoneBlocks, i);
                             else if (listName == "Sand")
-                                TileDetection.AddTilesToList(TileDetection.SandBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.SandBlocks, i);
                             else if (listName == "Snow")
-                                TileDetection.AddTilesToList(TileDetection.SnowyBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.SnowBlocks, i);
                             else if (listName == "Dirt")
-                                TileDetection.AddTilesToList(TileDetection.DirtBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.DirtBlocks, i);
                             else if (listName == "Metal")
-                                TileDetection.AddTilesToList(TileDetection.Metals, i);
+                                TileDetection.AddTilesToList(FootstepHandler.MetalBlocks, i);
                             else if (listName == "Ice")
-                                TileDetection.AddTilesToList(TileDetection.IcyBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.IceBlocks, i);
                             else if (listName == "Leaf")
-                                TileDetection.AddTilesToList(TileDetection.LeafBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.LeafBlocks, i);
                             else if (listName == "Glass")
-                                TileDetection.AddTilesToList(TileDetection.GlassBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.GlassBlocks, i);
                             else if (listName == "GraniteMarble")
-                                TileDetection.AddTilesToList(TileDetection.GraniteAndMarbles, i);
+                                TileDetection.AddTilesToList(FootstepHandler.MarblesGranites, i);
                             else if (listName == "SmoothStone")
-                                TileDetection.AddTilesToList(TileDetection.SmoothStones, i);
+                                TileDetection.AddTilesToList(FootstepHandler.SmoothStones, i);
                             else if (listName == "Sticky")
-                                TileDetection.AddTilesToList(TileDetection.StickyBlocks, i);
+                                TileDetection.AddTilesToList(FootstepHandler.StickyBlocks, i);
                             Logger.Info($"Successfully added modded tiles ({string.Join(", ", i.Select(id => TileID.Search.GetName(id)))} to the {listName} tile list.");
                         }
                     }
@@ -100,6 +101,10 @@ namespace TerrariaAmbience
         }
 
         private string _versCache;
+
+        public static AmbientHandler DefaultAmbientHandler;
+        public static FootstepHandler DefaultFootstepHandler;
+
         public override void Load()
         {
 
@@ -107,14 +112,14 @@ namespace TerrariaAmbience
             ContentInstance.Register(new Ambience());
             Main.versionNumber += $", Terraria Ambience v{Version}";
 
-            SavingSystem.LoadFromConfig();
-            Ambience.Initialize();
+            // calls DefaultAmbientHandler.Initialize() via the ctor
+            // Ambience.Initialize();
 
             On_Main.Update += Main_Update;
 
             MethodDetours.DetourAll();
 
-            Ambience.PlayAllAmbience();
+            //Ambience.PlayAllAmbience();
             var aLoader = Ambience.Instance;
 
             aLoader.dayCricketsVolume = 0f;
@@ -136,25 +141,42 @@ namespace TerrariaAmbience
             aLoader.breezeVolume = 0f;
         }
 
+        public static bool JustTurnedDay;
+        public static bool JustTurnedNight;
+
+        private static bool _curDay;
+        private static bool _oldDay;
         private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime)
         {
             orig(self, gameTime);
+
+            _curDay = Main.dayTime;
+
+            JustTurnedDay = !_oldDay && _curDay;
+            JustTurnedNight = _oldDay && !_curDay;
 
             if (!Main.dedServ)
             {
                 GeneralHelpers.ClickHandling();
                 GeneralHelpers.UpdateButtons();
 
-                Ambience.DoUpdate_Ambience();
-                Ambience.UpdateVolume();
+                DefaultAmbientHandler?.Update();
+                DefaultFootstepHandler?.Update();
+
+                //Ambience.DoUpdate_Ambience();
+                //Ambience.UpdateVolume();
                 if (Main.gameMenu)
                     return;
-                Ambience.ClampAll();
+                //Ambience.ClampAll();
             }
+            _oldDay = Main.dayTime;
         }
         public static bool UserHasSteelSeries;
         public override void PostSetupContent()
         {
+            DefaultAmbientHandler = new();
+            DefaultFootstepHandler = new();
+
             var enumerator = new MMDeviceEnumerator();
 
             // Allows you to enumerate rendering devices in certain states
@@ -175,30 +197,30 @@ namespace TerrariaAmbience
             #region Calamity Adds
             if (ModLoader.TryGetMod("CalamityMod", out var calamity))
             {
-                TileDetection.AddTilesToList(calamity, TileDetection.SnowyBlocks, "AstralSnow");
-                TileDetection.AddTilesToList(calamity, TileDetection.SandBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.SnowBlocks, "AstralSnow");
+                TileDetection.AddTilesToList(calamity, FootstepHandler.SandBlocks,
                     "SulphurousSand",
                     "AstralSand",
                     "EutrophicSand",
                     "AstralClay",
                     "SulphurousSandNoWater");
 
-                TileDetection.AddTilesToList(calamity, TileDetection.GrassBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.GrassBlocks,
                     "AstralDirt",
                     "AstralGrass");
 
-                TileDetection.AddTilesToList(calamity, TileDetection.LeafBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.LeafBlocks,
                     "PlantyMush");
 
-                TileDetection.AddTilesToList(calamity, TileDetection.DirtBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.DirtBlocks,
                     "PlantyMush",
                     "AstralDirt");
-                TileDetection.AddTilesToList(calamity, TileDetection.IcyBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.IceBlocks,
                     "AstralIce");
-                TileDetection.AddTilesToList(calamity, TileDetection.GraniteAndMarbles,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.MarblesGranites,
                     "StatigelBlock");
 
-                TileDetection.AddTilesToList(calamity, TileDetection.StoneBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.StoneBlocks,
                     "AstralOre",
                     "AstralStone",
                     "AstralMonolith",
@@ -216,11 +238,11 @@ namespace TerrariaAmbience
             #region Thorium Adds
             if (ModLoader.TryGetMod("ThoriumMod", out var thor))
             {
-                TileDetection.AddTilesToList(thor, TileDetection.StoneBlocks,
+                TileDetection.AddTilesToList(thor, FootstepHandler.StoneBlocks,
                     "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
                     "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
 
-                TileDetection.AddTilesToList(thor, TileDetection.SandBlocks, "Brack", "BrackBare");
+                TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
             }
             #endregion
         }

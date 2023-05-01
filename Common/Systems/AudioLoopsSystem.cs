@@ -6,6 +6,7 @@ using System.IO;
 using TerrariaAmbience.Helpers;
 using Terraria;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Content.AmbientAndMore;
 
 namespace TerrariaAmbience.Common.Systems
 {
@@ -61,7 +62,7 @@ namespace TerrariaAmbience.Common.Systems
                 }
 
                 var landingTile = Main.tile[(int)pos.X / 16, (int)pos.Y / 16 + 1];
-                if (!TileDetection.GrassBlocks.Contains(landingTile.TileType) && !TileDetection.DirtBlocks.Contains(landingTile.TileType))
+                if (!FootstepHandler.GrassBlocks.Contains(landingTile.TileType) && !FootstepHandler.DirtBlocks.Contains(landingTile.TileType))
                 {
                     _reason = "IsNotGrassOrDirt";
                     goto Retry;

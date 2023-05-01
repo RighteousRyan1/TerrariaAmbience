@@ -40,11 +40,11 @@ namespace TerrariaAmbience.Sounds
 				if (sDamp)
 				{
 					if (!badStyles.Contains(self.Style))
-						self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
+						self.Sound.ApplyReverbReturnInstance(gain / 2).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
 					return;
 				}
 				if (!badStyles.Contains(self.Style))
-					self.Sound.ApplyReverbReturnInstance(gain).ApplyLowPassFilterReturnInstance(occ);
+					self.Sound.ApplyReverbReturnInstance(gain / 2).ApplyLowPassFilterReturnInstance(occ);
 			}
 		}
 
