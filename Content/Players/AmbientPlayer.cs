@@ -69,17 +69,13 @@ if (Mod.Version > GetBrowserVersion())
 }*/
         }
 
-        private int legFrameSnapShotNew; // These 2 variables should never be modified. Ever.
-        private int legFrameSnapShotOld;
-
         private int chestStateNew;
         private int chestStateOld; // Same as above.
 
         /// <summary>
         /// For the use of rain. Not modifyable publically due to potential anomalies happening otherwise.
-        /// <para>
+        /// <para></para>
         /// Checks above the player for about 8 tiles for a ceiling. Used for wet-sounding footsteps.
-        /// </para>
         /// </summary>
         public bool HasTilesAbove;
 
@@ -102,7 +98,7 @@ if (Mod.Version > GetBrowserVersion())
 
             if (_showReverbTiles)
             {
-                if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && !cfg2.noReverbMath)
+                if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && cfg2.isReverbEnabled)
                 {
                     int wallCount = 0;
                     int tileCount = 0;
@@ -148,30 +144,29 @@ if (Mod.Version > GetBrowserVersion())
             #region Sound Paths / StepRands / Whatever
             timerUntilValidChestStateChange++;
             // This is a pretty niche finding for tiles above said player
-            Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
-            for (int i = (int)Player.Top.X - 1; i < Player.Top.X + 1; i++)
-            {
-                for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--)
-                {
-                    if (WorldGen.InWorld(i / 16, j / 16))
-                    {
-                        Tile tile = Main.tile[i / 16, j / 16];
-                        if (tile.HasTile && tile.CollisionType() == 1)
-                        {
-                            HasTilesAbove = true;
-                            break;
-                        }
-                        else
-                        {
-                            HasTilesAbove = false;
+            if (!Player.wet) {
+                Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
+                for (int i = (int)Player.Top.X - 1; i < Player.Top.X + 1; i++) {
+                    for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--) {
+                        if (WorldGen.InWorld(i / 16, j / 16)) {
+                            Tile tile = Main.tile[i / 16, j / 16];
+                            if (tile.HasTile && tile.CollisionType() == 1) {
+                                HasTilesAbove = true;
+                                break;
+                            }
+                            else {
+                                HasTilesAbove = false;
+                            }
                         }
                     }
                 }
             }
             if (Main.GameUpdateCount % 8 == 0)
             {
-                ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
-                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2;
+                if (ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) {
+                    ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
+                    Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2;
+                }
             }
 
             // this is left in because my reverb system thinks that the sound originates from within a tile.
@@ -203,7 +198,6 @@ if (Mod.Version > GetBrowserVersion())
                 }
             }
             chestStateOld = chestStateNew;
-            legFrameSnapShotOld = legFrameSnapShotNew;
             Player.runSoundDelay = 100;
         }
         public override void PostUpdate()
@@ -271,7 +265,15 @@ if (Mod.Version > GetBrowserVersion())
             else
                 Ambience.Instance.crackleVolume = 0f;
         }
-
+        /// <summary>
+        /// Gets distance from surface of water to the player.
+        /// </summary>
+        /// <param name="maxTileCheck">The maximum tiles to check above the player.</param>
+        /// <param name="defaultCheckPos">The position to check water pressure for. By default is the player's position.</param>
+        /// <returns>The subpixel Y-component distance from the player's head to the surface.</returns>
+        public float GetWaterPressureFloat(int heightCheck, Vector2 checkPos) {
+            return TileUtils.GetWaterPressureFloat(heightCheck, checkPos);
+        }
         /// <summary>
         /// Used for when the "splashes" config is enabled.
         /// </summary>
@@ -332,7 +334,7 @@ if (Mod.Version > GetBrowserVersion())
                     {
                         if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.HeadSlot))
                         {
-                            determinedValue *= 1.25f + 0.0025f;
+                            determinedValue *= 1.25f + 0.05f;
                         }
                     }
                 }
@@ -345,7 +347,7 @@ if (Mod.Version > GetBrowserVersion())
                     {
                         if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.ChestSlot))
                         {
-                            determinedValue += 0.005f;
+                            determinedValue += 0.05f;
                         }
                     }
                 }
@@ -380,21 +382,21 @@ if (Mod.Version > GetBrowserVersion())
             {
                 if (head.vanity)
                 {
-                    determinedValue *= 1.25f + 0.01f;
+                    determinedValue *= 1.25f + 0.1f;
                 }
             }
             if (hasChestArmor)
             {
                 if (chest.vanity)
                 {
-                    determinedValue += 0.02f;
+                    determinedValue += 0.14f;
                 }
             }
             if (hasLegArmor)
             {
                 if (legs.vanity)
                 {
-                     determinedValue += 0.03f;
+                     determinedValue += 0.1f;
                 }
             }
 

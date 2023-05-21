@@ -329,7 +329,7 @@ namespace TerrariaAmbience.Content
             if (Main.hasFocus)
             {
                 #region GeneralVolumeUpdate
-                aLoader.underwaterLoopVolume += player.Underwater() ? transitionHarshness / 2 : -transitionHarshness * 4;
+                aLoader.underwaterLoopVolume += player.IsWaterSuffocating() ? transitionHarshness / 2 : -transitionHarshness * 4;
                 aLoader.dayCricketsVolume +=
                     (player.ZonePurity || player.ZoneMeteor || (player.ZoneHallow && !player.ZoneDesert)) &&
                     Main.dayTime ?
@@ -603,7 +603,7 @@ namespace TerrariaAmbience.Content
             if (Main.gameMenu) return;
             Player player = Main.player[Main.myPlayer]?.GetModPlayer<AmbientPlayer>().Player;
 
-            if (player.Underwater())
+            if (player.IsWaterSuffocating())
             {
                 float defaultBand = 0.075f;
                 Instance.playerInLiquid = true;

@@ -328,7 +328,7 @@ namespace TerrariaAmbience.Helpers
     {
         public static Mod mod => ModContent.GetInstance<TerrariaAmbience>();
         public static bool Underwater(this Vector2 drowningPosition) => Collision.DrownCollision(drowningPosition, 1, 1);
-        public static bool Underwater(this Player player) => Collision.DrownCollision(player.position, player.width, player.height, player.gravDir); // how did i not know this existed before
+        public static bool IsWaterSuffocating(this Player player) => Collision.DrownCollision(player.position, player.width, player.height, player.gravDir); // how did i not know this existed before
         public static string AppendFileExtension(this string str, GeneralHelpers.AudioFileExtension extension)
         {
             return $"{str}.{extension.ToString().ToLower()}";
@@ -352,49 +352,7 @@ namespace TerrariaAmbience.Helpers
             }
             Solve();
         }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Color color)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
-                spriteBatch.Draw(tex, rect, color);
-            }
-        }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Color color)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
-                spriteBatch.Draw(tex, pos, color);
-            }
-        }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Rectangle? sourceRect, Color color)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
-                spriteBatch.Draw(tex, rect, sourceRect, color);
-            }
-        }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
-                spriteBatch.Draw(tex, pos, sourceRect, color);
-            }
-        }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Rectangle rect, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
-                spriteBatch.Draw(tex, rect, sourceRect, color, rot, orig, effects, layerDepth);
-            }
-        }
         public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
-                spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, layerDepth);
-            }
-        }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, Vector2 scale, SpriteEffects effects, float layerDepth)
         {
             if (tex != null && !tex.IsDisposed)
             {
@@ -504,6 +462,28 @@ namespace TerrariaAmbience.Helpers
     }
     public static class TileUtils
     {
+        public static float GetWaterPressureFloat(int heightCheck, Vector2 checkPos) {
+
+            if (!Collision.DrownCollision(checkPos, 1, 1, -1)) {
+                return 0f;
+            }
+
+            float yDist = 0;
+
+            int iterations = 0;
+
+            for (int i = (int)checkPos.Y; i > (int)checkPos.Y - heightCheck; i--) {
+                iterations++;
+
+                bool isWaterExistent = Collision.DrownCollision(checkPos - new Vector2(0, iterations), 1, 1, -1);
+                if (!isWaterExistent || iterations == heightCheck) {
+                    yDist = iterations;
+                    break;
+                }
+            }
+
+            return yDist;
+        }
         public static int CollisionType(this Tile tile)
         {
             if (!tile.HasTile)

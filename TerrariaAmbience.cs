@@ -177,6 +177,19 @@ namespace TerrariaAmbience
             DefaultAmbientHandler = new();
             DefaultFootstepHandler = new();
 
+            // hopefully reduce runtime overhead for later via *hopefully* caching all sounds in the load process.
+            /*for (int i = 0; i < 20; i++) {
+                var even = Main.rand.Next(1, AmbientHandler.NUM_EVENING_AMBIENCE + 1);
+                var night = Main.rand.Next(1, AmbientHandler.NUM_NIGHT_AMBIENCE + 1);
+                var morn = Main.rand.Next(1, AmbientHandler.NUM_MORNING_AMBIENCE + 1);
+                var day = Main.rand.Next(1, AmbientHandler.NUM_DAY_AMBIENCE + 1);
+                DefaultAmbientHandler.ForestEvening.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/evening_{even}");
+                DefaultAmbientHandler.ForestNight.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/night_{night}");
+                DefaultAmbientHandler.ForestMorning.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/morning_{morn}");
+                DefaultAmbientHandler.ForestDay.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/day_{day}");
+            }*/
+            // ^ doing this causes a read access violation. wtf.
+
             var enumerator = new MMDeviceEnumerator();
 
             // Allows you to enumerate rendering devices in certain states

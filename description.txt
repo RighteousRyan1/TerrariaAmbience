@@ -14,13 +14,26 @@ Most Recent Update:
 CONTENT
 --------------
 
-Added variants to evening and morning ambiences to switch up the potentially dull same-sound every night and morning.
+Added a depth-level to underwater ambience. The deeper you are the more intensive it gets.
+
+Added variants to morning, day, evening, and night ambiences to switch up the potentially dull same-sound every night and morning.
 
 Added underground jungle (day & night) ambient tracks.
+
+Added different variants to forest day and night ambient tracks.
+
+More variants to come!
 
 
 CHANGES
 --------------
+
+Some BTS tweaks.
+
+Added more sound configuration for people who prefer more vanilla-friendly sounds.
+
+Fixed corruption and crimson sounds not working for some reason.
+Fixed underwater ambience not working for some reason.
 
 Fixed config-related bugs.
 

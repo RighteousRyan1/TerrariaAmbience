@@ -55,7 +55,7 @@ namespace TerrariaAmbience.Common.Systems
             IngameGlobalTime = Main.time + (Main.dayTime ? 0 : Main.dayLength);
 
             Gradient_Hell = (float)CreateGradientValue(Main.LocalPlayer.Center.Y, (Main.maxTilesY - 300) * 16, Main.maxTilesY * 16);
-            Gradient_SkyToUnderground = (float)CreateGradientValue(Main.LocalPlayer.Center.Y, Main.worldSurface * 16 * 0.25f, Main.rockLayer * 16);
+            Gradient_SkyToUnderground = (float)CreateGradientValue(Main.LocalPlayer.Center.Y, Main.worldSurface * 16 * 0.35f, Main.worldSurface * 1.05f * 16);
             Gradient_Underground = (float)CreateGradientValue(Main.LocalPlayer.Center.Y, Main.worldSurface * 16, (Main.maxTilesY - 150) * 16);
             if (Main.dayTime)
             {

@@ -62,23 +62,17 @@ public class FootstepHandler {
         Metal = new(mod, "Sounds/Custom/steps/metal/step", 6, "Metal", MetalBlocks.ToArray());
         Water = new(mod, "Sounds/Custom/steps/water/step", 6, "Water Wading") {
             FootstepConditions = (p) => {
-                return !p.Underwater() && p.wet && !p.lavaWet;
+                return !p.IsWaterSuffocating() && p.wet && !p.lavaWet;
             }
         };
         Sticky = new(mod, "Sounds/Custom/steps/sticky/step", 6, "Sticky", StickyBlocks.ToArray());
         Armor = new(mod, "Sounds/Custom/steps/armor/heavy", 9, "Armor") {
             FootstepConditions = (p) => {
-                var vol = p.GetModPlayer<AmbientPlayer>().GetArmorStepVolume();
-                Armor.LandVolume = vol;
-                Armor.StepVolume = vol / 2;
                 return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
             }
         };
         Vanity = new(mod, "Sounds/Custom/steps/armor/light", 6, "Vanity") {
             FootstepConditions = (p) => {
-                var vol = p.GetModPlayer<AmbientPlayer>().GetVanityStepVolume();
-                Vanity.LandVolume = vol;
-                Vanity.StepVolume = vol / 2;
                 return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
             }
         };
@@ -90,6 +84,15 @@ public class FootstepHandler {
     }
 
     public void Update() {
+        if (!Main.gameMenu) {
+            var vol = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetArmorStepVolume();
+            Armor.LandVolume = vol;
+            Armor.StepVolume = vol / 2;
+
+            var vol1 = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetVanityStepVolume();
+            Vanity.LandVolume = vol1;
+            Vanity.StepVolume = vol1 / 2;
+        }
         AllSounds.ForEach(x => x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footsteps);
     }
 

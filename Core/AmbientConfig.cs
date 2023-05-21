@@ -116,16 +116,14 @@ namespace TerrariaAmbience.Core
 
         [Header("Sound Filters")]
 
-        [Label("Disable Reverb")]
-        [Tooltip("Enable this if you have FPS issues, especially while underground. This is caused by the system that determines the reverb sounds of all sounds in the game." +
-            "\nSince the math required for this operation is hefty, it can cause FPS issues." +
-            "\nDisable to have reverberated sound effects based on your environment.")]
-        [DefaultValue(false)]
-        public bool noReverbMath;
+        [Label("Reverb")]
+        [Tooltip("Makes sounds have a reverberation factor depending on environment or depth, depending on what settings for reverb you have enabled.")]
+        [DefaultValue(true)]
+        public bool isReverbEnabled;
 
         [Label("Enhanced Reverb Calculation (Underground)")]
         [Tooltip("In the cavern layer, the math for calculating reverb is changed a little bit." +
-            "\nHaving this enabled can lead to major FPS drops.")]
+            "\nHaving this enabled can be a problem for lower-end CPUs.")]
         [DefaultValue(true)]
         public bool ugReverbCalculation;
 
@@ -134,10 +132,20 @@ namespace TerrariaAmbience.Core
         [DefaultValue(true)]
         public bool surfaceReverbCalculation;
 
-        [Label("Advanced reverb calculation")]
-        [Tooltip("Toggle advanced audio reverb calculation algorythms.\nDisabling this will increase your reverb factor by how deep you are into the world.")]
+        [Label("Advanced Reverb Calculation")]
+        [Tooltip("Toggle advanced audio reverb calculation algorithms.\nDisabling this will increase your reverb factor by how deep you are into the world.")]
         [DefaultValue(true)]
         public bool advancedReverbCalculation;
+
+        [Label("Sound Dampening")]
+        [Tooltip("Makes sounds sound dampened when underwater.")]
+        [DefaultValue(true)]
+        public bool isSoundDampeningEnabled;
+
+        [Label("Sound Occlusion")]
+        [Tooltip("Makes sounds muffled when the Line-of-Sight to the player is blocked, depending on distance and density of the blockage.")]
+        [DefaultValue(true)]
+        public bool isSoundOcclusionEnabled;
     }
     [Label("SFX / Sound Filters")]
     public class AmbientConfigServer : ModConfig

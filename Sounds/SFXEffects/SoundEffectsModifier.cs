@@ -34,17 +34,28 @@ namespace TerrariaAmbience.Sounds
 			{
 				bool containsIgnoreablePos = badStyles.Contains(self.Style);
 				ReverbAudioSystem.CreateAudioFX(self.Position.Value, out float gain, out float occ, out float damp, out bool sDamp);
-
+				if (!ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled)
+					gain = 0f;
+				if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled) {
+					sDamp = false;
+					damp = 0f;
+				}
+				if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled) {
+					occ = 0f;
+				}
 				if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
 					gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
 				if (sDamp)
 				{
 					if (!badStyles.Contains(self.Style))
-						self.Sound.ApplyReverbReturnInstance(gain / 2).ApplyLowPassFilterReturnInstance(occ).ApplyBandPassFilter(damp);
+						self.Sound.ApplyReverbReturnInstance(gain / 2)
+							.ApplyLowPassFilterReturnInstance(occ)
+							.ApplyBandPassFilter(damp);
 					return;
 				}
 				if (!badStyles.Contains(self.Style))
-					self.Sound.ApplyReverbReturnInstance(gain / 2).ApplyLowPassFilterReturnInstance(occ);
+					self.Sound.ApplyReverbReturnInstance(gain / 2)
+						.ApplyLowPassFilterReturnInstance(occ);
 			}
 		}
 
@@ -249,8 +260,8 @@ namespace TerrariaAmbience.Sounds
 			var reverbActual = 0f;
 			if (Main.gameMenu)
 				return;
-			bool playerUnderwater = Main.LocalPlayer.Underwater();
-			if (!cfg.noReverbMath)
+			bool playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
+			if (cfg.isReverbEnabled)
 			{
 				if (cfg.advancedReverbCalculation)
 				{
