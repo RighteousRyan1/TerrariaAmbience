@@ -11,6 +11,8 @@ Developers:
 
 Most Recent Update:
 
+Fixed a bug that caused a fatal error on the server, resulting in the mod being disabled in multiplayer.
+
 CONTENT
 --------------
 

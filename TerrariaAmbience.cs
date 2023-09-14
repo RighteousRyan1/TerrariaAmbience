@@ -11,6 +11,8 @@ using Terraria.Audio;
 using TerrariaAmbience.Common.Systems;
 using NAudio.CoreAudioApi;
 using TerrariaAmbience.Content.AmbientAndMore;
+using TerrariaAmbience.Content.Players;
+using Microsoft.Xna.Framework.Audio;
 
 namespace TerrariaAmbience
 {
@@ -109,7 +111,6 @@ namespace TerrariaAmbience
         {
 
             _versCache = Main.versionNumber;
-            ContentInstance.Register(new Ambience());
             Main.versionNumber += $", Terraria Ambience v{Version}";
 
             // calls DefaultAmbientHandler.Initialize() via the ctor
@@ -118,27 +119,6 @@ namespace TerrariaAmbience
             On_Main.Update += Main_Update;
 
             MethodDetours.DetourAll();
-
-            //Ambience.PlayAllAmbience();
-            var aLoader = Ambience.Instance;
-
-            aLoader.dayCricketsVolume = 0f;
-            aLoader.nightCricketsVolume = 0f;
-            aLoader.eveningCricketsVolume = 0f;
-            aLoader.desertCricketsVolume = 0f;
-            aLoader.crackleVolume = 0f;
-            aLoader.ugAmbienceVolume = 0f;
-            aLoader.crimsonRumblesVolume = 0f;
-            aLoader.snowDayVolume = 0f;
-            aLoader.snowNightVolume = 0f;
-            aLoader.corruptionRoarsVolume = 0f;
-            aLoader.dayJungleVolume = 0f;
-            aLoader.nightJungleVolume = 0f;
-            aLoader.beachWavesVolume = 0f;
-            aLoader.hellRumbleVolume = 0f;
-            aLoader.rainVolume = 0f;
-            aLoader.morningCricketsVolume = 0f;
-            aLoader.breezeVolume = 0f;
         }
 
         public static bool JustTurnedDay;
@@ -174,88 +154,94 @@ namespace TerrariaAmbience
         public static bool UserHasSteelSeries;
         public override void PostSetupContent()
         {
-            DefaultAmbientHandler = new();
-            DefaultFootstepHandler = new();
+            if (!Main.dedServ) {
+                DefaultAmbientHandler = new();
+                DefaultFootstepHandler = new();
+                // Sounds\Custom\ambient\environment\campfire_crackle
+                // guh??? null??
+                var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
+                DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
 
-            // hopefully reduce runtime overhead for later via *hopefully* caching all sounds in the load process.
-            /*for (int i = 0; i < 20; i++) {
-                var even = Main.rand.Next(1, AmbientHandler.NUM_EVENING_AMBIENCE + 1);
-                var night = Main.rand.Next(1, AmbientHandler.NUM_NIGHT_AMBIENCE + 1);
-                var morn = Main.rand.Next(1, AmbientHandler.NUM_MORNING_AMBIENCE + 1);
-                var day = Main.rand.Next(1, AmbientHandler.NUM_DAY_AMBIENCE + 1);
-                DefaultAmbientHandler.ForestEvening.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/evening_{even}");
-                DefaultAmbientHandler.ForestNight.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/night_{night}");
-                DefaultAmbientHandler.ForestMorning.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/morning_{morn}");
-                DefaultAmbientHandler.ForestDay.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/day_{day}");
-            }*/
-            // ^ doing this causes a read access violation. wtf.
 
-            var enumerator = new MMDeviceEnumerator();
+                // hopefully reduce runtime overhead for later via *hopefully* caching all sounds in the load process.
+                /*for (int i = 0; i < 20; i++) {
+                    var even = Main.rand.Next(1, AmbientHandler.NUM_EVENING_AMBIENCE + 1);
+                    var night = Main.rand.Next(1, AmbientHandler.NUM_NIGHT_AMBIENCE + 1);
+                    var morn = Main.rand.Next(1, AmbientHandler.NUM_MORNING_AMBIENCE + 1);
+                    var day = Main.rand.Next(1, AmbientHandler.NUM_DAY_AMBIENCE + 1);
+                    DefaultAmbientHandler.ForestEvening.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/evening_{even}");
+                    DefaultAmbientHandler.ForestNight.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/night_{night}");
+                    DefaultAmbientHandler.ForestMorning.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/morning_{morn}");
+                    DefaultAmbientHandler.ForestDay.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/day_{day}");
+                }*/
+                // ^ doing this causes a read access violation. wtf.
 
-            // Allows you to enumerate rendering devices in certain states
-            var endpoints = enumerator.EnumerateAudioEndPoints(
-                DataFlow.Render,
-                DeviceState.Unplugged | DeviceState.Active);
+                /*var enumerator = new MMDeviceEnumerator();
 
-            var endpointNames = endpoints.Select(x => x.DeviceFriendlyName).ToArray();
+                // Allows you to enumerate rendering devices in certain states
+                var endpoints = enumerator.EnumerateAudioEndPoints(
+                    DataFlow.Render,
+                    DeviceState.Unplugged | DeviceState.Active);
 
-            UserHasSteelSeries = endpointNames.Any(endpoint => endpoint.Contains("SteelSeries") 
-            && endpoint.Contains("Sonar"));
-            // Mod thor = ModLoader.GetMod("ThoriumMod");
+                var endpointNames = endpoints.Select(x => x.DeviceFriendlyName).ToArray();
 
-            MenuDetours.Init();
+                UserHasSteelSeries = endpointNames.Any(endpoint => endpoint.Contains("SteelSeries") 
+                && endpoint.Contains("Sonar"));*/
+                // Mod thor = ModLoader.GetMod("ThoriumMod");
 
-            SoundChanges.Init();
-            // TODO: Finish adding these another day...
-            #region Calamity Adds
-            if (ModLoader.TryGetMod("CalamityMod", out var calamity))
-            {
-                TileDetection.AddTilesToList(calamity, FootstepHandler.SnowBlocks, "AstralSnow");
-                TileDetection.AddTilesToList(calamity, FootstepHandler.SandBlocks,
-                    "SulphurousSand",
-                    "AstralSand",
-                    "EutrophicSand",
-                    "AstralClay",
-                    "SulphurousSandNoWater");
+                MenuDetours.Init();
 
-                TileDetection.AddTilesToList(calamity, FootstepHandler.GrassBlocks,
-                    "AstralDirt",
-                    "AstralGrass");
+                SoundChanges.Init();
+                // TODO: Finish adding these another day...
+                #region Calamity Adds
+                if (ModLoader.TryGetMod("CalamityMod", out var calamity)) {
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.SnowBlocks, "AstralSnow");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.SandBlocks,
+                        "SulphurousSand",
+                        "AstralSand",
+                        "EutrophicSand",
+                        "AstralClay",
+                        "SulphurousSandNoWater");
 
-                TileDetection.AddTilesToList(calamity, FootstepHandler.LeafBlocks,
-                    "PlantyMush");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.GrassBlocks,
+                        "AstralDirt",
+                        "AstralGrass");
 
-                TileDetection.AddTilesToList(calamity, FootstepHandler.DirtBlocks,
-                    "PlantyMush",
-                    "AstralDirt");
-                TileDetection.AddTilesToList(calamity, FootstepHandler.IceBlocks,
-                    "AstralIce");
-                TileDetection.AddTilesToList(calamity, FootstepHandler.MarblesGranites,
-                    "StatigelBlock");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.LeafBlocks,
+                        "PlantyMush");
 
-                TileDetection.AddTilesToList(calamity, FootstepHandler.StoneBlocks,
-                    "AstralOre",
-                    "AstralStone",
-                    "AstralMonolith",
-                    "AstralMonolith", "AbyssGravel", "Tenebris", "ChaoticOre", "Voidstone", "Navystone",
-                    "TableCoral", "SeaPrism", "HazardChevronPanels", "Navyplate", "RustedPlating",
-                    "HardenedSulphurousSandstone", "ChaoticOre",
-                    "HardenedAstralSand",
-                    "SulphurousSandstone",
-                    "HardenedSulphurousSandstone",
-                    "BrimstoneSlag", "CharredOre",
-                    "LaboratoryShelf",
-                    "LaboratoryPanels", "Cinderplate", "SmoothVoidstone");
-            }
-            #endregion
-            #region Thorium Adds
-            if (ModLoader.TryGetMod("ThoriumMod", out var thor))
-            {
-                TileDetection.AddTilesToList(thor, FootstepHandler.StoneBlocks,
-                    "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
-                    "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.DirtBlocks,
+                        "PlantyMush",
+                        "AstralDirt");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.IceBlocks,
+                        "AstralIce");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.MarblesGranites,
+                        "StatigelBlock");
 
-                TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.StoneBlocks,
+                        "AstralOre",
+                        "AstralStone",
+                        "AstralMonolith",
+                        "AstralMonolith", "AbyssGravel", "Tenebris", "ChaoticOre", "Voidstone", "Navystone",
+                        "TableCoral", "SeaPrism", "HazardChevronPanels", "Navyplate", "RustedPlating",
+                        "HardenedSulphurousSandstone", "ChaoticOre",
+                        "HardenedAstralSand",
+                        "SulphurousSandstone",
+                        "HardenedSulphurousSandstone",
+                        "BrimstoneSlag", "CharredOre",
+                        "LaboratoryShelf",
+                        "LaboratoryPanels", "Cinderplate", "SmoothVoidstone");
+                }
+                #endregion
+                #region Thorium Adds
+                if (ModLoader.TryGetMod("ThoriumMod", out var thor)) {
+                    TileDetection.AddTilesToList(thor, FootstepHandler.StoneBlocks,
+                        "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
+                        "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
+
+                    TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
+                }
             }
             #endregion
         }
@@ -270,29 +256,5 @@ namespace TerrariaAmbience
         }
         public float lastPlayerPositionOnGround;
         public float delta_lastPos_playerBottom;
-    }
-    public class VolumeResetterSystem : ModSystem
-    {
-        public override void PreSaveAndQuit()
-        {
-            var aLoader = Ambience.Instance;
-            aLoader.dayCricketsVolume = 0f;
-            aLoader.nightCricketsVolume = 0f;
-            aLoader.eveningCricketsVolume = 0f;
-            aLoader.desertCricketsVolume = 0f;
-            aLoader.crackleVolume = 0f;
-            aLoader.ugAmbienceVolume = 0f;
-            aLoader.crimsonRumblesVolume = 0f;
-            aLoader.snowDayVolume = 0f;
-            aLoader.snowNightVolume = 0f;
-            aLoader.corruptionRoarsVolume = 0f;
-            aLoader.dayJungleVolume = 0f;
-            aLoader.nightJungleVolume = 0f;
-            aLoader.beachWavesVolume = 0f;
-            aLoader.hellRumbleVolume = 0f;
-            aLoader.rainVolume = 0f;
-            aLoader.morningCricketsVolume = 0f;
-            aLoader.breezeVolume = 0f;
-        }
     }
 }

@@ -80,8 +80,6 @@ namespace TerrariaAmbience.Core
             orig(self);
             displayable = string.Empty;
 
-            var loader = Ambience.Instance;
-
             bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
             foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
                 displayable += $"{amb.Name}: {amb.volume}\n";
@@ -97,8 +95,7 @@ namespace TerrariaAmbience.Core
                 + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<Sounds.ReverbPlayer>().ReverbFactor}"
                 + $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
-            if (ModContent.GetInstance<GeneralConfig>().debugInterface)
-            {
+            if (ModContent.GetInstance<GeneralConfig>().debugInterface) {
                 #region DrawVolume
                 if (Main.playerInventory && (Main.mapStyle == 0 || Main.mapStyle == 2))
                     drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 175);
@@ -181,27 +178,6 @@ namespace TerrariaAmbience.Core
         private static float posY;
         private static bool active;
         #endregion
-        public static void HaltAllMenuAmbient()
-        {
-            var aLoader = Ambience.Instance;
-            aLoader.dayCricketsVolume = 0f;
-            aLoader.nightCricketsVolume = 0f;
-            aLoader.eveningCricketsVolume = 0f;
-            aLoader.desertCricketsVolume = 0f;
-            aLoader.crackleVolume = 0f;
-            aLoader.ugAmbienceVolume = 0f;
-            aLoader.crimsonRumblesVolume = 0f;
-            aLoader.snowDayVolume = 0f;
-            aLoader.snowNightVolume = 0f;
-            aLoader.corruptionRoarsVolume = 0f;
-            aLoader.dayJungleVolume = 0f;
-            aLoader.nightJungleVolume = 0f;
-            aLoader.beachWavesVolume = 0f;
-            aLoader.hellRumbleVolume = 0f;
-            aLoader.rainVolume = 0f;
-            aLoader.morningCricketsVolume = 0f;
-            aLoader.breezeVolume = 0f;
-        }
         public static bool sOpen;
         public static bool eOpen;
         private static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)

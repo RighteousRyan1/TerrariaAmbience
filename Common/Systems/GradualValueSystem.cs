@@ -2,6 +2,8 @@ using Terraria;
 using Microsoft.Xna.Framework;
 using Terraria.ModLoader;
 using TerrariaAmbience.Content;
+using System;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Common.Systems
 {
@@ -17,6 +19,9 @@ namespace TerrariaAmbience.Common.Systems
 
         public static float Gradient_AllDayPartNight { get; private set; }
         public static float Gradient_AllNightPartDay { get; private set; }
+
+        public static float Gradient_WindSpeedsLow { get; private set; }
+        public static float Gradient_WindSpeedsHigh { get; private set; }
 
         public static double IngameGlobalTime { get; private set; }
 
@@ -53,6 +58,9 @@ namespace TerrariaAmbience.Common.Systems
         private static void UpdateGradients()
         {
             IngameGlobalTime = Main.time + (Main.dayTime ? 0 : Main.dayLength);
+
+            Gradient_WindSpeedsLow = CreateGradientValue(MathF.Abs(Main.windSpeedCurrent), -0.2f, 0.4f);
+            Gradient_WindSpeedsHigh = CreateGradientValue(MathF.Abs(Main.windSpeedCurrent), 0.2f, 1.0f);
 
             Gradient_Hell = (float)CreateGradientValue(Main.LocalPlayer.Center.Y, (Main.maxTilesY - 300) * 16, Main.maxTilesY * 16);
             Gradient_SkyToUnderground = (float)CreateGradientValue(Main.LocalPlayer.Center.Y, Main.worldSurface * 16 * 0.35f, Main.worldSurface * 1.05f * 16);

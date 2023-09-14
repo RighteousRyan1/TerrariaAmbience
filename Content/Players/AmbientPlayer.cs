@@ -2,10 +2,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -82,8 +78,7 @@ if (Mod.Version > GetBrowserVersion())
         private bool _wet; // old state of player wet
 
         private bool _showReverbTiles;
-        public override void PreUpdate()
-        {
+        public override void PreUpdate() {
             var cfg = ModContent.GetInstance<GeneralConfig>();
             var cfg2 = ModContent.GetInstance<AudioAdditionsConfig>();
             var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
@@ -96,42 +91,32 @@ if (Mod.Version > GetBrowserVersion())
             if (GeneralHelpers.KeyPress(Microsoft.Xna.Framework.Input.Keys.RightAlt))
                 _showReverbTiles = !_showReverbTiles;
 
-            if (_showReverbTiles)
-            {
-                if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && cfg2.isReverbEnabled)
-                {
+            if (_showReverbTiles) {
+                if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && cfg2.isReverbEnabled) {
                     int wallCount = 0;
                     int tileCount = 0;
-                    if (Main.GameUpdateCount % 10 == 0)
-                    {
-                        if (Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight)
-                        {
+                    if (Main.GameUpdateCount % 10 == 0) {
+                        if (Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight) {
                             int wallsNear = ReverbAudioSystem.WallsAround(Player.Center, new Point(15, 15), out List<Point> wallPoints);
                             int tilesNear = ReverbAudioSystem.TilesAround(Player.Center, new Point(15, 15), out List<Point> tilePoints);
-                            foreach (var tilePos in tilePoints)
-                            {
+                            foreach (var tilePos in tilePoints) {
                                 var worldCoords = tilePos.ToVector2() * 16;
                                 var left = new Point(tilePos.X - 1, tilePos.Y);
                                 var right = new Point(tilePos.X + 1, tilePos.Y);
                                 var up = new Point(tilePos.X, tilePos.Y - 1);
                                 var down = new Point(tilePos.X, tilePos.Y + 1);
                                 if (ReverbAudioSystem.CanRaycastTo(Player.Center, left.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, right.ToVector2() * 16)
-                                    || ReverbAudioSystem.CanRaycastTo(Player.Center, up.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, down.ToVector2() * 16))
-                                {
+                                    || ReverbAudioSystem.CanRaycastTo(Player.Center, up.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, down.ToVector2() * 16)) {
                                     tileCount++;
-                                    if (Main.GameUpdateCount % 10 == 0)
-                                    {
+                                    if (Main.GameUpdateCount % 10 == 0) {
                                         Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
                                     }
                                 }
                             }
-                            foreach (var wallPos in wallPoints)
-                            {
-                                if (ReverbAudioSystem.CanRaycastTo(Player.Center, wallPos.ToVector2() * 16))
-                                {
+                            foreach (var wallPos in wallPoints) {
+                                if (ReverbAudioSystem.CanRaycastTo(Player.Center, wallPos.ToVector2() * 16)) {
                                     wallCount++;
-                                    if (Main.GameUpdateCount % 10 == 0)
-                                    {
+                                    if (Main.GameUpdateCount % 10 == 0) {
                                         Dust.QuickBox(wallPos.ToVector2() * 16, wallPos.ToVector2() * 16 + new Vector2(16), 0, Color.Red, null);
                                     }
                                 }
@@ -161,8 +146,7 @@ if (Mod.Version > GetBrowserVersion())
                     }
                 }
             }
-            if (Main.GameUpdateCount % 8 == 0)
-            {
+            if (Main.GameUpdateCount % 8 == 0) {
                 if (ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) {
                     ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
                     Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2;
@@ -173,24 +157,17 @@ if (Mod.Version > GetBrowserVersion())
             #endregion
             // HandleContainerOpenings(ContainerContext.Chest, out var opened);
             chestStateNew = Player.chest;
-            if (Main.soundVolume > 0f)
-            {
-                if (ModContent.GetInstance<AmbientConfigServer>().chestSounds)
-                {
-                    if (timerUntilValidChestStateChange > 10)
-                    {
-                        if (chestStateNew >= -1)
-                        {
-                            if ((chestStateNew != chestStateOld) && chestStateNew > -1)
-                            {
+            if (Main.soundVolume > 0f) {
+                if (ModContent.GetInstance<AmbientConfigServer>().chestSounds) {
+                    if (timerUntilValidChestStateChange > 10) {
+                        if (chestStateNew >= -1) {
+                            if ((chestStateNew != chestStateOld) && chestStateNew > -1) {
                                 GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open") { Volume = 0.25f }, Player.Center);
                             }
-                            if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1)
-                            {
+                            if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1) {
                                 GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
                             }
-                            else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
-                            {
+                            else if ((chestStateNew != chestStateOld) && chestStateOld > -1) {
                                 GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
                             }
                         }
@@ -200,12 +177,11 @@ if (Mod.Version > GetBrowserVersion())
             chestStateOld = chestStateNew;
             Player.runSoundDelay = 100;
         }
-        public override void PostUpdate()
-        {
-            HandleIceScraping();
-
-            if (Player.whoAmI != Main.LocalPlayer.whoAmI)
+        public override void PostUpdate() {
+            if (Player.whoAmI != Main.myPlayer)
                 return;
+            HandleIceScraping();
+            // ^ method above will work in multiplayer eventually... when i care enough.
             int randX = Main.rand.Next(-1750, 1750);
             int randY = Main.rand.Next(-1750, 1750);
             int randC = Main.rand.Next(1, 6);
@@ -219,10 +195,8 @@ if (Mod.Version > GetBrowserVersion())
             float mafs = 2000 / (Main.maxRaining * 2);
             float chance3 = Main.rand.NextFloat(mafs);
 
-            if (Main.raining && !Player.ZoneSnow && Player.ZoneOverworldHeight)
-            {
-                if (chance3 < 2)
-                {
+            if (Main.raining && !Player.ZoneSnow && Player.ZoneOverworldHeight) {
+                if (chance3 < 2) {
                     var id = SoundEngine.PlaySound(new SoundStyle(pathToThunder, 0, SoundType.Ambient), Player.Center + new Vector2(randX, randY));
                     SoundEngine.TryGetActiveSound(id, out var snd);
                     thunderInstance = snd.Sound;
@@ -230,15 +204,12 @@ if (Mod.Version > GetBrowserVersion())
                     thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
                 }
             }
-            if (!Main.dayTime)
-            {
+            if (!Main.dayTime) {
                 string pathToHowl = $"TerrariaAmbience/Sounds/Custom/ambient/animals/howl";
 
                 int chance = Main.rand.Next(1500);
-                if (Player.ZoneSnow && !Player.ZoneUnderworldHeight && !Player.ZoneRockLayerHeight)
-                {
-                    if (chance == 1)
-                    {
+                if (Player.ZoneSnow && !Player.ZoneUnderworldHeight && !Player.ZoneRockLayerHeight) {
+                    if (chance == 1) {
                         var id = SoundEngine.PlaySound(new SoundStyle(pathToHowl), Player.Center + new Vector2(randX, randY));
                         SoundEngine.TryGetActiveSound(id, out var snd);
                         howlInstance = snd.Sound;
@@ -247,24 +218,32 @@ if (Mod.Version > GetBrowserVersion())
                     }
                 }
             }
-            if (Player.ZoneDungeon)
-            {
+            if (Player.ZoneDungeon) {
                 int possibleChance = Main.rand.Next(1000);
                 int randX1 = Main.rand.Next(-2250, 2250);
                 int randY1 = Main.rand.Next(-2250, 2250);
                 if (possibleChance == 0)
                     GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/animals/rattling_bones"), Player.Center + new Vector2(randX1, randY1)).Volume = Main.ambientVolume * 0.05f; ;
             }
-            var aLoader = Ambience.Instance;
-            if (aLoader.crackleVolume > 1)
-                aLoader.crackleVolume = 1;
-            if (aLoader.crackleVolume < 0)
-                aLoader.crackleVolume = 0;
-            if (isNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds)
-                Ambience.Instance.crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceToCampfire / 780;
+
+            if (!TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.IsPlaying())
+                TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
+            float maxDist = 780f;
+            float campfireVolumeScalar = 0.75f;
+            if (isNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds) {
+                cracklePan = (ModContent.GetInstance<CampfireDetection>().distanceToCampfire / maxDist) * (ModContent.GetInstance<CampfireDetection>().isOnRight ? -1 : 1) / 2;
+                crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceToCampfire / maxDist * campfireVolumeScalar;
+            }
             else
-                Ambience.Instance.crackleVolume = 0f;
+                crackleVolume = 0f;
+
+            crackleVolume = MathHelper.Clamp(crackleVolume, 0f, 1f);
+            cracklePan = MathHelper.Clamp(cracklePan, -1f, 1f);
+            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = crackleVolume;
+            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Pan = cracklePan;
         }
+        public static float crackleVolume;
+        public static float cracklePan;
         /// <summary>
         /// Gets distance from surface of water to the player.
         /// </summary>
@@ -277,13 +256,11 @@ if (Mod.Version > GetBrowserVersion())
         /// <summary>
         /// Used for when the "splashes" config is enabled.
         /// </summary>
-        public void ManagePlayerSplashes()
-        {
+        public void ManagePlayerSplashes() {
             bool justWet = Player.wet && !_wet;
             bool justUnwet = !Player.wet && _wet;
 
-            if (justWet || justUnwet)
-            {
+            if (justWet || justUnwet) {
                 var vel = Math.Abs(Player.velocity.Y);
 
                 const float loud_thresh = 10f;
@@ -294,7 +271,7 @@ if (Mod.Version > GetBrowserVersion())
                     soundSplash.Volume = vel / loud_thresh / 4;
                 if (vel == 0)
                     soundSplash.Volume = 0.1f;
-                
+
 
                 GeneralHelpers.PlaySound(soundSplash, Player.position);
             }
@@ -304,8 +281,7 @@ if (Mod.Version > GetBrowserVersion())
             _wet = Player.wet;
         }
 
-        public float GetArmorStepVolume()
-        {
+        public float GetArmorStepVolume() {
             bool hasHeadArmor = GeneralHelpers.CheckPlayerArmorSlot(Player, GeneralHelpers.IDs.ArmorSlotID.HeadSlot, out var head);
             bool hasChestArmor = GeneralHelpers.CheckPlayerArmorSlot(Player, GeneralHelpers.IDs.ArmorSlotID.ChestSlot, out var chest);
             bool hasLegArmor = GeneralHelpers.CheckPlayerArmorSlot(Player, GeneralHelpers.IDs.ArmorSlotID.LegSlot, out var legs);
@@ -313,53 +289,38 @@ if (Mod.Version > GetBrowserVersion())
             float determinedValue = 0f;
 
             // 10 <= x <= 12 == vanity armor
-            bool isWood(Item item)
-            {
-                if (ItemID.Search.TryGetName(item.type, out var name))
-                {
+            bool isWood(Item item) {
+                if (ItemID.Search.TryGetName(item.type, out var name)) {
                     return name.ToLower().Contains("wood");
                 }
                 return false;
             }
-            bool hasVanityCovering(int context)
-            {
+            bool hasVanityCovering(int context) {
                 return !Player.armor[context + 10].IsAir;
             }
 
-            if (hasHeadArmor)
-            {
-                if (!head.vanity)
-                {
-                    if (!isWood(head))
-                    {
-                        if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.HeadSlot))
-                        {
+            if (hasHeadArmor) {
+                if (!head.vanity) {
+                    if (!isWood(head)) {
+                        if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.HeadSlot)) {
                             determinedValue *= 1.25f + 0.05f;
                         }
                     }
                 }
             }
-            if (hasChestArmor)
-            {
-                if (!chest.vanity)
-                {
-                    if (!isWood(chest))
-                    {
-                        if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.ChestSlot))
-                        {
+            if (hasChestArmor) {
+                if (!chest.vanity) {
+                    if (!isWood(chest)) {
+                        if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.ChestSlot)) {
                             determinedValue += 0.05f;
                         }
                     }
                 }
             }
-            if (hasLegArmor)
-            {
-                if (!legs.vanity)
-                {
-                    if (!isWood(legs))
-                    {
-                        if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.LegSlot))
-                        {
+            if (hasLegArmor) {
+                if (!legs.vanity) {
+                    if (!isWood(legs)) {
+                        if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.LegSlot)) {
                             determinedValue += 0.01f;
                         }
                     }
@@ -369,8 +330,7 @@ if (Mod.Version > GetBrowserVersion())
             return determinedValue;
         }
 
-        public float GetVanityStepVolume()
-        {
+        public float GetVanityStepVolume() {
             bool hasHeadArmor = GeneralHelpers.CheckPlayerArmorSlot(Player, GeneralHelpers.IDs.ArmorSlotID.VanityHeadSlot, out var head);
             bool hasChestArmor = GeneralHelpers.CheckPlayerArmorSlot(Player, GeneralHelpers.IDs.ArmorSlotID.VanityChestSlot, out var chest);
             bool hasLegArmor = GeneralHelpers.CheckPlayerArmorSlot(Player, GeneralHelpers.IDs.ArmorSlotID.VanityLegSlot, out var legs);
@@ -378,58 +338,42 @@ if (Mod.Version > GetBrowserVersion())
             float determinedValue = 0f;
 
             // 10 <= x <= 12 == vanity armor
-            if (hasHeadArmor)
-            {
-                if (head.vanity)
-                {
+            if (hasHeadArmor) {
+                if (head.vanity) {
                     determinedValue *= 1.25f + 0.1f;
                 }
             }
-            if (hasChestArmor)
-            {
-                if (chest.vanity)
-                {
+            if (hasChestArmor) {
+                if (chest.vanity) {
                     determinedValue += 0.14f;
                 }
             }
-            if (hasLegArmor)
-            {
-                if (legs.vanity)
-                {
-                     determinedValue += 0.1f;
+            if (hasLegArmor) {
+                if (legs.vanity) {
+                    determinedValue += 0.1f;
                 }
             }
 
             return determinedValue;
         }
 
-        public void HandleContainerOpenings(ContainerContext context, out bool opened)
-        {
+        public void HandleContainerOpenings(ContainerContext context, out bool opened) {
             opened = false;
             chestStateNew = Player.chest;
-            if (timerUntilValidChestStateChange > 10)
-            {
+            if (timerUntilValidChestStateChange > 10) {
                 // Main.NewText($"{chestStateNew} : {chestStateOld}");
-                switch (context)
-                {
+                switch (context) {
                     case ContainerContext.Chest:
                         // > -1
-                        if (chestStateNew >= -1)
-                        {
+                        if (chestStateNew >= -1) {
                             if ((chestStateNew != chestStateOld) && chestStateNew > -1)
-                            {
                                 opened = true;
-                            }
                             // orignal closed, none other opened
                             if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1)
-                            {
                                 opened = false;
-                            }
                             // original closed, new opened
                             else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
-                            {
                                 opened = false;
-                            }
                         }
                         break;
                     case ContainerContext.PiggyBank:
@@ -450,12 +394,9 @@ if (Mod.Version > GetBrowserVersion())
         public SoundEffectInstance soundSlippySmoothInst;
 
         private bool _areSoundsInitialized;
-        public void HandleIceScraping()
-        {
-            if (!Main.dedServ)
-            {
-                if (!_areSoundsInitialized)
-                {
+        public void HandleIceScraping() {
+            if (!Main.dedServ) {
+                if (!_areSoundsInitialized) {
                     soundSlippyRough = Mod.Assets.Request<SoundEffect>("Sounds/Custom/ambient/player/ice_slide_rough", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
                     soundSlippyRoughInst = soundSlippyRough.CreateInstance();
                     soundSlippyRoughInst.IsLooped = true;
@@ -483,11 +424,6 @@ if (Mod.Version > GetBrowserVersion())
                 soundSlippySmoothInst.Volume = MathHelper.Clamp(soundSlippySmoothInst.Volume, 0f, 0.5f);
             }
         }
-
-        public override void ResetEffects()
-        {
-            // TileDetection.curTileType = -1;
-        }
     }
     public class CampfireDetection : GlobalTile
     {
@@ -495,6 +431,7 @@ if (Mod.Version > GetBrowserVersion())
 
         public float distanceToCampfire;
 
+        public bool isOnRight;
         public override void NearbyEffects(int i, int j, int type, bool closer)
         {
             if (!Main.dedServ)
@@ -513,6 +450,7 @@ if (Mod.Version > GetBrowserVersion())
                         //if (t.frameY <= 18 && t.frameY >= 0)
                         {
                             distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
+                            isOnRight = originOfCampfire.X < player.Center.X;
                             player.GetModPlayer<AmbientPlayer>().isNearCampfire = true;
                         }
                     }
@@ -523,8 +461,8 @@ if (Mod.Version > GetBrowserVersion())
                         Main.NewText(t.frameY);*/
                         //if (t.frameY <= 54 && t.frameY >= 36)
                         {
-                            if (Ambience.CampfireCrackleInstance is not null)
-                                Ambience.CampfireCrackleInstance.Volume = 0f;
+                            //if (TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance is not null)
+                                //TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
                             player.GetModPlayer<AmbientPlayer>().isNearCampfire = false;
                         }
                     }

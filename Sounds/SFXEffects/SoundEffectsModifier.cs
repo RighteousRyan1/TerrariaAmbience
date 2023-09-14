@@ -20,7 +20,10 @@ namespace TerrariaAmbience.Sounds
 {
 	public class SoundEffectsModifier : ModSystem
     {
-		public override void Load()
+        public override void PreSaveAndQuit() {
+			TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Stop();
+        }
+        public override void Load()
 		{
 			AudioModifier.CacheReflection();
             On_ActiveSound.Play += ActiveSound_Play;

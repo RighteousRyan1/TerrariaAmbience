@@ -1,0 +1,221 @@
+Configs: {
+	AmbientConfigServer: {
+		DisplayName: Ambient Config (Server)
+
+		chestSounds: {
+			Label: Chest Open/Close Sounds
+			Tooltip:
+				'''
+				Toggle on to turn chest sounds on. Toggle off to turn them off.
+				Turned on by default.
+				This config is shared with everyone in the server.
+				'''
+		}
+
+		newSplashSounds: {
+			Label: Toggle New Water Sounds
+			Tooltip:
+				'''
+				Toggle on to turn this mod's new water interaction sounds on. Toggle off to turn them off.
+				Turned on by default.
+				This config is shared with everyone in the server.
+				'''
+		}
+	}
+
+	AudioAdditionsConfig: {
+		DisplayName: Audio Additions Config
+
+		slimySounds: {
+			Label: Slimy Sounds
+			Tooltip: Toggle the sounds that slimes create when jumping and landing.
+		}
+
+		woodCreaks: {
+			Label: Wood Creaks
+			Tooltip:
+				'''
+				Toggle the sounds that slightly unsupported wood make.
+				Do note that this can potentially increase FPS, as this can be a hefty process.
+				'''
+		}
+
+		dynamicAnimalSounds: {
+			Label: Various Animal Sounds
+			Tooltip: Toggle the (somewhat loud) sounds that play and have dynamic sound updating based on location-to-player panning.
+		}
+
+		Headers.SoundFilters: Sound Filters
+
+		isReverbEnabled: {
+			Label: Reverb
+			Tooltip: Makes sounds have a reverberation factor depending on environment or depth, depending on what settings for reverb you have enabled.
+		}
+
+		ugReverbCalculation: {
+			Label: Enhanced Reverb Calculation (Underground)
+			Tooltip:
+				'''
+				In the cavern layer, the math for calculating reverb is changed a little bit.
+				Having this enabled can be a problem for lower-end CPUs.
+				'''
+		}
+
+		surfaceReverbCalculation: {
+			Label: Enhanced Reverb Calculation (Surface)
+			Tooltip: Toggle surface audio reverb calculations.
+		}
+
+		advancedReverbCalculation: {
+			Label: Advanced Reverb Calculation
+			Tooltip:
+				'''
+				Toggle advanced audio reverb calculation algorithms.
+				Disabling this will increase your reverb factor by how deep you are into the world.
+				'''
+		}
+
+		isSoundDampeningEnabled: {
+			Label: Sound Dampening
+			Tooltip: Makes sounds sound dampened when underwater.
+		}
+
+		isSoundOcclusionEnabled: {
+			Label: Sound Occlusion
+			Tooltip: Makes sounds muffled when the Line-of-Sight to the player is blocked, depending on distance and density of the blockage.
+		}
+	}
+
+	GeneralConfig: {
+		DisplayName: General Config
+
+		Headers: {
+			AmbienceAndSounds: Ambience And Sounds
+			Debugging: Debugging
+			AmbienceTrackVolume: Ambient Track Volume
+		}
+
+		footsteps: {
+			Label: Toggle Footsteps
+			Tooltip:
+				'''
+				Toggle on to turn on footsteps. Toggle off to turn them off.
+				Enabled by default.
+				'''
+		}
+
+		campfireSounds: {
+			Label: Toggle Campfire Volumetric Sound
+			Tooltip:
+				'''
+				Toggle on to turn campfire sounds on. Toggle off to turn them off.
+				Turned on by default.
+				'''
+		}
+
+		transitionHarshness: {
+			Label: Ambient Transition Harshness
+			Tooltip:
+				'''
+				Changes the harshness between ambient track transitions. Keep it low for a nice, soothing transition.
+				Put it closer to 1 and make it near-instant.
+				Anywhere under 0.075 is a good value.
+				Making it go too low can cause issues or make things a bit unwanted. Choose the value at your own risk!
+				DISCLAIMER: Making this input a non-floating-point numeric type will cause the value to default to 0.01.
+				'''
+		}
+
+		areArmorAndVanitySoundsEnabled: {
+			Label: Armor/Vanity Sounds
+			Tooltip: Determines whether or not the extra sounds that having armor / vanity equipped play when walking around.
+		}
+
+		debugInterface: {
+			Label: Toggle Debug Values (Vanilla Ambiences)
+			Tooltip: Toggle volume debugging values, such as snow, crickets, and more.
+		}
+
+		overallVolume: {
+			Label: Overall Volume
+			Tooltip: The overall volume of ambience from this mod.
+		}
+
+		forestVolumes: {
+			Label: Forest
+			Tooltip:
+				'''
+				Order: Top -> Bottom
+
+				Morning
+				Afternoon
+				Evening
+				Night
+				'''
+		}
+
+		snowVolumes: {
+			Label: Snow
+			Tooltip:
+				'''
+				Order: Top -> Bottom
+
+				Day
+				Night
+				'''
+		}
+
+		jungleVolumes: {
+			Label: Jungle
+			Tooltip:
+				'''
+				Order: Top -> Bottom
+
+				SurfaceDay
+				SurfaceNight
+				UndergroundDay
+				UndergroundNight
+				'''
+		}
+
+		evilVolumes: {
+			Label: World Evils
+			Tooltip:
+				'''
+				Order: Top -> Bottom
+
+				Corruption
+				Crimson
+				'''
+		}
+
+		desertVolume: {
+			Label: Desert
+			Tooltip: ""
+		}
+
+		oceanVolume: {
+			Label: Ocean
+			Tooltip: ""
+		}
+
+		cavernsVolume: {
+			Label: Caverns
+			Tooltip: ""
+		}
+
+		hellVolume: {
+			Label: Hell
+			Tooltip: ""
+		}
+
+		breezeVolume: {
+			Label: Breeze
+			Tooltip: ""
+		}
+
+		underwaterVolume: {
+			Label: Submerged
+			Tooltip: ""
+		}
+	}
+}

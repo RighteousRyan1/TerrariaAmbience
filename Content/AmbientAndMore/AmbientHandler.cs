@@ -10,6 +10,7 @@ using System.Linq;
 using System;
 using System.Text;
 using TerrariaAmbience.Content.Players;
+using Microsoft.Xna.Framework.Audio;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -42,7 +43,8 @@ public class AmbientHandler {
     public ModAmbience JungleUndergroundDay; // aka swamp
     public ModAmbience JungleUndergroundNight;
 
-    public ModAmbience Beach;
+    public ModAmbience BeachCalm;
+    public ModAmbience BeachAggro;
 
     public ModAmbience EvilsCrimson;
     public ModAmbience EvilsCorruption;
@@ -56,6 +58,9 @@ public class AmbientHandler {
 
     public List<ModAmbience> Ambiences;
 
+    // since ModAmbience can't really do campfire stuff. lul.
+    public SoundEffectInstance CampfireCrackleInstance;
+
     // these two fields will be chosen at either the last dusk or the last dawn respectively, aka pre-emptively chosen.
     private int _chosenMorningAmbience;
     private int _chosenEveningAmbience;
@@ -66,6 +71,12 @@ public class AmbientHandler {
     public const int NUM_MORNING_AMBIENCE = 4;
     public const int NUM_NIGHT_AMBIENCE = 3;
     public const int NUM_DAY_AMBIENCE = 3;
+
+    // values scraped from decompiled terraria. Main.cs::_minWind,_maxWind,_minRain,_maxRain
+    public float MinWind = 0.34f;
+    public float MaxWind = 0.4f;
+    public float MinRain = 0.4f;
+    public float MaxRain = 0.5f;
 
     public void Initialize() {
 
@@ -142,11 +153,15 @@ public class AmbientHandler {
             return player.ZoneJungle;
         });
 
-        Beach = new(mod, AmbientPath + "biome/beach/waves", "Ocean", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+        BeachCalm = new(mod, AmbientPath + "biome/beach/waves_calm", "BeachCalm", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+            var player = Main.LocalPlayer;
+
+            return player.ZoneBeach && !player.ZoneRockLayerHeight;
+        });
+        BeachAggro = new(mod, AmbientPath + "biome/beach/waves_aggro", "BeachAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
             return player.ZoneBeach && !player.ZoneRockLayerHeight;
         });
-
         Hell = new(mod, AmbientPath + "biome/hell/rumbles", "Hell", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             return true; // we return true because we simply control the volume by the player's level of depth in Update()
         });
@@ -167,10 +182,16 @@ public class AmbientHandler {
         }
     }
 
+    // FROM HERE: I am creating fields that are used to determine ambient noise changes or differences.
+    public float WindThreshold = 20f;
+    public bool IsWindTooHarsh;
+
     public void Update() {
 
         if (Main.dedServ)
             return;
+
+        IsWindTooHarsh = Math.Abs(Main.windSpeedCurrent) >= MaxWind;
 
         if (TerrariaAmbience.JustTurnedDay) {
             _chosenEveningAmbience = Main.rand.Next(1, NUM_EVENING_AMBIENCE + 1);
@@ -190,7 +211,6 @@ public class AmbientHandler {
         }
 
         // Make a "master volume" for ambiences.
-
         if (float.TryParse(ModContent.GetInstance<GeneralConfig>().transitionHarshness, out float harshness)) {
             Ambiences.ForEach(x => x.VolumeStep = TransitionHarshness);
             TransitionHarshness = harshness;
@@ -250,8 +270,8 @@ public class AmbientHandler {
 
         // Main.NewText(EvilsCorruption.AreConditionsMet + ", " + EvilsCorruption.IsPlaying);
 
-        Beach.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().oceanVolume;
-
+        BeachCalm.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().oceanVolume;
+        BeachAggro.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_WindSpeedsHigh * ModContent.GetInstance<GeneralConfig>().oceanVolume;
         Breeze.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume;
 
         CavernLayer.MaxVolume = GradualValueSystem.Gradient_Underground * ModContent.GetInstance<GeneralConfig>().cavernsVolume * 0.4f;
