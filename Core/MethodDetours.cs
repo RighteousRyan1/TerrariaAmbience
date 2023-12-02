@@ -35,7 +35,7 @@ namespace TerrariaAmbience.Core
             On_Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
             On_IngameOptions.DrawRightSide += DrawVolumeValues;
             // MenuDetours.On_AddMenuButtons += MenuDetours_On_AddMenuButtons;
-
+            
             active = true;
             posY = 4;
         }
@@ -47,6 +47,7 @@ namespace TerrariaAmbience.Core
         }
         private static bool oldHover;
         private static bool hovering;
+        // disposing sounds in draw code?
         private static bool DrawVolumeValues(On_IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
         {
             Rectangle hoverPos = new((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
@@ -79,6 +80,8 @@ namespace TerrariaAmbience.Core
         {
             orig(self);
             displayable = string.Empty;
+
+            var ambPlayer = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
 
             bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
             foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
@@ -133,8 +136,9 @@ namespace TerrariaAmbience.Core
                     "\nK: Spawn Positional Audio Sound at mouse" +
                     "\nOemOpenBrackets: Play CurTile footstep sound" +
                     "\n\nGradients:" +
-                    $"\nAllNightPartDay: {GradualValueSystem.Gradient_AllNightPartDay}" +
-                    $"\nAllDayPartNight: {GradualValueSystem.Gradient_AllDayPartNight}";
+                    $"\nAllNightPartDay: {GradientGlobals.AllNightPartDay}" +
+                    $"\nAllDayPartNight: {GradientGlobals.AllDayPartNight}" +
+                    $"\nBehindWallMultiplier: {ambPlayer.BehindWallMultiplier}";
                 Vector2 offset = new(-300, 0);
                 Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
                     new Rectangle((int)(drawPos.X + offset.X - 6), 
@@ -169,7 +173,6 @@ namespace TerrariaAmbience.Core
                         }
                     }
                 }
-                    // Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetFootstepSound(false)?.Play();
                 #endregion
             }
         }
@@ -182,9 +185,6 @@ namespace TerrariaAmbience.Core
         public static bool eOpen;
         private static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
-            // orig(self, gameTime);
-            //Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
-            // DrawAmbienceMenu();
             Mod mod = ModContent.GetInstance<TerrariaAmbience>();
 
             posX = MathHelper.Clamp(posX, -325, -16);
@@ -240,11 +240,6 @@ namespace TerrariaAmbience.Core
             posX += active ? 20f : -20f;
 
             if (Main.menuMode == 0) {
-                if (TerrariaAmbience.UserHasSteelSeries) {
-                    Vector2 scale = new Vector2(0.5f) * new Vector2(Main.screenWidth / 1920f, Main.screenHeight / 1080f);
-                    var warning = "Warning! You have a SteelSeries headset.\nIf you are using the [c/00FF00:Sonar] audio device, [c/FF0000:DISABLE IT] and [c/FF0000:RESTART].\nOtherwise, it will crash the game due to audio issues.";
-                    ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, warning, new Vector2(10, 60), Color.LightGray, 0f, Vector2.Zero, scale, 0, 1);
-                }
                 ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
                 ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
             }

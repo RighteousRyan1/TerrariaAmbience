@@ -140,6 +140,15 @@ Configs: {
 			Tooltip: The overall volume of ambience from this mod.
 		}
 
+		wetStepsEnabled: {
+			Label: Wet Steps
+			Tooltip:
+				'''
+				Whether or not to have wet footstep sounds when it is raining and the player is under a roof.
+				Do know that there is a *little* bit of performance gain from disabling this.
+				'''
+		}
+
 		forestVolumes: {
 			Label: Forest
 			Tooltip:
@@ -153,15 +162,9 @@ Configs: {
 				'''
 		}
 
-		snowVolumes: {
+		snowVolume: {
+			Tooltip: ""
 			Label: Snow
-			Tooltip:
-				'''
-				Order: Top -> Bottom
-
-				Day
-				Night
-				'''
 		}
 
 		jungleVolumes: {
@@ -216,6 +219,11 @@ Configs: {
 		underwaterVolume: {
 			Label: Submerged
 			Tooltip: ""
+		}
+
+		craftingSoundsVolume: {
+			Label: Crafting Sounds Volume
+			Tooltip: Changes the volume multiplier of the sounds made when a player crafts an item. Set to 0 to disable.
 		}
 	}
 }

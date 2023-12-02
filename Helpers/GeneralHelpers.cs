@@ -32,22 +32,19 @@ namespace TerrariaAmbience.Helpers
 
         public static void Init() {
             // this is useful to have for future notes.
-            AddMenuButtonsHook = new(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic), 
+            AddMenuButtonsHook = new(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic),
                 MethodDetours.MenuDetours_On_AddMenuButtons);
         }
     }
     public class GeneralHelpers
     {
-        public static SoundStyle SimpleSoundStyle(string path, int variants, SoundType type = SoundType.Sound, float volume = 1f, float pitch = 0f)
-        {
-            return new(path, variants, type)
-            {
+        public static SoundStyle SimpleSoundStyle(string path, int variants, SoundType type = SoundType.Sound, float volume = 1f, float pitch = 0f) {
+            return new(path, variants, type) {
                 Volume = volume,
                 Pitch = pitch,
             };
         }
-        public static SoundEffectInstance PlaySound(in SoundStyle style, Vector2? position = null)
-        {
+        public static SoundEffectInstance PlaySound(in SoundStyle style, Vector2? position = null) {
             var id = SoundEngine.PlaySound(style, position);
             if (SoundEngine.TryGetActiveSound(id, out var sound))
                 return sound.Sound;
@@ -56,30 +53,24 @@ namespace TerrariaAmbience.Helpers
         }
         public static Rectangle GetRectOf(Vector2 position) => new((int)position.X, (int)position.Y, 1, 1);
         public static Rectangle GetRectOf(Point position) => new(position.X, position.Y, 1, 1);
-        public static T GetAssetValue<T>(Mod mod, string path) where T : class
-        {
+        public static T GetAssetValue<T>(Mod mod, string path) where T : class {
             return mod.Assets.Request<T>(path, AssetRequestMode.ImmediateLoad).Value;
         }
-        public static void SavePlayer()
-        {
+        public static void SavePlayer() {
             Player.SavePlayer(Main.ActivePlayerFileData);
             Main.NewText("[c/00FF00:Console] >> Player saved. You are free to exit.");
         }
-        public static T Pick<T>(params T[] values)
-        {
+        public static T Pick<T>(params T[] values) {
             return Main.rand.Next(values);
         }
-        public static void ReloadMods()
-        {
+        public static void ReloadMods() {
             typeof(ModLoader).Assembly.GetType("Terraria.ModLoader.ModLoader").GetMethod("Reload", BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
         }
-        public static bool KeyPress(Keys key)
-        {
+        public static bool KeyPress(Keys key) {
             return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
         }
         public static GeneralHelpers Instance => ModContent.GetInstance<GeneralHelpers>();
-        public enum AudioFileExtension
-        {
+        public enum AudioFileExtension {
             MP3,
             WAV,
             OGG,
@@ -87,12 +78,10 @@ namespace TerrariaAmbience.Helpers
             FLAC,
             VOX
         }
-        public static void AddMainMenuButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons)
-        {
+        public static void AddMainMenuButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons) {
             buttonNames[buttonIndex] = text;
 
-            if (selectedMenu == buttonIndex)
-            {
+            if (selectedMenu == buttonIndex) {
                 SoundEngine.PlaySound(SoundID.MenuOpen);
                 act();
             }
@@ -100,42 +89,33 @@ namespace TerrariaAmbience.Helpers
             buttonIndex++;
             numButtons++;
         }
-        public static MouseState MSNew
-        {
+        public static MouseState MSNew {
             get;
             internal set;
         }
-        public static MouseState MSOld
-        {
+        public static MouseState MSOld {
             get;
             internal set;
         }
-        public static void ClickHandling()
-        {
+        public static void ClickHandling() {
             MSNew = Mouse.GetState();
 
         }
-        public static void UpdateButtons()
-        {
-            if (Main.dayTime)
-            {
+        public static void UpdateButtons() {
+            if (Main.dayTime) {
                 if (def < 150)
                     def++;
             }
-            else
-            {
+            else {
                 if (def > 86)
                     def--;
             }
         }
-        public static bool ClickEnded(bool leftClick)
-        {
-            if (leftClick)
-            {
+        public static bool ClickEnded(bool leftClick) {
+            if (leftClick) {
                 return MSOld.LeftButton == ButtonState.Pressed && MSNew.LeftButton == ButtonState.Released;
             }
-            else
-            {
+            else {
                 return MSOld.RightButton == ButtonState.Pressed && MSNew.RightButton == ButtonState.Released;
             }
         }
@@ -152,14 +132,11 @@ namespace TerrariaAmbience.Helpers
             Color nonHoverColor = default,
             float alpha = 1f,
             bool waitUntilClickEnd = false,
-            Action rightClickAction = null)
-        {
-            if (colorWhenHovered == default)
-            {
+            Action rightClickAction = null) {
+            if (colorWhenHovered == default) {
                 colorWhenHovered = Main.highVersionColor;
             }
-            if (nonHoverColor == default)
-            {
+            if (nonHoverColor == default) {
                 nonHoverColor = new Color(def, def, def);
             }
             useScale = MathHelper.Clamp(useScale, 0.65f, 0.85f);
@@ -170,36 +147,28 @@ namespace TerrariaAmbience.Helpers
             hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
 
             ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.DeathText.Value, text, position, hovering ? colorWhenHovered * alpha : nonHoverColor * alpha, 0f, bounds / 2, new Vector2(useScale), -1, 2);
-            if (!waitUntilClickEnd)
-            {
-                if (Main.mouseLeft && Main.mouseLeftRelease && hovering && whatToDo != null)
-                {
+            if (!waitUntilClickEnd) {
+                if (Main.mouseLeft && Main.mouseLeftRelease && hovering && whatToDo != null) {
                     whatToDo();
                 }
-                if (Main.mouseRight && Main.mouseRightRelease && hovering && rightClickAction != null)
-                {
+                if (Main.mouseRight && Main.mouseRightRelease && hovering && rightClickAction != null) {
                     rightClickAction();
                 }
             }
-            else
-            {
-                if (ClickEnded(true) && hovering && whatToDo != null)
-                {
+            else {
+                if (ClickEnded(true) && hovering && whatToDo != null) {
                     whatToDo();
                 }
             }
-            if (hoveringToDo != null)
-            {
-                if (hovering)
-                {
+            if (hoveringToDo != null) {
+                if (hovering) {
                     hoveringToDo();
                 }
             }
             useScale += hovering ? scaleMultiplier : -scaleMultiplier;
             return rectHoverable;
         }
-        public static bool CheckPlayerArmorSlot(Player player, int slot, out Item item)
-        {
+        public static bool CheckPlayerArmorSlot(Player player, int slot, out Item item) {
             item = new Item();
             if (!player.armor[slot].IsAir)
                 item = player.armor[slot];
@@ -207,38 +176,30 @@ namespace TerrariaAmbience.Helpers
             return !player.armor[slot].IsAir;
         }
 
-        public static int GetAllUsedAccSlots(Player player)
-        {
+        public static int GetAllUsedAccSlots(Player player) {
             int x = 0;
-            foreach (Item item in player.armor)
-            {
-                if (!item.IsAir)
-                {
+            foreach (Item item in player.armor) {
+                if (!item.IsAir) {
                     x++;
                 }
             }
             return x;
         }
-        public static string DisplayAllUsedAccSlots(Player player)
-        {
+        public static string DisplayAllUsedAccSlots(Player player) {
             int i = 0;
             string s = "";
-            foreach (Item item in player.armor)
-            {
-                if (!item.IsAir)
-                {
+            foreach (Item item in player.armor) {
+                if (!item.IsAir) {
                     i++;
-                    s+= $" | player.armor[{i - 1}]:{item.Name}";
+                    s += $" | player.armor[{i - 1}]:{item.Name}";
                 }
             }
-            return s == "" ? "No valid slots" : s;  
+            return s == "" ? "No valid slots" : s;
         }
         public static float TrueTime => (float)(Main.time + (Main.dayTime ? 0d : Main.dayLength));
         public const float FullDayLength = (float)(Main.nightLength + Main.dayLength);
-        public class IDs
-        {
-            public struct ArmorSlotID
-            {
+        public class IDs {
+            public struct ArmorSlotID {
                 public static ReLogic.Reflection.IdDictionary Search = ReLogic.Reflection.IdDictionary.Create<short, short>();
                 public const short HeadSlot = 0;
                 public const short ChestSlot = 1;
@@ -260,26 +221,20 @@ namespace TerrariaAmbience.Helpers
                 public const short VanityAccSlot5 = 6;
             }
         }
-        public static List<Tile> GetTileSquare(int i, int j, int width, int height)
-        {
+        public static List<Tile> GetTileSquare(int i, int j, int width, int height) {
             var tilesInSquare = new List<Tile>();
-            for (int n = i - width / 2; n < i + width / 2; n++)
-            {
-                for (int m = j - height / 2; m < j + height / 2; m++)
-                {
+            for (int n = i - width / 2; n < i + width / 2; n++) {
+                for (int m = j - height / 2; m < j + height / 2; m++) {
                     Tile tile = Framing.GetTileSafely(n, m);
                     tilesInSquare.Add(tile);
                 }
             }
             return tilesInSquare;
         }
-        public static List<Point> GetTileSquareCoordinates(int i, int j, int width, int height)
-        {
+        public static List<Point> GetTileSquareCoordinates(int i, int j, int width, int height) {
             var coordsPerTile = new List<Point>();
-            for (int n = i - width / 2; n < i + width / 2; n++)
-            {
-                for (int m = j - height / 2; m < j + height / 2; m++)
-                {
+            for (int n = i - width / 2; n < i + width / 2; n++) {
+                for (int m = j - height / 2; m < j + height / 2; m++) {
                     coordsPerTile.Add(new Point(n, m));
                 }
             }
@@ -287,34 +242,27 @@ namespace TerrariaAmbience.Helpers
             return coordsPerTile;
         }
 
-        public static Tile GetTileAt(Vector2 coordinates)
-        {
+        public static Tile GetTileAt(Vector2 coordinates) {
             return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? Framing.GetTileSafely(coordinates.ToPoint()) : new Tile();
         }
-        public static string GetTileNameAt(Vector2 coordinates)
-        {
+        public static string GetTileNameAt(Vector2 coordinates) {
             return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? TileID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).TileType) : "Empty";
         }
-        public static string GetWallNameAt(Vector2 coordinates)
-        {
+        public static string GetWallNameAt(Vector2 coordinates) {
             return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? WallID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).WallType) : "Empty";
         }
     }
     public static class MathUtils
     {
-        public static float InverseLerp(float begin, float end, float value, bool clamped = false)
-        {
-            if (clamped)
-            {
-                if (begin < end)
-                {
+        public static float InverseLerp(float begin, float end, float value, bool clamped = false) {
+            if (clamped) {
+                if (begin < end) {
                     if (value < begin)
                         return 0f;
                     if (value > end)
                         return 1f;
                 }
-                else
-                {
+                else {
                     if (value < end)
                         return 1f;
                     if (value > begin)
@@ -329,22 +277,17 @@ namespace TerrariaAmbience.Helpers
         public static Mod mod => ModContent.GetInstance<TerrariaAmbience>();
         public static bool Underwater(this Vector2 drowningPosition) => Collision.DrownCollision(drowningPosition, 1, 1);
         public static bool IsWaterSuffocating(this Player player) => Collision.DrownCollision(player.position, player.width, player.height, player.gravDir); // how did i not know this existed before
-        public static string AppendFileExtension(this string str, GeneralHelpers.AudioFileExtension extension)
-        {
+        public static string AppendFileExtension(this string str, GeneralHelpers.AudioFileExtension extension) {
             return $"{str}.{extension.ToString().ToLower()}";
         }
-        public static void ModifyRGB(this Color color, byte amount, bool subract = false)
-        {
-            void Solve()
-            {
-                if (!subract)
-                {
+        public static void ModifyRGB(this Color color, byte amount, bool subract = false) {
+            void Solve() {
+                if (!subract) {
                     color.R += amount;
                     color.G += amount;
                     color.B += amount;
                 }
-                else
-                {
+                else {
                     color.R -= amount;
                     color.G -= amount;
                     color.B -= amount;
@@ -352,10 +295,8 @@ namespace TerrariaAmbience.Helpers
             }
             Solve();
         }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth)
-        {
-            if (tex != null && !tex.IsDisposed)
-            {
+        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth) {
+            if (tex != null && !tex.IsDisposed) {
                 spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, layerDepth);
             }
         }
@@ -363,8 +304,7 @@ namespace TerrariaAmbience.Helpers
         /// Checks if this SoundEffectInstance is Playing.
         /// </summary>
         /// <returns>A boolean determining if this sound is Paused.</returns>
-        public static bool IsPlaying(this SoundEffectInstance sfx)
-        {
+        public static bool IsPlaying(this SoundEffectInstance sfx) {
             bool isNull = sfx == null;
 
             if (!isNull)
@@ -376,8 +316,7 @@ namespace TerrariaAmbience.Helpers
         /// Checks if this SoundEffectInstance is Stopped.
         /// </summary>
         /// <returns>A boolean determining if this sound is Stopped.</returns>
-        public static bool IsStopped(this SoundEffectInstance sfx)
-        {
+        public static bool IsStopped(this SoundEffectInstance sfx) {
             bool isNull = sfx == null;
 
             if (!isNull)
@@ -389,8 +328,7 @@ namespace TerrariaAmbience.Helpers
         /// Checks if this SoundEffectInstance is Paused.
         /// </summary>
         /// <returns>A boolean determining if this sound is Paused.</returns>
-        public static bool IsPaused(this SoundEffectInstance sfx)
-        {
+        public static bool IsPaused(this SoundEffectInstance sfx) {
             bool isNull = sfx == null;
 
             if (!isNull)
@@ -398,8 +336,7 @@ namespace TerrariaAmbience.Helpers
 
             return false;
         }
-        public static bool HeadWet(this Player player)
-        {
+        public static bool HeadWet(this Player player) {
             Vector2 v = new Vector2(player.Top.X, player.Top.Y - 1.4f).RotatedBy(player.fullRotation, player.Center);
             return Main.tile[(int)v.X / 16, (int)v.Y / 16].LiquidAmount > 0;
         }
@@ -409,19 +346,14 @@ namespace TerrariaAmbience.Helpers
         /// <param name="position">The position to check around.</param>
         /// <param name="dist">The distance from the player</param>
         /// <returns>The amount of tiles in dist around the player.</returns>
-        public static int TilesAround(this Vector2 position, int dist, bool condition)
-        {
+        public static int TilesAround(this Vector2 position, int dist, bool condition) {
             int index = 0;
-            if (condition)
-            {
-                for (int i = (int)position.X / 16 - dist; i < (int)position.X / 16 + dist; i++)
-                {
-                    for (int j = (int)position.Y / 16 - dist; j < (int)position.Y / 16 + dist; j++)
-                    {
+            if (condition) {
+                for (int i = (int)position.X / 16 - dist; i < (int)position.X / 16 + dist; i++) {
+                    for (int j = (int)position.Y / 16 - dist; j < (int)position.Y / 16 + dist; j++) {
                         Tile tile = Main.tile[i, j];
 
-                        if (tile.HasTile && tile.CollisionType() == 1)
-                        {
+                        if (tile.HasTile && tile.CollisionType() == 1) {
                             index++;
                         }
                     }
@@ -437,20 +369,15 @@ namespace TerrariaAmbience.Helpers
         /// <param name="dist">The distance from the player</param>
         /// <param name="tile">An tile to do something with the tiles inside <paramref name="dist"/>.</param>
         /// <returns></returns>
-        public static int TilesAround(this Player player, int dist, out Tile tile, bool condition)
-        {
+        public static int TilesAround(this Player player, int dist, out Tile tile, bool condition) {
             Tile leTile = Main.tile[1, 1];
             int index = 0;
-            if (condition)
-            {
-                for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++)
-                {
-                    for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++)
-                    {
+            if (condition) {
+                for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++) {
+                    for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++) {
                         leTile = Main.tile[i, j];
 
-                        if (leTile.HasTile && leTile.CollisionType() == 1)
-                        {
+                        if (leTile.HasTile && leTile.CollisionType() == 1) {
                             index++;
                         }
                     }
@@ -484,8 +411,7 @@ namespace TerrariaAmbience.Helpers
 
             return yDist;
         }
-        public static int CollisionType(this Tile tile)
-        {
+        public static int CollisionType(this Tile tile) {
             if (!tile.HasTile)
                 return 0;
             if (tile.BlockType == BlockType.HalfBlock)

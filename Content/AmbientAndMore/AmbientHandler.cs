@@ -11,12 +11,15 @@ using System;
 using System.Text;
 using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework;
+using Terraria.ID;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
 public class AmbientHandler {
     #region Metadata
-    public string AmbientPath => "Sounds/Custom/ambient/";
+    public static string AmbientPath => $"Sounds/Custom/ambient/";
+    public static string AmbientPathWithPrefix => $"{nameof(TerrariaAmbience)}/" + AmbientPath;
 
     #endregion
 
@@ -37,6 +40,8 @@ public class AmbientHandler {
 
     public ModAmbience SnowDay;
     public ModAmbience SnowNight;
+    // when it's snowy AND windy!
+    public ModAmbience SnowAggro;
 
     public ModAmbience JungleDay;
     public ModAmbience JungleNight;
@@ -44,6 +49,7 @@ public class AmbientHandler {
     public ModAmbience JungleUndergroundNight;
 
     public ModAmbience BeachCalm;
+    // when it's watery AND windy!
     public ModAmbience BeachAggro;
 
     public ModAmbience EvilsCrimson;
@@ -56,9 +62,10 @@ public class AmbientHandler {
     public ModAmbience Underwater;
     public ModAmbience UnderwaterDeep;
 
-    public List<ModAmbience> Ambiences;
+    public List<ModAmbience> Ambiences { get; private set; }
 
     // since ModAmbience can't really do campfire stuff. lul.
+    // well it technically could...
     public SoundEffectInstance CampfireCrackleInstance;
 
     // these two fields will be chosen at either the last dusk or the last dawn respectively, aka pre-emptively chosen.
@@ -67,10 +74,10 @@ public class AmbientHandler {
     private int _chosenNightAmbience;
     private int _chosenDayAmbience;
 
-    public const int NUM_EVENING_AMBIENCE = 4;
-    public const int NUM_MORNING_AMBIENCE = 4;
-    public const int NUM_NIGHT_AMBIENCE = 3;
-    public const int NUM_DAY_AMBIENCE = 3;
+    public const int NUM_EVENING_AMBIENCE = 5;
+    public const int NUM_MORNING_AMBIENCE = 5;
+    public const int NUM_NIGHT_AMBIENCE = 5;
+    public const int NUM_DAY_AMBIENCE = 5;
 
     // values scraped from decompiled terraria. Main.cs::_minWind,_maxWind,_minRain,_maxRain
     public float MinWind = 0.34f;
@@ -126,7 +133,10 @@ public class AmbientHandler {
             var player = Main.LocalPlayer;
             return player.ZoneSnow && !Main.dayTime && !player.ZoneUnderworldHeight;
         });
-
+        SnowAggro = new(mod, AmbientPath + "biome/snow/windy", "SnowAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+            var player = Main.LocalPlayer;
+            return player.ZoneSnow && !player.ZoneUnderworldHeight && Main.raining;
+        });
         EvilsCrimson = new(mod, AmbientPath + "biome/crimson/rumbles", "EvilsCrimson", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
             return player.ZoneCrimson;
@@ -138,11 +148,11 @@ public class AmbientHandler {
 
         JungleDay = new(mod, AmbientPath + "biome/jungle/day", "JungleDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return player.ZoneJungle && Main.dayTime;
+            return player.ZoneJungle;
         });
         JungleNight = new(mod, AmbientPath + "biome/jungle/night", "JungleNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return player.ZoneJungle && !Main.dayTime;
+            return player.ZoneJungle;
         });
         JungleUndergroundDay = new(mod, AmbientPath + "biome/jungle/underground_day", "JungleUndergroundDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
@@ -180,14 +190,21 @@ public class AmbientHandler {
         foreach (var fld in GetType().GetFields().Where(x => x.FieldType.TypeHandle.Equals(typeof(ModAmbience).TypeHandle))) {
             Ambiences.Add((ModAmbience)fld.GetValue(this));
         }
+
+        
     }
 
     // FROM HERE: I am creating fields that are used to determine ambient noise changes or differences.
     public float WindThreshold = 20f;
     public bool IsWindTooHarsh;
 
+    public void HandleEnterWorld() {
+        if (Main.raining) {
+            _chosenDayAmbience = AmbienceID.Day_Quiet;
+            ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{_chosenDayAmbience}");
+        }
+    }
     public void Update() {
-
         if (Main.dedServ)
             return;
 
@@ -202,8 +219,10 @@ public class AmbientHandler {
         else if (TerrariaAmbience.JustTurnedNight) {
             _chosenMorningAmbience = Main.rand.Next(1, NUM_MORNING_AMBIENCE + 1);
             _chosenDayAmbience = Main.rand.Next(1, NUM_DAY_AMBIENCE + 1);
-            ForestMorning.ChangeTrack(AmbientPath + $"biome/forest/morning_{_chosenMorningAmbience}");
+            if (Main.raining)
+                _chosenDayAmbience = AmbienceID.Day_Quiet;
             ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{_chosenDayAmbience}");
+            ForestMorning.ChangeTrack(AmbientPath + $"biome/forest/morning_{_chosenMorningAmbience}");
         }
         if (Main.gameMenu) {
             Ambiences.ForEach(x => x.MaxVolume = 0);
@@ -217,20 +236,22 @@ public class AmbientHandler {
         }
         else
             ModContent.GetInstance<GeneralConfig>().transitionHarshness = "0.01"; // a failsafe in case the player is stupid
-        ForestMorning.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_FromMorning * ModContent.GetInstance<GeneralConfig>().forestVolumes[0];
-        ForestDay.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_FromNoon * ModContent.GetInstance<GeneralConfig>().forestVolumes[1];
-        ForestEvening.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_FromEvening * ModContent.GetInstance<GeneralConfig>().forestVolumes[2];
-        ForestNight.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_FromNight * ModContent.GetInstance<GeneralConfig>().forestVolumes[3];
+        ForestMorning.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMorning * ModContent.GetInstance<GeneralConfig>().forestVolumes[0];
+        ForestDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromNoon * ModContent.GetInstance<GeneralConfig>().forestVolumes[1];
+        ForestEvening.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromEvening * ModContent.GetInstance<GeneralConfig>().forestVolumes[2];
+        ForestNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMidnight * ModContent.GetInstance<GeneralConfig>().forestVolumes[3];
 
-        JungleDay.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().jungleVolumes[0] * 0.75f; // it's a bit loud.
-        JungleNight.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().jungleVolumes[1] * 0.4f; // it's very loud by default.
-        JungleUndergroundDay.MaxVolume = GradualValueSystem.Gradient_Underground * GradualValueSystem.Gradient_AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[2];
-        JungleUndergroundNight.MaxVolume = GradualValueSystem.Gradient_Underground * GradualValueSystem.Gradient_AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[3] * 0.6f; // it's a bit louder than the day variant...
+        // added AllDayPartNight and AllNightPartDay to JungleDay and JungleNight at 11/22/2023 @ 9:33 AM
+        JungleDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[0] * 0.75f; // it's a bit loud.
+        JungleNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[1] * 0.4f; // it's very loud by default.
+        JungleUndergroundDay.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[2];
+        JungleUndergroundNight.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[3] * 0.6f; // it's a bit louder than the day variant...
 
-        SnowDay.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().snowVolumes[0];
-        SnowNight.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().snowVolumes[1];
-
-        Desert.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().desertVolume;
+        SnowDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().snowVolume;
+        SnowNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().snowVolume;
+        SnowAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.RainIntensity * GradientGlobals.WindSpeedsHigh *  ModContent.GetInstance<GeneralConfig>().snowVolume;
+        // make quieter / bandpass filter when inside
+        Desert.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().desertVolume;
         if (Desert.SoundInstance != null)
             Desert.SoundInstance.Pitch = Main.dayTime ? 0f : -0.1f;
         if (!Underwater.AreConditionsMet)
@@ -260,7 +281,7 @@ public class AmbientHandler {
             float lightMinThresh = 2;
 
             // we start the minValue in the negatives because we want some sort of audio if the player is in very shallow water.
-            var underwaterLightGradient = GradualValueSystem.CreateGradientValue(
+            var underwaterLightGradient = Gradient.CreateFloat(
                 waterDepth, -tileSize * lightMinThresh, tileSize * lightMaxThresh);
             var underwaterDeepGradient = Utils.GetLerpValue(tileSize * deepMinThresh, tileSize * deepMaxThresh, waterDepth);
 
@@ -270,12 +291,37 @@ public class AmbientHandler {
 
         // Main.NewText(EvilsCorruption.AreConditionsMet + ", " + EvilsCorruption.IsPlaying);
 
-        BeachCalm.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().oceanVolume;
-        BeachAggro.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * GradualValueSystem.Gradient_WindSpeedsHigh * ModContent.GetInstance<GeneralConfig>().oceanVolume;
-        Breeze.MaxVolume = GradualValueSystem.Gradient_SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume;
-
-        CavernLayer.MaxVolume = GradualValueSystem.Gradient_Underground * ModContent.GetInstance<GeneralConfig>().cavernsVolume * 0.4f;
-
-        Hell.MaxVolume = GradualValueSystem.Gradient_Hell * ModContent.GetInstance<GeneralConfig>().hellVolume;
+        BeachCalm.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().oceanVolume;
+        BeachAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsHigh * ModContent.GetInstance<GeneralConfig>().oceanVolume;
+        Breeze.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume;
+        CavernLayer.MaxVolume = GradientGlobals.Underground * ModContent.GetInstance<GeneralConfig>().cavernsVolume * 0.4f;
+        Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<GeneralConfig>().hellVolume;
+        var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
+        Ambiences.ForEach(x => x.MaxVolume *= pl.BehindWallMultiplier);
     }
+}
+public static class AmbienceID {
+    public const int Day_BirdsAndCrowsLoud = 1;
+    public const int Day_BirdsSinging = 2;
+    public const int Day_BirdsSingingQuieter = 3;
+    public const int Day_BirdsSingingQuiet = 4;
+    public const int Day_Quiet = 5;
+
+    public const int Morning_CricketsQuiet = 1;
+    public const int Morning_CricketsTrillingQuiet = 2;
+    public const int Morning_CricketsAndCicadas = 3;
+    public const int Morning_CricketsTrillingLoud = 4;
+    public const int Morning_QuietTrillingCicadas = 5;
+
+    public const int Night_CricketsQuiet = 1;
+    public const int Night_CricketsPersistent = 2;
+    public const int Night_CicadasAndCrickets = 3;
+    public const int Night_CicadasConstant = 4;
+    public const int Night_LoudEverything = 4;
+
+    public const int Evening_SinewaveCrickets = 1;
+    public const int Evening_LoudCricketsWithCicadas = 2;
+    public const int Evening_HumidSoundingCrickets = 3;
+    public const int Evening_CricketsTrilling = 4;
+    public const int Evening_CricketsAndQuietCicadas = 5;
 }

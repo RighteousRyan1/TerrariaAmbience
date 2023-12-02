@@ -6,12 +6,14 @@ Hopefully you can relax a bit more with this mod!
 
 Developers:
 
-- RighteousRyan#8008 (Programmer)
-- William#9010 (Mod Icon Artist)
+- RighteousRyan (Programmer)
+- William (Mod Icon Artist)
 
 Most Recent Update:
 
-Fixed a bug that caused a fatal error on the server, resulting in the mod being disabled in multiplayer.
+Added crafting sounds that can be heard by everyone. They can be toggled.
+
+Some optimisations here and there.
 
 CONTENT
 --------------
@@ -41,8 +43,6 @@ Fixed config-related bugs.
 
 Removed sound packs. Literally no one used them and it made up 1500 lines of painful code.
 Converted codebase to use TerrariaAmbienceAPI. TerrariaAmbienceAPI will now be a mod dependency.
-
-[DISCLAIMER] Disclaimer added for SteelSeries users. HEED TO IT.
 
 1.4 Update:
 

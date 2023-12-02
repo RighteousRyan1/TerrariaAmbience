@@ -20,6 +20,12 @@ namespace TerrariaAmbience.Core
 
         [DefaultValue(true)]
         public bool areArmorAndVanitySoundsEnabled;
+
+        [DefaultValue(true)]
+        public bool wetStepsEnabled;
+
+        [DefaultValue(1f)]
+        public float craftingSoundsVolume;
         #endregion
 
         #region Debug
@@ -37,8 +43,10 @@ namespace TerrariaAmbience.Core
         [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
         public float[] forestVolumes = new float[4];
 
-        [DefaultValue(new float[] { 1f, 1f })]
-        public float[] snowVolumes = new float[2];
+        //[DefaultValue(new float[] { 1f, 1f })]
+        //public float[] snowVolumes = new float[2];
+        [DefaultValue(1f)]
+        public float snowVolume;
 
         [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
         public float[] jungleVolumes = new float[4];

@@ -287,7 +287,8 @@ public class FootstepHandler {
             TileID.MartianConduitPlating,
             TileID.TinPlating,
             TileID.ShroomitePlating,
-            TileID.CopperPlating
+            TileID.CopperPlating,
+            TileID.TrapdoorClosed
         };
     public static List<int> MarblesGranites { get; private set; } = new()
     {

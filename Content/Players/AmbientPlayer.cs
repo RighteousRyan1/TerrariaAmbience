@@ -10,6 +10,9 @@ using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Common.Enums;
+using TerrariaAmbience.Common.Systems;
+using System.Reflection;
+using System.Linq;
 
 namespace TerrariaAmbience.Content.Players
 {
@@ -19,7 +22,15 @@ namespace TerrariaAmbience.Content.Players
 
         public int WallsAround => ReverbAudioSystem.WallsAround(Player.Center, new(4, 4), out var coords);
 
-        public bool isNearCampfire;
+        private float _multInternal;
+        public float BehindWallMultiplier => MathHelper.Clamp(_multInternal, 0.5f, 1f);
+
+        public FieldInfo _stormShaderObstruction = typeof(Player).GetField("_stormShaderObstruction", BindingFlags.Instance | BindingFlags.NonPublic);
+        public float BlizzardVisualIntensity => (float)_stormShaderObstruction.GetValue(Player);
+
+        public bool BehindBackWall_MyStyle;
+
+        public bool IsNearCampfire;
 
         public SoundEffectInstance thunderInstance;
         public SoundEffectInstance hootInstance;
@@ -27,42 +38,7 @@ namespace TerrariaAmbience.Content.Players
 
         internal int timerUntilValidChestStateChange;
         public override void OnEnterWorld() {
-            /*string Between(string text, string start, string end)
-{
-    if (text.Contains(start) && text.Contains(end))
-    {
-        int stringStart;
-        int stringEnd;
-        stringStart = text.IndexOf(start, 0) + start.Length;
-        stringEnd = text.IndexOf(end, stringStart);
-        return text.Substring(stringStart, stringEnd - stringStart);
-    }
-    return "";
-}
-Version GetBrowserVersion()
-{
-    Version vers;
-    ServicePointManager.Expect100Continue = true;
-    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-    WebClient client = new WebClient();
-    string URL = "https://mirror.sgkoi.dev/Mods/Details/TerrariaAmbience";
-    string htmlCode = client.DownloadString(URL);
-
-    htmlCode = Between(htmlCode, "Version", "</dd>");
-    htmlCode = htmlCode.Remove(0, 50).Trim().Remove(0, 1);
-    vers = new Version(htmlCode);
-
-    return vers;
-}
-if (Mod.Version < GetBrowserVersion())
-{
-    if (!Environment.Is64BitProcess)
-        Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an outdated version of [c/FabcdF:Terraria Ambience].\nYour current version is [c/FFdd00:v{Mod.Version}], the browser version is [c/00dd00:v{GetBrowserVersion()}]. Go to the mod browser and install the latest version!", false, Color.White);
-}
-if (Mod.Version > GetBrowserVersion())
-{
-    Main.NewTextMultiline($"[c/FabcdF:Terraria Ambience] >> [c/FFFF00:Hey]! You are using an early release of [c/FabcdF:Terraria Ambience]. Do not spread this anywhere!", false, Color.White);
-}*/
+            TerrariaAmbience.DefaultAmbientHandler.HandleEnterWorld();
         }
 
         private int chestStateNew;
@@ -78,6 +54,13 @@ if (Mod.Version > GetBrowserVersion())
         private bool _wet; // old state of player wet
 
         private bool _showReverbTiles;
+
+        private List<string> _ignoredWalls = new() {
+            "fence",
+            "grass",
+            "flower",
+            "leaf"
+        };
         public override void PreUpdate() {
             var cfg = ModContent.GetInstance<GeneralConfig>();
             var cfg2 = ModContent.GetInstance<AudioAdditionsConfig>();
@@ -129,22 +112,28 @@ if (Mod.Version > GetBrowserVersion())
             #region Sound Paths / StepRands / Whatever
             timerUntilValidChestStateChange++;
             // This is a pretty niche finding for tiles above said player
-            if (!Player.wet) {
-                Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
-                for (int i = (int)Player.Top.X - 1; i < Player.Top.X + 1; i++) {
-                    for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--) {
-                        if (WorldGen.InWorld(i / 16, j / 16)) {
-                            Tile tile = Main.tile[i / 16, j / 16];
-                            if (tile.HasTile && tile.CollisionType() == 1) {
-                                HasTilesAbove = true;
-                                break;
-                            }
-                            else {
-                                HasTilesAbove = false;
+            if (cfg.wetStepsEnabled) {
+                if (!Player.wet) {
+                    Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
+                    for (int i = (int)Player.Top.X - 1; i < Player.Top.X + 1; i++) {
+                        for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--) {
+                            if (WorldGen.InWorld(i / 16, j / 16)) {
+                                Tile tile = Main.tile[i / 16, j / 16];
+                                if (tile.HasTile && tile.CollisionType() == 1) {
+                                    HasTilesAbove = true;
+                                    break;
+                                }
+                                else {
+                                    HasTilesAbove = false;
+                                }
                             }
                         }
                     }
                 }
+            }
+            else {
+                // this essentially just works as a way to not have wet sounds play. no need to do extra magic.
+                HasTilesAbove = true;
             }
             if (Main.GameUpdateCount % 8 == 0) {
                 if (ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) {
@@ -180,6 +169,22 @@ if (Mod.Version > GetBrowserVersion())
         public override void PostUpdate() {
             if (Player.whoAmI != Main.myPlayer)
                 return;
+            var tile = Framing.GetTileSafely(Player.Center);
+            var modTile = ModContent.GetModTile(tile.TileType);
+
+            // TODO: this isn't exactly working as planned but that can be fixed.
+            if (modTile is null)
+                BehindBackWall_MyStyle = tile.WallType > 0 && !_ignoredWalls.Contains(TileID.Search.GetName(tile.TileType).ToLower());
+            else // let's hope each modtile's internal name for fences includes "fence"
+                BehindBackWall_MyStyle = tile.WallType > 0 && !_ignoredWalls.Contains(modTile.Name.ToLower());
+
+            if (BehindBackWall_MyStyle) {
+                _multInternal -= 0.0075f;
+            }
+            else {
+                _multInternal += 0.0075f;
+            }
+            _multInternal = MathHelper.Clamp(_multInternal, 0, 1);
             HandleIceScraping();
             // ^ method above will work in multiplayer eventually... when i care enough.
             int randX = Main.rand.Next(-1750, 1750);
@@ -230,7 +235,7 @@ if (Mod.Version > GetBrowserVersion())
                 TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
             float maxDist = 780f;
             float campfireVolumeScalar = 0.75f;
-            if (isNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds) {
+            if (IsNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds) {
                 cracklePan = (ModContent.GetInstance<CampfireDetection>().distanceToCampfire / maxDist) * (ModContent.GetInstance<CampfireDetection>().isOnRight ? -1 : 1) / 2;
                 crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceToCampfire / maxDist * campfireVolumeScalar;
             }
@@ -451,7 +456,7 @@ if (Mod.Version > GetBrowserVersion())
                         {
                             distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
                             isOnRight = originOfCampfire.X < player.Center.X;
-                            player.GetModPlayer<AmbientPlayer>().isNearCampfire = true;
+                            player.GetModPlayer<AmbientPlayer>().IsNearCampfire = true;
                         }
                     }
                     if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
@@ -463,7 +468,7 @@ if (Mod.Version > GetBrowserVersion())
                         {
                             //if (TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance is not null)
                                 //TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
-                            player.GetModPlayer<AmbientPlayer>().isNearCampfire = false;
+                            player.GetModPlayer<AmbientPlayer>().IsNearCampfire = false;
                         }
                     }
                 }

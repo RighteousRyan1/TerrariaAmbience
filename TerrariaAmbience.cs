@@ -13,6 +13,7 @@ using NAudio.CoreAudioApi;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
+using System.IO;
 
 namespace TerrariaAmbience
 {
@@ -130,6 +131,8 @@ namespace TerrariaAmbience
         {
             orig(self, gameTime);
 
+            CraftSounds.TimeSinceLastCraft++;
+
             _curDay = Main.dayTime;
 
             JustTurnedDay = !_oldDay && _curDay;
@@ -145,23 +148,21 @@ namespace TerrariaAmbience
 
                 //Ambience.DoUpdate_Ambience();
                 //Ambience.UpdateVolume();
+
+                GradientGlobals.Update();
+
                 if (Main.gameMenu)
                     return;
                 //Ambience.ClampAll();
             }
             _oldDay = Main.dayTime;
         }
-        public static bool UserHasSteelSeries;
         public override void PostSetupContent()
         {
             if (!Main.dedServ) {
-                DefaultAmbientHandler = new();
-                DefaultFootstepHandler = new();
                 // Sounds\Custom\ambient\environment\campfire_crackle
                 // guh??? null??
                 var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
-                DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
 
 
                 // hopefully reduce runtime overhead for later via *hopefully* caching all sounds in the load process.
@@ -176,19 +177,6 @@ namespace TerrariaAmbience
                     DefaultAmbientHandler.ForestDay.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/day_{day}");
                 }*/
                 // ^ doing this causes a read access violation. wtf.
-
-                /*var enumerator = new MMDeviceEnumerator();
-
-                // Allows you to enumerate rendering devices in certain states
-                var endpoints = enumerator.EnumerateAudioEndPoints(
-                    DataFlow.Render,
-                    DeviceState.Unplugged | DeviceState.Active);
-
-                var endpointNames = endpoints.Select(x => x.DeviceFriendlyName).ToArray();
-
-                UserHasSteelSeries = endpointNames.Any(endpoint => endpoint.Contains("SteelSeries") 
-                && endpoint.Contains("Sonar"));*/
-                // Mod thor = ModLoader.GetMod("ThoriumMod");
 
                 MenuDetours.Init();
 
@@ -208,6 +196,13 @@ namespace TerrariaAmbience
                         "AstralDirt",
                         "AstralGrass");
 
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.MetalBlocks,
+                        "ExoPrismPanelTile",
+                        "ExoPlatingTile",
+                        "ExoPrismPlatformTile",
+                        "ExoPlatformTile",
+                        "");
+
                     TileDetection.AddTilesToList(calamity, FootstepHandler.LeafBlocks,
                         "PlantyMush");
 
@@ -217,9 +212,11 @@ namespace TerrariaAmbience
                     TileDetection.AddTilesToList(calamity, FootstepHandler.IceBlocks,
                         "AstralIce");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.MarblesGranites,
-                        "StatigelBlock");
+                        "StatigelBlock",
+                        "SmoothNavystone");
 
                     TileDetection.AddTilesToList(calamity, FootstepHandler.StoneBlocks,
+                        "OtherworldlyStone",
                         "AstralOre",
                         "AstralStone",
                         "AstralMonolith",
@@ -242,7 +239,22 @@ namespace TerrariaAmbience
 
                     TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
                 }
+                #region SpookyMod
+                /*if (ModLoader.TryGetMod("SpookyMod", out var thor)) {
+                    TileDetection.AddTilesToList(thor, FootstepHandler.StoneBlocks,
+                        "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
+                        "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
+
+                    TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
+                }*/
+                #endregion
+                DefaultAmbientHandler = new();
+                DefaultFootstepHandler = new();
+
+                DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
+                DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
             }
+
             #endregion
         }
         public override void Unload()
@@ -250,11 +262,23 @@ namespace TerrariaAmbience
             MenuDetours.AddMenuButtonsHook = null;
             Main.versionNumber = _versCache;
         }
-        public override void Close()
-        {
-            base.Close();
-        }
         public float lastPlayerPositionOnGround;
         public float delta_lastPos_playerBottom;
+
+        public override void HandlePacket(BinaryReader reader, int whoAmI) {
+            var pos = reader.ReadVector2();
+            var path = reader.ReadString();
+
+            if (Main.netMode == NetmodeID.Server) {
+                var p = GetPacket();
+                p.WriteVector2(pos);
+                p.Write(path);
+                p.Send(ignoreClient: whoAmI);
+            }
+            else {
+                var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
+                SoundEngine.PlaySound(new SoundStyle(path).WithVolumeScale(CraftSounds.UniversalSoundScale * volScale), pos);
+            }
+        }
     }
 }
