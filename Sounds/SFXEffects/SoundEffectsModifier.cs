@@ -20,6 +20,7 @@ namespace TerrariaAmbience.Sounds
 {
 	public class SoundEffectsModifier : ModSystem
     {
+		public static List<ActiveSound> dynamicSfxActiveSounds = new();
         public override void PreSaveAndQuit() {
 			TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Stop();
         }
@@ -27,12 +28,47 @@ namespace TerrariaAmbience.Sounds
 		{
 			AudioModifier.CacheReflection();
             On_ActiveSound.Play += ActiveSound_Play;
+            //On_ActiveSound.Update += UpdateActiveSoundFilters;
 		}
 
-		private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self)
+        public override void PostUpdateEverything() {
+			foreach (var sfx in dynamicSfxActiveSounds) {
+				if (sfx.Sound is DynamicSoundEffectInstance d) {
+					if (sfx.Position.HasValue) {
+						bool containsIgnoreablePos = badStyles.Contains(sfx.Style);
+						ReverbAudioSystem.CreateAudioFX(sfx.Position.Value, out float gain, out float occ, out float damp, out bool sDamp);
+						if (!ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled)
+							gain = 0f;
+						if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled) {
+							sDamp = false;
+							damp = 0f;
+						}
+						if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled) {
+							occ = 0f;
+						}
+						if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
+							gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
+						if (sDamp) {
+							if (!badStyles.Contains(sfx.Style))
+								d.ApplyReverbReturnDynamicInstance(gain / 2)
+									.ApplyLowPassFilterReturnInstance(occ)
+									.ApplyBandPassFilter(damp);
+							return;
+						}
+						if (!badStyles.Contains(sfx.Style))
+							d.ApplyReverbReturnDynamicInstance(gain / 2)
+								.ApplyLowPassFilterReturnInstance(occ);
+					}
+				}
+			}
+        }
+
+        private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self)
 		{
 			orig(self);
 
+			if (self.Sound is DynamicSoundEffectInstance)
+				dynamicSfxActiveSounds.Add(self);
 			if (self.Position.HasValue)
 			{
 				bool containsIgnoreablePos = badStyles.Contains(self.Style);
@@ -376,17 +412,18 @@ namespace TerrariaAmbience.Sounds
 			if (playerUnderwater && !underWater)
 			{
 				shouldDampen = true;
-				dampening = 0.015f;
+				dampening = 0.0175f;
 			}
 			if (underWater && playerUnderwater)
 			{
 				shouldDampen = true;
-				dampening = 0.075f;
+				// old = .075
+				dampening = 0.01f;
 			}
 			if (underWater && !playerUnderwater)
 			{
 				shouldDampen = true;
-				dampening = 0.225f;
+				dampening = 0.025f;
 			}
 		}
 	}
@@ -429,7 +466,13 @@ namespace TerrariaAmbience.Sounds
 				ReverbInfo?.Invoke(instance, new object[] { rvGain });
 			return instance;
 		}
-		public static ActiveSound ApplyReverbOnActiveSound(this ActiveSound sound, float rvGain)
+        public static DynamicSoundEffectInstance ApplyReverbReturnDynamicInstance(this DynamicSoundEffectInstance instance, float rvGain) {
+            rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
+            if (instance != null)
+                ReverbInfo?.Invoke(instance, new object[] { rvGain });
+            return instance;
+        }
+        public static ActiveSound ApplyReverbOnActiveSound(this ActiveSound sound, float rvGain)
 		{
 			rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
 			if (sound.Sound != null)
@@ -450,7 +493,13 @@ namespace TerrariaAmbience.Sounds
 				LowPassInfo?.Invoke(instance, new object[] { cutoff });
 			return instance;
 		}
-		public static SoundEffectInstance ApplyHighPassFilter(this SoundEffectInstance instance, float cutoff)
+        public static DynamicSoundEffectInstance ApplyLowPassFilterReturnDynamicInstance(this DynamicSoundEffectInstance instance, float cutoff) {
+            cutoff = MathHelper.Clamp(cutoff, 0f, 1f);
+            if (instance != null)
+                LowPassInfo?.Invoke(instance, new object[] { cutoff });
+            return instance;
+        }
+        public static SoundEffectInstance ApplyHighPassFilter(this SoundEffectInstance instance, float cutoff)
 		{
 			cutoff = MathHelper.Clamp(cutoff, 0f, 1f);
 			if (instance != null)
@@ -464,7 +513,13 @@ namespace TerrariaAmbience.Sounds
 				BandPassInfo?.Invoke(instance, new object[] { center });
 			return instance;
 		}
-		public static void SafelySetPan(this SoundEffectInstance sfx, float pan)
+        public static DynamicSoundEffectInstance ApplyBandPassFilterReturnDynamic(this DynamicSoundEffectInstance instance, float center) {
+            center = MathHelper.Clamp(center, -1f, 1f);
+            if (instance != null)
+                BandPassInfo?.Invoke(instance, new object[] { center });
+            return instance;
+        }
+        public static void SafelySetPan(this SoundEffectInstance sfx, float pan)
 		{
 			pan = MathHelper.Clamp(pan, -1f, 1f);
 			sfx.Pan = pan;

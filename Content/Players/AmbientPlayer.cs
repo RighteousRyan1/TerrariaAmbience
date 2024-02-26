@@ -25,8 +25,8 @@ namespace TerrariaAmbience.Content.Players
         private float _multInternal;
         public float BehindWallMultiplier => MathHelper.Clamp(_multInternal, 0.5f, 1f);
 
-        public FieldInfo _stormShaderObstruction = typeof(Player).GetField("_stormShaderObstruction", BindingFlags.Instance | BindingFlags.NonPublic);
-        public float BlizzardVisualIntensity => (float)_stormShaderObstruction.GetValue(Player);
+        //public FieldInfo _stormShaderObstruction = typeof(Player).GetField("_stormShaderObstruction", BindingFlags.Instance | BindingFlags.NonPublic);
+        //public float BlizzardVisualIntensity => (float)_stormShaderObstruction.GetValue(Player);
 
         public bool BehindBackWall_MyStyle;
 
@@ -45,11 +45,11 @@ namespace TerrariaAmbience.Content.Players
         private int chestStateOld; // Same as above.
 
         /// <summary>
-        /// For the use of rain. Not modifyable publically due to potential anomalies happening otherwise.
+        /// For the use of rain. Not modifiable publically due to potential anomalies happening otherwise.
         /// <para></para>
         /// Checks above the player for about 8 tiles for a ceiling. Used for wet-sounding footsteps.
         /// </summary>
-        public bool HasTilesAbove;
+        public bool HasTilesAbove { get; private set; }
 
         private bool _wet; // old state of player wet
 
@@ -115,7 +115,8 @@ namespace TerrariaAmbience.Content.Players
             if (cfg.wetStepsEnabled) {
                 if (!Player.wet) {
                     Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
-                    for (int i = (int)Player.Top.X - 1; i < Player.Top.X + 1; i++) {
+                    // i know i can just remove this loop but just in case i want to tweak it again i'll have it like this
+                    for (int i = (int)Player.Top.X/* - 1*/; i < Player.Top.X /*+ 1*/; i++) {
                         for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--) {
                             if (WorldGen.InWorld(i / 16, j / 16)) {
                                 Tile tile = Main.tile[i / 16, j / 16];

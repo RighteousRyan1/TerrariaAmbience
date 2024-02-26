@@ -28,6 +28,7 @@ public class FootstepHandler {
     public FootstepSound Metal;
     public FootstepSound Water;
     public FootstepSound Sticky;
+    public FootstepSound Gem;
 
     public FootstepSound Armor;
     public FootstepSound Vanity;
@@ -60,6 +61,7 @@ public class FootstepHandler {
         Glass = new(mod, "Sounds/Custom/steps/glass/step", 6, "Glass", GlassBlocks.ToArray());
         SmoothStone = new(mod, "Sounds/Custom/steps/smoothstones/step", 7, "Smooth Stone", SmoothStones.ToArray());
         Metal = new(mod, "Sounds/Custom/steps/metal/step", 6, "Metal", MetalBlocks.ToArray());
+        Gem = new(mod, "Sounds/Custom/steps/gem/step", 14, "Gem", 0.3f, 0.6f, GemBlocks.ToArray());
         Water = new(mod, "Sounds/Custom/steps/water/step", 6, "Water Wading") {
             FootstepConditions = (p) => {
                 return !p.IsWaterSuffocating() && p.wet && !p.lavaWet;
@@ -130,27 +132,12 @@ public class FootstepHandler {
                 TileID.Stone,
                 TileID.ActiveStoneBlock,
                 TileID.Diamond,
-                TileID.DiamondGemspark,
-                TileID.DiamondGemsparkOff,
                 TileID.Ruby,
-                TileID.RubyGemspark,
-                TileID.RubyGemsparkOff,
                 TileID.Topaz,
-                TileID.TopazGemspark,
-                TileID.TopazGemsparkOff,
                 TileID.Sapphire,
-                TileID.SapphireGemspark,
-                TileID.SapphireGemsparkOff,
                 TileID.Amethyst,
-                TileID.AmethystGemspark,
-                TileID.AmethystGemsparkOff,
                 TileID.Emerald,
-                TileID.EmeraldGemspark,
-                TileID.EmeraldGemsparkOff,
-                TileID.AmberGemspark,
-                TileID.AmberGemsparkOff,
                 TileID.Ebonstone,
-                TileID.FleshBlock,
                 TileID.Crimstone,
                 TileID.CrimsonSandstone,
                 TileID.CorruptHardenedSand,
@@ -185,7 +172,8 @@ public class FootstepHandler {
                 TileID.DesertFossil,
                 TileID.ShellPile,
                 TileID.Meteorite,
-                TileID.Demonite
+                TileID.Demonite,
+                TileID.Chlorophyte
         };
     public static List<int> SandBlocks { get; private set; } = new()
     {
@@ -227,6 +215,7 @@ public class FootstepHandler {
             TileID.ObsidianBrick,
             TileID.Asphalt,
             TileID.StoneSlab,
+            TileID.AccentSlab,
             TileID.SandStoneSlab,
             TileID.Coralstone,
             TileID.CrimstoneBrick,
@@ -314,7 +303,17 @@ public class FootstepHandler {
     {
             TileID.LivingMahoganyLeaves,
             TileID.LeafBlock,
-        };
+    };
+    public static List<int> GemBlocks { get; private set; } = new()
+    {
+        TileID.AmberGemspark,
+        TileID.AmethystGemspark,
+        TileID.DiamondGemspark,
+        TileID.EmeraldGemspark,
+        TileID.RubyGemspark,
+        TileID.SapphireGemspark,
+        TileID.TopazGemspark,
+    };
     public static List<int> StickyBlocks { get; private set; } = new()
     {
             TileID.Mud,
@@ -324,8 +323,9 @@ public class FootstepHandler {
             TileID.BeeHive,
             TileID.Hive,
             TileID.HoneyBlock,
-            TileID.CrispyHoneyBlock
-        };
+            TileID.CrispyHoneyBlock,
+            TileID.FleshBlock
+    };
     // VERY IMPORTANT TO ADD ALL ABOVE LISTS HERE.
     internal static List<List<int>> AllTileLists = new()
     {
@@ -340,6 +340,7 @@ public class FootstepHandler {
             MarblesGranites,
             MetalBlocks,
             GlassBlocks,
-            StickyBlocks
+            StickyBlocks,
+            GemBlocks
         };
 }

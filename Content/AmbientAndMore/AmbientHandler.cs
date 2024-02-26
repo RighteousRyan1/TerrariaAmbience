@@ -29,7 +29,8 @@ public class AmbientHandler {
 
     public float TransitionHarshness;
 
-    public ModAmbience Breeze;
+    public ModAmbience BreezeLight;
+    public ModAmbience BreezeHeavy;
 
     public ModAmbience ForestMorning;
     public ModAmbience ForestDay;
@@ -62,6 +63,10 @@ public class AmbientHandler {
     public ModAmbience Underwater;
     public ModAmbience UnderwaterDeep;
 
+    public ModAmbience RainLight;
+    public ModAmbience RainMed;
+    public ModAmbience RainHeavy;
+
     public List<ModAmbience> Ambiences { get; private set; }
 
     // since ModAmbience can't really do campfire stuff. lul.
@@ -92,7 +97,11 @@ public class AmbientHandler {
 
         var mod = ModContent.GetInstance<TerrariaAmbience>();
 
-        Breeze = new(mod, AmbientPath + "environment/breeze", "Breeze", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+        BreezeLight = new(mod, AmbientPath + "environment/breeze_light", "BreezeLight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+            var player = Main.LocalPlayer;
+            return player.ZoneOverworldHeight && !player.ZoneSkyHeight;
+        });
+        BreezeHeavy = new(mod, AmbientPath + "environment/breeze_heavy", "BreezeHeavy", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
             return player.ZoneOverworldHeight && !player.ZoneSkyHeight;
         });
@@ -165,8 +174,9 @@ public class AmbientHandler {
 
         BeachCalm = new(mod, AmbientPath + "biome/beach/waves_calm", "BeachCalm", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-
-            return player.ZoneBeach && !player.ZoneRockLayerHeight;
+            // do this when i'm not lazy
+            var calLoadedAtSulfSea = false; //TerrariaAmbience.IsPlayerInCalBiome(player, "SulphurousSeaBiome") && TerrariaAmbience.IsCalLoaded;
+            return (player.ZoneBeach && !player.ZoneRockLayerHeight) || (calLoadedAtSulfSea);
         });
         BeachAggro = new(mod, AmbientPath + "biome/beach/waves_aggro", "BeachAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
@@ -183,6 +193,18 @@ public class AmbientHandler {
         UnderwaterDeep = new(mod, AmbientPath + "environment/underwater_loop-deep", "UnderwaterDeep", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
             return player.IsWaterSuffocating();
+        });
+        RainLight = new(mod, AmbientPath + "rain/light", "RainLight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+            var player = Main.LocalPlayer;
+            return Main.raining && !Main.LocalPlayer.ZoneSnow;
+        });
+        RainMed = new(mod, AmbientPath + "rain/med", "RainMedium", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+            var player = Main.LocalPlayer;
+            return Main.raining && !Main.LocalPlayer.ZoneSnow;
+        });
+        RainHeavy = new(mod, AmbientPath + "rain/heavy", "RainHeavy", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
+            var player = Main.LocalPlayer;
+            return Main.raining && !Main.LocalPlayer.ZoneSnow;
         });
 
         // finally, we add all of them via reflection because manual labor is stupid.
@@ -249,7 +271,7 @@ public class AmbientHandler {
 
         SnowDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().snowVolume;
         SnowNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().snowVolume;
-        SnowAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.RainIntensity * GradientGlobals.WindSpeedsHigh *  ModContent.GetInstance<GeneralConfig>().snowVolume;
+        SnowAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.RainIntensityForSnow * GradientGlobals.WindSpeedsHigh *  ModContent.GetInstance<GeneralConfig>().snowVolume;
         // make quieter / bandpass filter when inside
         Desert.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().desertVolume;
         if (Desert.SoundInstance != null)
@@ -264,6 +286,11 @@ public class AmbientHandler {
 
         Underwater.MaxVolume = 0f;
         UnderwaterDeep.MaxVolume = 0f;
+
+        // rain volume slider.
+        RainLight.MaxVolume = GradientGlobals.RainIntensityForRainLight * GradientGlobals.SkyToUnderground;
+        RainMed.MaxVolume = GradientGlobals.RainIntensityForRainMed * GradientGlobals.SkyToUnderground;
+        RainHeavy.MaxVolume = GradientGlobals.RainIntensityForRainHeavy * GradientGlobals.SkyToUnderground * 0.6f;
 
         if (Underwater.AreConditionsMet) {
             // do volume lerp between underwater_loop and underwater_loop-deep
@@ -293,8 +320,11 @@ public class AmbientHandler {
 
         BeachCalm.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().oceanVolume;
         BeachAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsHigh * ModContent.GetInstance<GeneralConfig>().oceanVolume;
-        Breeze.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume;
+        
+        BreezeLight.MaxVolume = GradientGlobals.WindLight * GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume;
+        BreezeHeavy.MaxVolume = GradientGlobals.WindCapped * GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume * 0.5f;
         CavernLayer.MaxVolume = GradientGlobals.Underground * ModContent.GetInstance<GeneralConfig>().cavernsVolume * 0.4f;
+        
         Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<GeneralConfig>().hellVolume;
         var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
         Ambiences.ForEach(x => x.MaxVolume *= pl.BehindWallMultiplier);

@@ -14,6 +14,7 @@ using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
 using System.IO;
+using System.Collections.Generic;
 
 namespace TerrariaAmbience
 {
@@ -57,6 +58,8 @@ namespace TerrariaAmbience
                                 TileDetection.AddTilesToList(mod, FootstepHandler.SmoothStones, s);
                             else if (listName == "Sticky")
                                 TileDetection.AddTilesToList(mod, FootstepHandler.StickyBlocks, s);
+                            else if (listName == "Gem")
+                                TileDetection.AddTilesToList(mod, FootstepHandler.GemBlocks, s);
                             else {
                                 Logger.Info("Mod.Call failure: Unknown tile list specified.");
                                 return "Unknown tile list specified.";
@@ -157,66 +160,61 @@ namespace TerrariaAmbience
             }
             _oldDay = Main.dayTime;
         }
-        public override void PostSetupContent()
-        {
+        public override void PostSetupContent() {
             if (!Main.dedServ) {
-                // Sounds\Custom\ambient\environment\campfire_crackle
-                // guh??? null??
-                var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-
-
-                // hopefully reduce runtime overhead for later via *hopefully* caching all sounds in the load process.
-                /*for (int i = 0; i < 20; i++) {
-                    var even = Main.rand.Next(1, AmbientHandler.NUM_EVENING_AMBIENCE + 1);
-                    var night = Main.rand.Next(1, AmbientHandler.NUM_NIGHT_AMBIENCE + 1);
-                    var morn = Main.rand.Next(1, AmbientHandler.NUM_MORNING_AMBIENCE + 1);
-                    var day = Main.rand.Next(1, AmbientHandler.NUM_DAY_AMBIENCE + 1);
-                    DefaultAmbientHandler.ForestEvening.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/evening_{even}");
-                    DefaultAmbientHandler.ForestNight.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/night_{night}");
-                    DefaultAmbientHandler.ForestMorning.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/morning_{morn}");
-                    DefaultAmbientHandler.ForestDay.ChangeTrack(DefaultAmbientHandler.AmbientPath + $"biome/forest/day_{day}");
-                }*/
-                // ^ doing this causes a read access violation. wtf.
-
                 MenuDetours.Init();
 
                 SoundChanges.Init();
                 // TODO: Finish adding these another day...
                 #region Calamity Adds
                 if (ModLoader.TryGetMod("CalamityMod", out var calamity)) {
+                    IsCalLoaded = true;
+                    CalBiomes = calamity.GetContent<ModBiome>().ToList();
                     TileDetection.AddTilesToList(calamity, FootstepHandler.SnowBlocks, "AstralSnow");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.SandBlocks,
                         "SulphurousSand",
                         "AstralSand",
                         "EutrophicSand",
                         "AstralClay",
-                        "SulphurousSandNoWater");
+                        "SulphurousSandNoWater",
+                        "CelestialRemains");
 
                     TileDetection.AddTilesToList(calamity, FootstepHandler.GrassBlocks,
-                        "AstralDirt",
-                        "AstralGrass");
+                        "AstralGrass",
+                        "VernalSoil");
 
                     TileDetection.AddTilesToList(calamity, FootstepHandler.MetalBlocks,
                         "ExoPrismPanelTile",
                         "ExoPlatingTile",
                         "ExoPrismPlatformTile",
                         "ExoPlatformTile",
-                        "");
-
+                        "CosmilitePlatform", "CosmiliteBrick",
+                        "PlaguedPlatePlatform",
+                        "LaboratoryPlating",
+                        "LaboratoryPipePlating",
+                        "RustedShelf", "RustedPlating", "PlaguedPlate");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.GemBlocks,
+                        "SilvaCrystal");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.LeafBlocks,
                         "PlantyMush");
-
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.GlassBlocks,
+                        "SeaPrismBrick", "EutrophicGlass", "CryonicBrick");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.DirtBlocks,
                         "PlantyMush",
                         "AstralDirt");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.IceBlocks,
                         "AstralIce");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.MarblesGranites,
-                        "StatigelBlock",
-                        "SmoothNavystone");
-
+                        "StatigelBlock", "StatigelPlatform",
+                        "SmoothNavystone",
+                        "SmoothBrimstoneSlag");
+                    TileDetection.AddTilesToList(calamity, FootstepHandler.SmoothStones,
+                        "AshenSlab", "AshenAccentSlab", "AshenPlatform", "SmoothAbyssGravel",
+                        "OccultBrickTile", "SilvaPlatform", "OccultPlatformTile",
+                        "RunicProfanedBrick", "VoidstoneSlab", "ProfanedSlab", "ScoriaBrick",
+                        "PerennialBrick", "AerialiteBrick", "BrimstoneSlab", "AstralBrick");
                     TileDetection.AddTilesToList(calamity, FootstepHandler.StoneBlocks,
-                        "OtherworldlyStone",
+                        "OtherworldlyStone", "OtherworldlyPlatform",
                         "AstralOre",
                         "AstralStone",
                         "AstralMonolith",
@@ -228,15 +226,32 @@ namespace TerrariaAmbience
                         "HardenedSulphurousSandstone",
                         "BrimstoneSlag", "CharredOre",
                         "LaboratoryShelf",
-                        "LaboratoryPanels", "Cinderplate", "SmoothVoidstone");
+                        "LaboratoryPanels", "Cinderplate", "SmoothVoidstone", "Onyxplate", "Elumplate",
+                        "Havocplate", "CryonicOre", "ProfanedRock",
+                        "PerennialOre", "HallowedOre", "NovaeSlag", "AuricOre", "AstralSandstone",
+                        "UelibloomOre", "AerialiteOre", "AerialiteOreDisenchanted", "ExodiumOre",
+                        "PlagueContainmentCells", "SulphurousShale");
                 }
                 #endregion
                 #region Thorium Adds
                 if (ModLoader.TryGetMod("ThoriumMod", out var thor)) {
+                    // multiple sounds for things like CloudSlab because snowy + stone-y sounds would probably fit!
                     TileDetection.AddTilesToList(thor, FootstepHandler.StoneBlocks,
                         "ThoriumOre", "LifeQuartz", "MarineRock", "MarineRockMoss", "DepthsAmber", "PearlStone", "Aquaite", "DepthsOpal",
-                        "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform");
-
+                        "SynthPlatinum", "DepthsOnyx", "DepthsSapphire", "DepthsEmerald", "DepthsTopaz", "DepthsAmethyst", "ScarletChestPlatform",
+                        "SugarCookieBlockNew", "BloodstainedBlock", "Aquamarine",
+                        "CursedBlockNew", "OrnateBlock", "SynthGold", "ShadyBlock", "OrnatePlatform");
+                    TileDetection.AddTilesToList(thor, FootstepHandler.SmoothStones,
+                        "CelestialBrick", "CloudSlab", "CutStoneBlock", "CutSandstoneBlock", 
+                        "CutStoneBlockSlab", "CutSandstoneBlockSlab", "NagaBlockNew", "CelestialPlatform", "NagaPlatform");
+                    TileDetection.AddTilesToList(thor, FootstepHandler.GrassBlocks,
+                        "SpookyAstroturf", "CherryAstroturf");
+                    TileDetection.AddTilesToList(thor, FootstepHandler.MarblesGranites,
+                        "CheckeredBrickTile", "RefinedMarineBlock");
+                    TileDetection.AddTilesToList(thor, FootstepHandler.SnowBlocks,
+                        "SnowyAstroturf", "CloudSlab");
+                    TileDetection.AddTilesToList(thor, FootstepHandler.GemBlocks,
+                        "AquamarineGemsparkNew", "ThoriumBrick", "ThoriumBrickBlock", "ThoriumPlatform");
                     TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
                 }
                 #region SpookyMod
@@ -248,19 +263,29 @@ namespace TerrariaAmbience
                     TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
                 }*/
                 #endregion
+                #endregion
+
+                var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
                 DefaultAmbientHandler = new();
                 DefaultFootstepHandler = new();
-
                 DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
                 DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
             }
-
-            #endregion
         }
+
+        public static bool IsCalLoaded;
+        public static List<ModBiome> CalBiomes;
         public override void Unload()
         {
             MenuDetours.AddMenuButtonsHook = null;
             Main.versionNumber = _versCache;
+        }
+        // this seems like fps loss waiting to happen. oh well.
+        public static bool IsPlayerInCalBiome(Player player, string calBiomeName) {
+            var b = CalBiomes.FirstOrDefault(x => x.Name == calBiomeName);
+            if (CalBiomes.IndexOf(b) == -1)
+                return false;
+            return player.InModBiome(b);
         }
         public float lastPlayerPositionOnGround;
         public float delta_lastPos_playerBottom;

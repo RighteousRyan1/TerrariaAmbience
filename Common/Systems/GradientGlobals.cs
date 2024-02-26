@@ -25,6 +25,8 @@ namespace TerrariaAmbience.Common.Systems
         public static double IngameGlobalTime { get; private set; }
 
 
+        public static float WindCapped;
+        public static float WindLight;
         private static float MinLowWind = -0.2f;
         private static float MaxLowWind = 0.4f;
 
@@ -32,7 +34,10 @@ namespace TerrariaAmbience.Common.Systems
         private static float MaxHighWind = 1f;
 
         public static float WindSpeedsHigh;
-        public static float RainIntensity;
+        public static float RainIntensityForSnow;
+        public static float RainIntensityForRainLight;
+        public static float RainIntensityForRainMed;
+        public static float RainIntensityForRainHeavy;
         /// <summary>
         /// If the <see cref="Gradient"/> specified is higher than the median, cap it at 1.
         /// </summary>
@@ -55,7 +60,15 @@ namespace TerrariaAmbience.Common.Systems
             WindSpeedsLow = Gradient.CreateFloat(MathF.Abs(Main.windSpeedCurrent), MinLowWind, MaxLowWind);
             WindSpeedsHigh = GradientCapped(MathF.Abs(Main.windSpeedCurrent), MinHighWind, MaxHighWind);
 
-            RainIntensity = GradientCapped(Main.maxRaining, 0.1f, 1.1f);
+            WindLight = Gradient.CreateFloat(MathF.Abs(Main.windSpeedCurrent), 0f, 0.65f * 1.5f);
+            WindCapped = GradientCapped(MathF.Abs(Main.windSpeedCurrent), 0.35f * 1.5f, MaxHighWind * 1.5f);
+            // magical numbers (aka 1.5f)
+            // to future me, these are just values to make the breeze more seamlessly combine at higher/lower values
+
+            RainIntensityForSnow = GradientCapped(Main.maxRaining, 0.1f, 1.1f);
+            RainIntensityForRainLight = Gradient.CreateFloat(Main.maxRaining, 0f, 0.4f);
+            RainIntensityForRainMed = Gradient.CreateFloat(Main.maxRaining, 0.2f, 1f);
+            RainIntensityForRainHeavy = GradientCapped(Main.maxRaining, 0.5f, 1.5f);
 
             Hell = Gradient.CreateFloat(Main.LocalPlayer.Center.Y, (Main.maxTilesY - 300) * 16, Main.maxTilesY * 16);
             SkyToUnderground = (float)Gradient.CreateDouble(Main.LocalPlayer.Center.Y, Main.worldSurface * 16 * 0.35f, Main.worldSurface * 1.05f * 16);

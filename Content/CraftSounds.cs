@@ -17,6 +17,35 @@ namespace TerrariaAmbience.Content;
 public class CraftSounds : GlobalItem {
     public override bool InstancePerEntity => true;
     /// <summary>
+    /// A list containing all TINKER-ISH CRAFTING STATIONS. Add to this if you wish, mods out there.
+    /// </summary>
+    public static List<int> TinkerStations = new() {
+        TileID.TinkerersWorkbench
+    };
+    /// <summary>
+    /// A list containing all FLESHY CRAFTING STATIONS. Add to this if you wish, mods out there.
+    /// </summary>
+    public static List<int> FleshyStations = new() {
+        TileID.MeatGrinder,
+        //TileID.DemonAltar // will have to use tile framing manipulation lol.
+    };
+    public static List<int> Altars = new() {
+        TileID.DemonAltar
+    };
+    /// <summary>
+    /// A list containing all ALCHEMY STATIONS. Add to this if you wish, mods out there.
+    /// </summary>
+    public static List<int> Alchemy = new() {
+        TileID.AlchemyTable,
+        TileID.Bottles
+    };
+    /// <summary>
+    /// A list containing all STATIONS WITH SAWS. Add to this if you wish, mods out there.
+    /// </summary>
+    public static List<int> SawStations = new() {
+        TileID.Sawmill
+    };
+    /// <summary>
     /// A list containing all ANVILS. Add to this if you wish, mods out there.
     /// </summary>
     public static List<int> Anvils = new() {
@@ -37,6 +66,7 @@ public class CraftSounds : GlobalItem {
     public static List<int> Furnaces = new() {
         TileID.Furnaces,
         TileID.LihzahrdFurnace,
+        TileID.GlassKiln
     };
     /// <summary>
     /// A list containing all BOOK RELATED THINGS. Add to this if you wish, mods out there.
@@ -45,13 +75,29 @@ public class CraftSounds : GlobalItem {
         TileID.Bookcases,
         TileID.Books
     };
-    //[Obsolete("Do not use for the time being- it is being finalized.")]
+
+    public static List<List<int>> AllCategories = new() {
+        Altars,
+        SawStations,
+        Books,
+        Furnaces,
+        WorkBenches,
+        Anvils,
+        Alchemy,
+        TinkerStations,
+        // FleshyStations // no noise for this yet.
+    };
     public static string WorkBenchesSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_workbench";
     public static string AnvilsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_anvil";
     public static string BooksSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_book";
     public static string FurnaceSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_furnace";
+    public static string AltarsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_demonaltar";
+    public static string AlchemySoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_alchemy{Main.rand.Next(1, 3)}"; // a lil bitta random :zany:
+    public static string SawsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_saws{Main.rand.Next(1, 3)}";
+    public static string TinkerSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_tinker";
+
     public static float UniversalSoundScale = 0.8f;
-    public static int LastCraftedPlaceable = -1;
+    public static int LastCraftedConsumable = -1;
     // Incremented in TerrariaAmbience.On_Terraria::Main_Update(On_Main.orig_Update, Main, GameTime)
     public static int TimeSinceLastCraft = 0;
     public override void OnCreated(Item item, ItemCreationContext context) {
@@ -61,27 +107,31 @@ public class CraftSounds : GlobalItem {
         var player = Main.player[Main.myPlayer];
         var aPlayer = player.GetModPlayer<AmbientPlayer>();
         // var pket = mod.GetPacket();
-        bool craftWithAnvil = Anvils.Intersect(recipe.requiredTile).Any();
-        bool craftWithWB = WorkBenches.Intersect(recipe.requiredTile).Any();
-        bool craftWithFurnace = Furnaces.Intersect(recipe.requiredTile).Any();
-        bool craftWithBook = Books.Intersect(recipe.requiredTile).Any();
-
+        var wasValidStation = AllCategories.Any(x => x.Intersect(recipe.requiredTile).Any());
         TimeSinceLastCraft = 0;
 
         // a second is probably acceptable.
         // why tf is "TimeSinceLastCraft" shitting its pants? we will never know. ryan out
-        if (LastCraftedPlaceable != item.type || TimeSinceLastCraft > 60) {
-            if (craftWithAnvil || craftWithWB || craftWithBook || craftWithFurnace) {
+        if (LastCraftedConsumable != item.type || TimeSinceLastCraft > 60) {
+            if (wasValidStation) {
                 var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
                 var dir = string.Empty;
-                if (craftWithAnvil)
+                if (Anvils.Intersect(recipe.requiredTile).Any())
                     dir = AnvilsSoundDir;
-                if (craftWithWB)
+                if (WorkBenches.Intersect(recipe.requiredTile).Any())
                     dir = WorkBenchesSoundDir;
-                if (craftWithFurnace)
+                if (Furnaces.Intersect(recipe.requiredTile).Any())
                     dir = FurnaceSoundDir;
-                if (craftWithBook)
+                if (Books.Intersect(recipe.requiredTile).Any())
                     dir = BooksSoundDir;
+                if (SawStations.Intersect(recipe.requiredTile).Any())
+                    dir = SawsSoundDir;
+                if (TinkerStations.Intersect(recipe.requiredTile).Any())
+                    dir = TinkerSoundDir;
+                if (Alchemy.Intersect(recipe.requiredTile).Any())
+                    dir = AlchemySoundDir;
+                if (Altars.Intersect(recipe.requiredTile).Any())
+                    dir = AltarsSoundDir;
 
                 SoundEngine.PlaySound(new SoundStyle(dir).WithVolumeScale(UniversalSoundScale * volScale), player.Center);
 
@@ -93,8 +143,8 @@ public class CraftSounds : GlobalItem {
                 }
             }
         }
-        if (item.createTile >= 0 || item.createWall >= 0)
-            LastCraftedPlaceable = item.type;
+        if (item.createTile >= 0 || item.createWall >= 0 || item.consumable)
+            LastCraftedConsumable = item.type;
         // i think this is what i need? not too sure.
         //if (recipe.Conditions.Contains(Condition.NearWater) || recipe.Conditions.Contains(Condition.NearHoney)) {
             //SoundEngine.PlaySound(SoundID.Splash, player.Center);

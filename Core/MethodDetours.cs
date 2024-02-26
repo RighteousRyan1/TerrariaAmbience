@@ -22,6 +22,7 @@ using NAudio.CoreAudioApi;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbienceAPI.Common;
 using TerrariaAmbience.Common.Systems;
+using TerrariaAmbience.Sounds;
 
 namespace TerrariaAmbience.Core
 {
@@ -87,7 +88,7 @@ namespace TerrariaAmbience.Core
             foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
                 displayable += $"{amb.Name}: {amb.volume}\n";
             }
-            displayable += $"\n\nTile Registry (Is player on?):\n";
+            displayable += $"\nTile Registry (Is player on?):\n";
             foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
                 displayable += $"{step.Name}: {(step.IsPlayerOnAnyTile 
                     && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
@@ -95,19 +96,19 @@ namespace TerrariaAmbience.Core
             }
 
             displayable += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
-                + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<Sounds.ReverbPlayer>().ReverbFactor}"
+                + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<ReverbPlayer>().ReverbFactor}"
                 + $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
             if (ModContent.GetInstance<GeneralConfig>().debugInterface) {
                 #region DrawVolume
                 if (Main.playerInventory && (Main.mapStyle == 0 || Main.mapStyle == 2))
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 175);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 120);
                 if (Main.mapStyle == 1 && Main.playerInventory)
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 375);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 320);
                 if (Main.mapStyle == 1 && !Main.playerInventory)
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 375);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 320);
                 if ((Main.mapStyle == 0 || Main.mapStyle == 2) && !Main.playerInventory)
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 175);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 120);
                 Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
                     new Rectangle(
                         (int)drawPos.X - 6,

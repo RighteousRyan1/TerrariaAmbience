@@ -11,12 +11,24 @@ Developers:
 
 Most Recent Update:
 
-Added crafting sounds that can be heard by everyone. They can be toggled.
+Added support for InfraSonic, a proximity voice chat mod.
 
-Some optimisations here and there.
+Major mod support! (Calamity, Thorium)
+Feel free to comment any mods you wish to see footstep support for, as any unsupported blocks will simply sound like wood.
+
+Added some new crafting sounds! 
+Sounds added for these categories: Saw-related, Altar-related, Alchemy-related, Tinkerer-related
+
+Removed vanilla rain/wind sounds since they're both terrible. Don't worry, I replaced them with my own better alternative!	
+
+Changed the underwater dampening value to sound more consistent with real life.
+
+Added a new footstep sound for gems and similar types of blocks.
 
 CONTENT
 --------------
+
+Added sounds that everyone can hear when a player crafts an item at certain crafting stations.
 
 Added a depth-level to underwater ambience. The deeper you are the more intensive it gets.
 
@@ -36,12 +48,6 @@ Some BTS tweaks.
 
 Added more sound configuration for people who prefer more vanilla-friendly sounds.
 
-Fixed corruption and crimson sounds not working for some reason.
-Fixed underwater ambience not working for some reason.
-
-Fixed config-related bugs.
-
-Removed sound packs. Literally no one used them and it made up 1500 lines of painful code.
 Converted codebase to use TerrariaAmbienceAPI. TerrariaAmbienceAPI will now be a mod dependency.
 
 1.4 Update:
@@ -59,3 +65,13 @@ There are now 2D positional audios that update as you go around the world, these
 Sounds now play when sliding on ice.
 
 Audio smooth-transition. As you get closer to space, ambient tracks will grow quiet. As you go into the underground, the sound of caves grows louder.
+
+Sound Credits:
+
+InspectorJ
+morgantj
+kinoton
+globofonia
+wjoojoo
+JoelAudio
+MegaShroom
