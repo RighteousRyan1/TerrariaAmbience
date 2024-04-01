@@ -49,7 +49,7 @@ public class FootstepHandler {
                 return AllTileLists.All(list => !list.Contains(PlayerTileChecker.TileId));
             }
         };
-        Wet = new(mod, "Sounds/Custom/steps/wet/step", 3, "Wet") {
+        Wet = new(mod, "Sounds/Custom/steps/wet/step", 3, "Wet", 0.2f, 0.4f) {
             FootstepConditions = (p) => {
                 return !p.GetModPlayer<AmbientPlayer>().HasTilesAbove && Main.raining && !p.wet && !p.ZoneSnow && p.ZoneOverworldHeight;
             }
@@ -205,11 +205,6 @@ public class FootstepHandler {
             TileID.Sunplate,
             TileID.PearlstoneBrick,
             TileID.IridescentBrick,
-            TileID.AdamantiteBeam,
-            TileID.GraniteColumn,
-            TileID.MarbleColumn,
-            TileID.PalladiumColumn,
-            TileID.SandstoneColumn,
             TileID.SandStoneSlab,
             TileID.SmoothSandstone,
             TileID.ObsidianBrick,

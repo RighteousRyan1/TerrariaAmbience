@@ -32,9 +32,8 @@ namespace TerrariaAmbience.Content.Players
 
         public bool IsNearCampfire;
 
-        public SoundEffectInstance thunderInstance;
-        public SoundEffectInstance hootInstance;
-        public SoundEffectInstance howlInstance;
+        public static SoundEffectInstance thunderInstance;
+        public static SoundEffectInstance howlInstance;
 
         internal int timerUntilValidChestStateChange;
         public override void OnEnterWorld() {
@@ -393,23 +392,19 @@ namespace TerrariaAmbience.Content.Players
             chestStateOld = chestStateNew;
         }
 
-        public SoundEffect soundSlippyRough;
-        public SoundEffectInstance soundSlippyRoughInst;
+        public static SoundEffectInstance soundSlippyRoughInst;
 
-        public SoundEffect soundSlippySmooth;
-        public SoundEffectInstance soundSlippySmoothInst;
+        public static SoundEffectInstance soundSlippySmoothInst;
 
         private bool _areSoundsInitialized;
         public void HandleIceScraping() {
             if (!Main.dedServ) {
                 if (!_areSoundsInitialized) {
-                    soundSlippyRough = Mod.Assets.Request<SoundEffect>("Sounds/Custom/ambient/player/ice_slide_rough", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                    soundSlippyRoughInst = soundSlippyRough.CreateInstance();
+                    soundSlippyRoughInst = Mod.Assets.Request<SoundEffect>("Sounds/Custom/ambient/player/ice_slide_rough", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value.CreateInstance();
                     soundSlippyRoughInst.IsLooped = true;
                     soundSlippyRoughInst?.Play();
                     soundSlippyRoughInst.Volume = 0f;
-                    soundSlippySmooth = Mod.Assets.Request<SoundEffect>("Sounds/Custom/ambient/player/ice_slide_smooth", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                    soundSlippySmoothInst = soundSlippySmooth.CreateInstance();
+                    soundSlippySmoothInst = Mod.Assets.Request<SoundEffect>("Sounds/Custom/ambient/player/ice_slide_smooth", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value.CreateInstance();
                     soundSlippySmoothInst.IsLooped = true;
                     soundSlippySmoothInst?.Play();
                     soundSlippySmoothInst.Volume = 0f;
@@ -418,12 +413,16 @@ namespace TerrariaAmbience.Content.Players
                 bool slippyRough = Player.slippy;
                 bool slippySmooth = Player.slippy2;
 
-                if (slippyRough)
-                    soundSlippyRoughInst.Volume = Math.Abs(Player.velocity.X / 50f);
+                if (slippyRough) {
+                    soundSlippyRoughInst.Volume = Math.Abs(Player.velocity.X / 50f) * GeneralHelpers.GetVolumeFromPosition(Player.Bottom) * Main.soundVolume;
+                    soundSlippyRoughInst.Pan = GeneralHelpers.GetPanFromPosition(Player.Bottom);
+                }
                 else
                     soundSlippyRoughInst.Volume -= 0.01f;
-                if (slippySmooth)
-                    soundSlippySmoothInst.Volume = Math.Abs(Player.velocity.X / 50f);
+                if (slippySmooth) {
+                    soundSlippySmoothInst.Volume = Math.Abs(Player.velocity.X / 50f) * GeneralHelpers.GetVolumeFromPosition(Player.Bottom) * Main.soundVolume;
+                    soundSlippySmoothInst.Pan = GeneralHelpers.GetPanFromPosition(Player.Bottom);
+                }
                 else
                     soundSlippySmoothInst.Volume -= 0.01f;
                 soundSlippyRoughInst.Volume = MathHelper.Clamp(soundSlippyRoughInst.Volume, 0f, 0.5f);

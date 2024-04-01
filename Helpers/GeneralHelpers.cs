@@ -38,6 +38,66 @@ namespace TerrariaAmbience.Helpers
     }
     public class GeneralHelpers
     {
+        public static float GetPanFromPosition(Vector2 position) {
+            bool onScreen = false;
+            float panFromVector = 0f;
+            if (position.X == -1f || position.Y == -1f) {
+                onScreen = true;
+            }
+            else {
+                Rectangle screenBounds = new((int)(Main.screenPosition.X - Main.screenWidth * 2), (int)(Main.screenPosition.Y - Main.screenHeight * 2), Main.screenWidth * 5, Main.screenHeight * 5);
+                Rectangle rectFromVect = new((int)position.X, (int)position.Y, 1, 1);
+                Vector2 midScreen = new(Main.screenPosition.X + Main.screenWidth / 2, Main.screenPosition.Y + Main.screenHeight / 2);
+                if (rectFromVect.Intersects(screenBounds)) {
+                    onScreen = true;
+                }
+                if (onScreen) {
+                    panFromVector = (position.X - midScreen.X) / ((float)Main.screenWidth * 0.5f);
+                    float num = Math.Abs(position.X - midScreen.X);
+                    float absPanY = Math.Abs(position.Y - midScreen.Y);
+                    Math.Sqrt((double)(num * num + absPanY * absPanY));
+                }
+            }
+            if (panFromVector < -1f) {
+                panFromVector = -1f;
+            }
+            if (panFromVector > 1f) {
+                panFromVector = 1f;
+            }
+            return panFromVector;
+        }
+
+        public static float GetVolumeFromPosition(Vector2 position) {
+            bool onScreen = false;
+            float volumeFromVector = 1f;
+            if (position.X == -1f || position.Y == -1f) {
+                onScreen = true;
+            }
+            else {
+                Rectangle screenBounds = new((int)(Main.screenPosition.X - Main.screenWidth * 2), (int)(Main.screenPosition.Y - Main.screenHeight * 2), Main.screenWidth * 5, Main.screenHeight * 5);
+                Rectangle rectFromVect = new((int)position.X, (int)position.Y, 1, 1);
+                Vector2 midScreen = new(Main.screenPosition.X + Main.screenWidth / 2, Main.screenPosition.Y + Main.screenHeight / 2);
+                if (rectFromVect.Intersects(screenBounds)) {
+                    onScreen = true;
+                }
+                if (onScreen) {
+                    float num7 = Math.Abs(position.X - midScreen.X);
+                    float num5 = Math.Abs(position.Y - midScreen.Y);
+                    float num6 = (float)Math.Sqrt((double)(num7 * num7 + num5 * num5));
+                    volumeFromVector = 1f - num6 / ((float)Main.screenWidth * 1.5f);
+                }
+            }
+            if (volumeFromVector > 1f) {
+                volumeFromVector = 1f;
+            }
+            if (volumeFromVector < 0f) {
+                volumeFromVector = 0f;
+            }
+            if (Vector2.Distance(Main.screenPosition, position) > 3850f) {
+                volumeFromVector = 0f;
+            }
+            return volumeFromVector;
+        }
         public static SoundStyle SimpleSoundStyle(string path, int variants, SoundType type = SoundType.Sound, float volume = 1f, float pitch = 0f) {
             return new(path, variants, type) {
                 Volume = volume,

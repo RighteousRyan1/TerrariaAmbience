@@ -64,7 +64,6 @@ namespace TerrariaAmbience.Common.Systems
             WindCapped = GradientCapped(MathF.Abs(Main.windSpeedCurrent), 0.35f * 1.5f, MaxHighWind * 1.5f);
             // magical numbers (aka 1.5f)
             // to future me, these are just values to make the breeze more seamlessly combine at higher/lower values
-
             RainIntensityForSnow = GradientCapped(Main.maxRaining, 0.1f, 1.1f);
             RainIntensityForRainLight = Gradient.CreateFloat(Main.maxRaining, 0f, 0.4f);
             RainIntensityForRainMed = Gradient.CreateFloat(Main.maxRaining, 0.2f, 1f);

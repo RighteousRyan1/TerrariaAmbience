@@ -15,18 +15,17 @@ using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
 using System.IO;
 using System.Collections.Generic;
+using Terraria.ModLoader.Core;
+using System.Reflection;
 
 namespace TerrariaAmbience
 {
-    public partial class TerrariaAmbience : Mod
-	{
+    public partial class TerrariaAmbience : Mod {
         // TODO: add all other types to the call
-        public override object Call(params object[] args)
-        {
+        public override object Call(params object[] args) {
             try {
                 string message = args[0] as string;
-                if (message == "AddTilesToList")
-                {
+                if (message == "AddTilesToList") {
                     Mod mod = args[1] as Mod;
                     string listName = args[2] as string; // Can be Stone, Grass, Sand, Snow, or Dirt (FOR NOW, OR EVER) (UPDATE THIS)
                     // string[] nameStringList = args[3] as string[];
@@ -111,8 +110,7 @@ namespace TerrariaAmbience
         public static AmbientHandler DefaultAmbientHandler;
         public static FootstepHandler DefaultFootstepHandler;
 
-        public override void Load()
-        {
+        public override void Load() {
 
             _versCache = Main.versionNumber;
             Main.versionNumber += $", Terraria Ambience v{Version}";
@@ -130,8 +128,7 @@ namespace TerrariaAmbience
 
         private static bool _curDay;
         private static bool _oldDay;
-        private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime)
-        {
+        private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime) {
             orig(self, gameTime);
 
             CraftSounds.TimeSinceLastCraft++;
@@ -141,8 +138,7 @@ namespace TerrariaAmbience
             JustTurnedDay = !_oldDay && _curDay;
             JustTurnedNight = _oldDay && !_curDay;
 
-            if (!Main.dedServ)
-            {
+            if (!Main.dedServ) {
                 GeneralHelpers.ClickHandling();
                 GeneralHelpers.UpdateButtons();
 
@@ -242,7 +238,7 @@ namespace TerrariaAmbience
                         "SugarCookieBlockNew", "BloodstainedBlock", "Aquamarine",
                         "CursedBlockNew", "OrnateBlock", "SynthGold", "ShadyBlock", "OrnatePlatform");
                     TileDetection.AddTilesToList(thor, FootstepHandler.SmoothStones,
-                        "CelestialBrick", "CloudSlab", "CutStoneBlock", "CutSandstoneBlock", 
+                        "CelestialBrick", "CloudSlab", "CutStoneBlock", "CutSandstoneBlock",
                         "CutStoneBlockSlab", "CutSandstoneBlockSlab", "NagaBlockNew", "CelestialPlatform", "NagaPlatform");
                     TileDetection.AddTilesToList(thor, FootstepHandler.GrassBlocks,
                         "SpookyAstroturf", "CherryAstroturf");
@@ -253,6 +249,12 @@ namespace TerrariaAmbience
                     TileDetection.AddTilesToList(thor, FootstepHandler.GemBlocks,
                         "AquamarineGemsparkNew", "ThoriumBrick", "ThoriumBrickBlock", "ThoriumPlatform");
                     TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
+                }
+                if (ModLoader.TryGetMod("SpiritMod", out var spirit)) {
+                    TileDetection.AddTilesToList(spirit, FootstepHandler.StoneBlocks,
+                        "BlastStone");
+                    TileDetection.AddTilesToList(spirit, FootstepHandler.GrassBlocks,
+                        "BriarGrass");
                 }
                 #region SpookyMod
                 /*if (ModLoader.TryGetMod("SpookyMod", out var thor)) {
@@ -275,10 +277,23 @@ namespace TerrariaAmbience
 
         public static bool IsCalLoaded;
         public static List<ModBiome> CalBiomes;
-        public override void Unload()
-        {
+        public override void Unload() {
+            UnloadAllSFXSoWeCanAvoidStupidCrashesThatHappenOnUnload();
             MenuDetours.AddMenuButtonsHook = null;
             Main.versionNumber = _versCache;
+        }
+
+        private void UnloadAllSFXSoWeCanAvoidStupidCrashesThatHappenOnUnload() {
+            DefaultAmbientHandler.CampfireCrackleInstance?.Dispose();
+            DefaultAmbientHandler.CampfireCrackleInstance = null;
+
+            AmbientPlayer.howlInstance?.Dispose();
+            AmbientPlayer.howlInstance = null;
+
+            AmbientPlayer.soundSlippyRoughInst?.Dispose();
+            AmbientPlayer.soundSlippyRoughInst = null;
+            AmbientPlayer.soundSlippySmoothInst?.Dispose();
+            AmbientPlayer.soundSlippySmoothInst = null;
         }
         // this seems like fps loss waiting to happen. oh well.
         public static bool IsPlayerInCalBiome(Player player, string calBiomeName) {
