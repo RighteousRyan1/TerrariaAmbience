@@ -12,6 +12,9 @@ namespace TerrariaAmbience.Core
         [DefaultValue(true)]
         public bool footsteps;
 
+        [DefaultValue(1f)]
+        public float footstepsVolMult;
+
         [DefaultValue(true)]
         public bool campfireSounds;
 

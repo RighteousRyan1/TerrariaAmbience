@@ -225,5 +225,10 @@ Configs: {
 			Label: Crafting Sounds Volume
 			Tooltip: Changes the volume multiplier of the sounds made when a player crafts an item. Set to 0 to disable.
 		}
+
+		footstepsVolMult: {
+			// Label: footsteps Vol Mult
+			// Tooltip: ""
+		}
 	}
 }

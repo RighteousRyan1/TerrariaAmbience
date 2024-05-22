@@ -17,11 +17,8 @@ using Terraria.ID;
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
 public class AmbientHandler {
-    #region Metadata
     public static string AmbientPath => $"Sounds/Custom/ambient/";
     public static string AmbientPathWithPrefix => $"{nameof(TerrariaAmbience)}/" + AmbientPath;
-
-    #endregion
 
     public AmbientHandler() {
         Initialize();
@@ -208,12 +205,10 @@ public class AmbientHandler {
         });
 
         // finally, we add all of them via reflection because manual labor is stupid.
-        Ambiences = new();
+        Ambiences = [];
         foreach (var fld in GetType().GetFields().Where(x => x.FieldType.TypeHandle.Equals(typeof(ModAmbience).TypeHandle))) {
             Ambiences.Add((ModAmbience)fld.GetValue(this));
         }
-
-        
     }
 
     // FROM HERE: I am creating fields that are used to determine ambient noise changes or differences.

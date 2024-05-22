@@ -12,6 +12,7 @@ using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
+/// <summary>The default handler. Default use is for players.</summary>
 public class FootstepHandler {
     public FootstepSound Grass;
     public FootstepSound Sand;
@@ -87,6 +88,9 @@ public class FootstepHandler {
 
     public void Update() {
         if (!Main.gameMenu) {
+            for (int i = 0; i < AllSounds.Count; i++) {
+                AllSounds[i].VolumeMultiplier = ModContent.GetInstance<GeneralConfig>().footstepsVolMult;
+            }
             var vol = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetArmorStepVolume();
             Armor.LandVolume = vol;
             Armor.StepVolume = vol / 2;
@@ -96,6 +100,16 @@ public class FootstepHandler {
             Vanity.StepVolume = vol1 / 2;
         }
         AllSounds.ForEach(x => x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footsteps);
+    }
+
+    public Tile GetTileBelow(Entity ent) => Framing.GetTileSafely((int)ent.Bottom.X / 16, (int)(ent.Bottom.Y + 8) / 16);
+    /// <summary>Get all footstep sounds that are used for a given tile.</summary>
+    /// <param name="tileId">The tile to check.</param>
+    public FootstepSound[] GetFootstepSoundFromTile(Tile tile) {
+        // probably could be optimised...
+        if (!tile.HasTile) return [];
+        var all = AllSounds.Where(x => x.TileIds.Contains(tile.TileType)).ToArray();
+        return all.Length != 0 ? all : [Wood];
     }
 
     public static List<int> GrassBlocks { get; private set; } = new()

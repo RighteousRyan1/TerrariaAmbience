@@ -225,5 +225,10 @@ Configs: {
 			Label: Głośność Dźwięków Tworzenia
 			Tooltip: Zmienia mnożnik głośności dźwięków wydawanych podczas tworzenia przedmiotu przez gracza. Ustaw na 0, aby wyłączyć.
 		}
+
+		footstepsVolMult: {
+			// Label: footsteps Vol Mult
+			// Tooltip: ""
+		}
 	}
 }
