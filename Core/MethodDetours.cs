@@ -90,7 +90,8 @@ namespace TerrariaAmbience.Core
             }
             displayable += $"\nTile Registry (Is player on?):\n";
             foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
-                displayable += $"{step.Name}: {(step.IsPlayerOnAnyTile 
+                var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
+                displayable += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
                     && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
                 // it doesnt update unless player is on ground... hmmm fix?
             }
@@ -102,13 +103,14 @@ namespace TerrariaAmbience.Core
             if (ModContent.GetInstance<GeneralConfig>().debugInterface) {
                 #region DrawVolume
                 if (Main.playerInventory && (Main.mapStyle == 0 || Main.mapStyle == 2))
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 120);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 7, 80);
                 if (Main.mapStyle == 1 && Main.playerInventory)
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 2, 320);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 5, 80);
                 if (Main.mapStyle == 1 && !Main.playerInventory)
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 320);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 5, 80);
                 if ((Main.mapStyle == 0 || Main.mapStyle == 2) && !Main.playerInventory)
-                    drawPos = new Vector2(Main.screenWidth - Main.screenHeight / 3, 120);
+                    drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 20, 80);
+                drawPos.X -= FontAssets.DeathText.Value.MeasureString(displayable).X * 0.24f;
                 Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
                     new Rectangle(
                         (int)drawPos.X - 6,
@@ -169,8 +171,9 @@ namespace TerrariaAmbience.Core
                 }
                 if (GeneralHelpers.KeyPress(Keys.OemOpenBrackets)) {
                     foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
-                        if (step.IsPlayerOnAnyTile) {
-                            step.PlayAny(1f, Main.LocalPlayer.Center);
+                        var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
+                        if (step.IsPlayerOnAnyTile && meetsConditions && Main.LocalPlayer.velocity.Y == 0) {
+                            step.PlayAny(step.StepVolume, Main.LocalPlayer.Center);
                         }
                     }
                 }
@@ -182,8 +185,6 @@ namespace TerrariaAmbience.Core
         private static float posY;
         private static bool active;
         #endregion
-        public static bool sOpen;
-        public static bool eOpen;
         private static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
         {
             Mod mod = ModContent.GetInstance<TerrariaAmbience>();
@@ -243,6 +244,26 @@ namespace TerrariaAmbience.Core
             if (Main.menuMode == 0) {
                 ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
                 ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
+
+                var alert = "!!! WARNING !!!";
+                var disclaimer1 = "Ensure your audio device is set to 48000hz or less.";
+                var disclaimer2 = "Otherwise, your game will crash soon after entering a world.";
+
+                var alertScale = 0.4f;
+                var txtScale = 0.3f;
+
+                ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, alert,
+                    new Vector2(Main.screenWidth - 10, 10),
+                    Color.Yellow, 0f, new Vector2(FontAssets.DeathText.Value.MeasureString(alert).X, 0), new Vector2(alertScale), 0, 1);
+
+                ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, disclaimer1,
+                    new Vector2(Main.screenWidth - 10, 10 + FontAssets.DeathText.Value.MeasureString(alert).Y * alertScale),
+                    Color.White, 0f, new Vector2(FontAssets.DeathText.Value.MeasureString(disclaimer1).X, 0), new Vector2(txtScale), 0, 1);
+
+                ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, disclaimer2,
+                    new Vector2(Main.screenWidth - 10, 10 + FontAssets.DeathText.Value.MeasureString(alert).Y * alertScale
+                    + FontAssets.DeathText.Value.MeasureString(disclaimer1).Y * txtScale),
+                    Color.White, 0f, new Vector2(FontAssets.DeathText.Value.MeasureString(disclaimer2).X, 0), new Vector2(txtScale), 0, 1);
             }
 
             GeneralHelpers.MSOld = GeneralHelpers.MSNew;

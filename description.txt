@@ -11,7 +11,11 @@ Developers:
 
 Most Recent Update:
 
-Update to .NET 8.0, and hopefully fix loading/unloading issues?
+Add new 'gravel' footstep sounds, a few new variants to wood footsteps, and a new variant to sand footsteps.
+
+Fixed some bugs, including no sounds playing when 'sound occlusion' was disabled. Thank you
+
+Fixed broken compatibility with InfraSonic.
 
 ---------------------------
 

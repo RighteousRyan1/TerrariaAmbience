@@ -64,10 +64,13 @@ public static class GradientGlobals
         WindCapped = GradientCapped(MathF.Abs(Main.windSpeedCurrent), 0.35f * 1.5f, MaxHighWind * 1.5f);
         // magical numbers (aka 1.5f)
         // to future me, these are just values to make the breeze more seamlessly combine at higher/lower values
-        RainIntensityForSnow = GradientCapped(Main.maxRaining, 0.1f, 1.1f);
-        RainIntensityForRainLight = Gradient.CreateFloat(Main.maxRaining, 0f, 0.4f);
-        RainIntensityForRainMed = Gradient.CreateFloat(Main.maxRaining, 0.2f, 1f);
-        RainIntensityForRainHeavy = GradientCapped(Main.maxRaining, 0.5f, 1.5f);
+        // cloudAlpha instead of maxRaining since cloudAlpha is the CURRENT raining power
+        
+        // weird- but not possible (?) edge-case, rain is on but rain intensity is 0 creates a weird pausing behavior
+        RainIntensityForSnow = GradientCapped(Main.cloudAlpha, 0.1f, 1.1f);
+        RainIntensityForRainLight = Gradient.CreateFloat(Main.cloudAlpha, 0f, 0.4f);
+        RainIntensityForRainMed = Gradient.CreateFloat(Main.cloudAlpha, 0.2f, 1f);
+        RainIntensityForRainHeavy = GradientCapped(Main.cloudAlpha, 0.5f, 1.5f);
 
         Hell = Gradient.CreateFloat(Main.LocalPlayer.Center.Y, (Main.maxTilesY - 300) * 16, Main.maxTilesY * 16);
         SkyToUnderground = (float)Gradient.CreateDouble(Main.LocalPlayer.Center.Y, Main.worldSurface * 16 * 0.35f, Main.worldSurface * 1.05f * 16);

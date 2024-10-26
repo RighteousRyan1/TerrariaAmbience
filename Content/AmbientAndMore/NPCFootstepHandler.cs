@@ -34,7 +34,7 @@ public class NPCFootstepHandler : GlobalNPC {
 
         for (int i = 0; i < NPCID.Search.Count; i++) {
             var name = NPCID.Search.GetName(i);
-            if (name.ToLower().Contains("zombie")) {
+            if (name.Contains("zombie", StringComparison.CurrentCultureIgnoreCase)) {
                 if (ContentSamples.NpcsByNetId[i].frame.Height < 150) {
                     zombieIds.Add(i);
                 }
@@ -55,16 +55,16 @@ public class NPCFootstepHandler : GlobalNPC {
             }
         }*/
         // implement landing sounds i presume?
-        if (NPCIDToStepFrame.ContainsKey(npc.type)) {
+        if (NPCIDToStepFrame.TryGetValue(npc.type, out (int[] Frames, float VolMult) value)) {
             // avoid division by zero.
             if (npc.frame.Height > 0) {
                 curFrame = npc.frame.Y / npc.frame.Height;
-                var data = NPCIDToStepFrame[npc.type];
-                if (data.Frames.Any(x => x == curFrame) && oldFrame != curFrame) {
+                var (Frames, VolMult) = value;
+                if (Frames.Any(x => x == curFrame) && oldFrame != curFrame) {
                     var tileBelow = TerrariaAmbience.DefaultFootstepHandler.GetTileBelow(npc);
                     var sounds = TerrariaAmbience.DefaultFootstepHandler.GetFootstepSoundFromTile(tileBelow);
                     foreach (var item in sounds) {
-                        item.PlayAny(item.StepVolume * data.VolMult, npc.Bottom - new Vector2(0, 8));
+                        item.PlayAny(item.StepVolume * VolMult, npc.Bottom - new Vector2(0, 8));
                     }
                 }
                 oldFrame = curFrame;

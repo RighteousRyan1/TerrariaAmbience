@@ -115,6 +115,7 @@ public partial class TerrariaAmbience : Mod {
         _versCache = Main.versionNumber;
         Main.versionNumber += $", Terraria Ambience v{Version}";
 
+        AmbientHandler.InitializeAllAmbienceToAvoidRuntimeOverhead();
         // calls DefaultAmbientHandler.Initialize() via the ctor
         // Ambience.Initialize();
 
@@ -286,16 +287,19 @@ public partial class TerrariaAmbience : Mod {
     }
 
     private void UnloadAllSFXSoWeCanAvoidStupidCrashesThatHappenOnUnload() {
+        // if null, nothing in this mod has even loaded yet xd
+        if (DefaultAmbientHandler != null)
+            return;
         DefaultAmbientHandler.CampfireCrackleInstance?.Dispose();
         DefaultAmbientHandler.CampfireCrackleInstance = null;
 
         // hopefully this removes all of the stupid unload crashes. :|
         // this is also done in TerrariaAmbienceAPI but let's see if magic happens xd.
-        for (int i = 0; i < DefaultAmbientHandler.Ambiences.Count; i++) {
+        /*for (int i = 0; i < DefaultAmbientHandler.Ambiences.Count; i++) {
             DefaultAmbientHandler.Ambiences[i].SoundInstance?.Stop();
             DefaultAmbientHandler.Ambiences[i].SoundInstance?.Dispose();
             DefaultAmbientHandler.Ambiences[i] = null;
-        }
+        }*/ // works fine now?
 
         AmbientPlayer.howlInstance?.Dispose();
         AmbientPlayer.howlInstance = null;

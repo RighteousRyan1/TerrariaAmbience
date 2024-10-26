@@ -14,7 +14,10 @@ public class AudioLoopsSystem : ModSystem
 {
     public static PositionalAudio2D[] grassCritters = new PositionalAudio2D[10];
     public static PositionalAudio2D[] owls = new PositionalAudio2D[4];
-
+    public override void PreSaveAndQuit() {
+        TerrariaAmbience.DefaultAmbientHandler.RandomizeDawnTracks();
+        TerrariaAmbience.DefaultAmbientHandler.RandomizeDuskTracks();
+    }
     public override void OnModLoad()
     {
         grassCritters[0] = new PositionalAudio2D(GeneralHelpers.GetAssetValue<SoundEffect>(Mod, "Sounds/Custom/variousanimals/crickets1"), (5, 10), 0.25f, (0, 0)).WithName("QuietCricket");
