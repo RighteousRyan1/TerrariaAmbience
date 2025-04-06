@@ -20,11 +20,18 @@ public class FootstepHandler {
     public FootstepSound Wet;
     public FootstepSound Dirt;
     public FootstepSound Leaf;
-    public FootstepSound MarbleGranite;
-    public FootstepSound Ice;
+
+    public FootstepSound Marble;
+
+    public FootstepSound IceWeak;
+    public FootstepSound IceStrong;
+
     public FootstepSound Glass;
     public FootstepSound SmoothStone;
+
     public FootstepSound Metal;
+    public FootstepSound MetalPlating;
+
     public FootstepSound Water;
     public FootstepSound Sticky;
     public FootstepSound Gem;
@@ -48,6 +55,7 @@ public class FootstepHandler {
 
     public void Initialize() {
         var mod = ModContent.GetInstance<TerrariaAmbience>();
+        // natural
         Grass = new(mod, "Sounds/Custom/steps/grass/step", 8, "Grass", [.. GrassBlocks]);
         Stone = new(mod, "Sounds/Custom/steps/stone/step", 8, "Stone", [.. StoneBlocks]);
         Snow = new(mod, "Sounds/Custom/steps/snow/step", 11, "Snow", [.. SnowBlocks]);
@@ -58,11 +66,18 @@ public class FootstepHandler {
         };
         Dirt = new(mod, "Sounds/Custom/steps/dirt/step", 6, "Dirt", [.. DirtBlocks]);
         Leaf = new(mod, "Sounds/Custom/steps/leaf/step", 7, "Leaf", [.. LeafBlocks]);
-        MarbleGranite = new(mod, "Sounds/Custom/steps/marblegranite/step", 7, "Marble/Granite", [.. MarblesGranites]);
-        Ice = new(mod, "Sounds/Custom/steps/ice/step", 7, "Ice", [.. IceBlocks]);
+
+        Marble = new(mod, "Sounds/Custom/steps/marble/step", 7, "Marbles", [.. Marbles]);
+
+        IceWeak = new(mod, "Sounds/Custom/steps/ice_weak/step", 7, "Weak Ice", 0.5f, 0.8f, [.. WeakIceBlocks]);
+        IceStrong = new(mod, "Sounds/Custom/steps/ice_strong/step", 10, "Strong Ice", [.. StrongIceBlocks]);
+
         Glass = new(mod, "Sounds/Custom/steps/glass/step", 6, "Glass", [.. GlassBlocks]);
-        SmoothStone = new(mod, "Sounds/Custom/steps/smoothstones/step", 7, "Smooth Stone", [.. SmoothStones]);
+        SmoothStone = new(mod, "Sounds/Custom/steps/smooth_stones/step", 7, "Smooth Stone", [.. SmoothStones]);
+
         Metal = new(mod, "Sounds/Custom/steps/metal/step", 6, "Metal", [.. MetalBlocks]);
+        MetalPlating = new(mod, "Sounds/Custom/steps/metal_plating/step", 11, "Metal Plating", 0.2f, 0.4f, [.. MetalPlatingBlocks]);
+
         Gem = new(mod, "Sounds/Custom/steps/gem/step", 14, "Gem", 0.3f, 0.6f, [.. GemBlocks]);
         Sticky = new(mod, "Sounds/Custom/steps/sticky/step", 6, "Sticky", [.. StickyBlocks]);
         Water = new(mod, "Sounds/Custom/steps/water/step", 6, "Water Wading") {
@@ -70,6 +85,7 @@ public class FootstepHandler {
                 return !p.IsWaterSuffocating() && p.wet && !p.lavaWet;
             }
         };
+
         Armor = new(mod, "Sounds/Custom/steps/armor/heavy", 9, "Armor") {
             FootstepConditions = (p) => {
                 return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
@@ -90,7 +106,7 @@ public class FootstepHandler {
                 return !p.ZoneBeach;
             }
         };
-        SandRough = new(mod, "Sounds/Custom/steps/sandcrunchy/step", 11, "SandRough", 0.1f, 0.3f, [.. SandBlocks]) {
+        SandRough = new(mod, "Sounds/Custom/steps/sand_crunchy/step", 11, "SandRough", 0.1f, 0.3f, [.. SandBlocks]) {
             FootstepConditions = (p) => {
                 return p.ZoneBeach;
             }
@@ -100,12 +116,13 @@ public class FootstepHandler {
 
         WoodFilled = new(mod, "Sounds/Custom/steps/wood/step", 7, "Wood") {
             FootstepConditions = (p) => {
-                return (AllTileLists.All(list => !list.Contains(PlayerTileChecker.TileId)) && PlayerTileChecker.TileId < TileID.Count) || 
+                bool isNotOnAnyOtherTile = (AllTileLists.All(list => !list.Contains(PlayerTileChecker.TileId)) && PlayerTileChecker.TileId < TileID.Count) ||
                 (PlayerTileChecker.TileId > TileID.Count && FilledWood.Contains(PlayerTileChecker.TileId));
+                return isNotOnAnyOtherTile && p.velocity.Y == 0;
             }
         };
-        WoodHollow = new(mod, "Sounds/Custom/steps/woodblunt/step", 11, "WoodBlunt", 0.15f, 0.3f, [.. BluntWood]);
-        WoodDeck = new(mod, "Sounds/Custom/steps/wooddeck/step", 11, "WoodDeck", 0.125f, 0.275f, [.. DeckWood]);
+        WoodHollow = new(mod, "Sounds/Custom/steps/wood_blunt/step", 11, "WoodBlunt", 0.15f, 0.3f, [.. BluntWood]);
+        WoodDeck = new(mod, "Sounds/Custom/steps/wood_deck/step", 11, "WoodDeck", 0.125f, 0.275f, [.. DeckWood]);
 
         AllSounds = [];
         foreach (var fld in GetType().GetFields().Where(x => x.FieldType.TypeHandle.Equals(typeof(FootstepSound).TypeHandle))) {
@@ -127,10 +144,11 @@ public class FootstepHandler {
             var vol1 = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetVanityStepVolume();
             Vanity.LandVolume = vol1;
             Vanity.StepVolume = vol1 / 2;
+
+            // TODO: make landing step volumes scale based on fall speed?
         }
         AllSounds.ForEach(x => {
-            if (x is null)
-                return;
+            if (x is null) return;
             x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footsteps;
         });
     }
@@ -146,26 +164,27 @@ public class FootstepHandler {
     }
 
     public static List<int> GrassBlocks { get; private set; } =
-[
-                TileID.Grass,
-                TileID.BlueMoss,
-                TileID.BrownMoss,
-                TileID.GreenMoss,
-                TileID.LavaMoss,
-                TileID.LongMoss,
-                TileID.PurpleMoss,
-                TileID.RedMoss,
-                TileID.JungleGrass,
-                TileID.CorruptGrass,
-                TileID.CrimsonGrass,
-                TileID.HallowedGrass,
-                TileID.MushroomGrass,
-                TileID.ArgonMoss,
-                TileID.XenonMoss,
-                TileID.KryptonMoss,
-                TileID.GolfGrass,
-                TileID.GolfGrassHallowed
-        ];
+    [
+        TileID.Grass,
+        TileID.BlueMoss,
+        TileID.BrownMoss,
+        TileID.GreenMoss,
+        TileID.LavaMoss,
+        TileID.LongMoss,
+        TileID.PurpleMoss,
+        TileID.RedMoss,
+        TileID.JungleGrass,
+        TileID.CorruptGrass,
+        TileID.CrimsonGrass,
+        TileID.HallowedGrass,
+        TileID.MushroomGrass,
+        TileID.ArgonMoss,
+        TileID.XenonMoss,
+        TileID.KryptonMoss,
+        TileID.GolfGrass,
+        TileID.GolfGrassHallowed,
+        TileID.AshGrass,
+    ];
     public static List<int> DirtBlocks { get; private set; } =
     [
             TileID.Dirt,
@@ -235,15 +254,18 @@ public class FootstepHandler {
             TileID.RainCloud,
             TileID.Cloud,
         ];
-    public static List<int> IceBlocks { get; private set; } =
+    public static List<int> WeakIceBlocks { get; private set; } =
+    [
+            TileID.BreakableIce,
+            TileID.MagicalIceBlock,
+    ];
+    public static List<int> StrongIceBlocks { get; private set; } =
     [
             TileID.IceBlock,
-            TileID.BreakableIce,
             TileID.HallowedIce,
             TileID.CorruptIce,
             TileID.FleshIce,
-            TileID.MagicalIceBlock,
-        ];
+    ];
     public static List<int> SmoothStones { get; private set; } =
     [
             TileID.Titanstone,
@@ -298,28 +320,40 @@ public class FootstepHandler {
         ];
     public static List<int> MetalBlocks { get; private set; } =
     [
-            TileID.MetalBars,
-            TileID.Anvils,
             TileID.MythrilAnvil,
-            TileID.MythrilBrick,
-            TileID.CobaltBrick,
-            TileID.LunarBrick,
-            TileID.IronBrick,
-            TileID.GoldBrick,
-            TileID.PlatinumBrick,
-            TileID.CopperBrick,
-            TileID.TinBrick,
-            TileID.SilverBrick,
-            TileID.DemoniteBrick,
-            TileID.CrimtaneBrick,
-            TileID.LeadBrick,
             TileID.MartianConduitPlating,
             TileID.TinPlating,
             TileID.ShroomitePlating,
             TileID.CopperPlating,
             TileID.TrapdoorClosed
-        ];
-    public static List<int> MarblesGranites { get; private set; } =
+    ];
+    public static List<int> MetalPlatingBlocks { get; private set; } =
+    [
+        TileID.MetalBars,
+        TileID.Anvils,
+        TileID.MythrilBrick,
+        TileID.CobaltBrick,
+        TileID.LunarBrick,
+        TileID.IronBrick,
+        TileID.GoldBrick,
+        TileID.AncientGoldBrick,
+        TileID.PlatinumBrick,
+        TileID.CopperBrick,
+        TileID.AncientCopperBrick,
+        TileID.TinBrick,
+        TileID.SilverBrick,
+        TileID.AncientSilverBrick,
+        TileID.DemoniteBrick,
+        TileID.CrimtaneBrick,
+        TileID.LeadBrick,
+        TileID.AncientBlueBrick,
+        TileID.AncientPinkBrick,
+        TileID.AncientGreenBrick,
+        TileID.AncientHellstoneBrick,
+        TileID.AncientMythrilBrick,
+        TileID.AncientCobaltBrick,
+    ];
+    public static List<int> Marbles { get; private set; } =
     [
             TileID.Granite,
             TileID.GraniteBlock,
@@ -397,7 +431,10 @@ public class FootstepHandler {
     [
         GrassBlocks,
         DirtBlocks,
-        IceBlocks,
+
+        WeakIceBlocks,
+        StrongIceBlocks,
+
         LeafBlocks,
         SmoothStones,
         SnowBlocks,
@@ -405,8 +442,11 @@ public class FootstepHandler {
         SandBlocks,
 
         StoneBlocks,
-        MarblesGranites,
+        Marbles,
+
         MetalBlocks,
+        MetalPlatingBlocks,
+
         GlassBlocks,
         StickyBlocks,
         GemBlocks,

@@ -5,6 +5,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -13,7 +14,7 @@ public class NPCFootstepHandler : GlobalNPC {
     private int oldFrame;
     public override bool InstancePerEntity => true;
 
-    public static Dictionary<int, (int[] Frames, float VolMult)> NPCIDToStepFrame = new();
+    public static Dictionary<int, (int[] Frames, float VolMult)> NPCIDToStepFrame = [];
     public static void InitializeNPCStepping() {
         NPCIDToStepFrame.Clear();
         foreach (var elem in ContentSamples.NpcsByNetId) {
@@ -54,6 +55,8 @@ public class NPCFootstepHandler : GlobalNPC {
                 InitializeNPCStepping();
             }
         }*/
+        var cfg = ModContent.GetInstance<GeneralConfig>();
+        if (cfg.entityFootstepsVolume == 0f) return; 
         // implement landing sounds i presume?
         if (NPCIDToStepFrame.TryGetValue(npc.type, out (int[] Frames, float VolMult) value)) {
             // avoid division by zero.
@@ -64,7 +67,7 @@ public class NPCFootstepHandler : GlobalNPC {
                     var tileBelow = TerrariaAmbience.DefaultFootstepHandler.GetTileBelow(npc);
                     var sounds = TerrariaAmbience.DefaultFootstepHandler.GetFootstepSoundFromTile(tileBelow);
                     foreach (var item in sounds) {
-                        item.PlayAny(item.StepVolume * VolMult, npc.Bottom - new Vector2(0, 8));
+                        item.PlayAny(item.StepVolume * VolMult * cfg.entityFootstepsVolume, npc.Bottom - new Vector2(0, 8));
                     }
                 }
                 oldFrame = curFrame;

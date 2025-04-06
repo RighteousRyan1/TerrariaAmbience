@@ -1,5 +1,4 @@
 using Terraria;
-using System.Security.Permissions;
 using Terraria.ModLoader;
 using TerrariaAmbienceAPI.Common;
 using TerrariaAmbience.Common.Systems;
@@ -8,12 +7,10 @@ using TerrariaAmbience.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.Text;
 using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework;
 using Terraria.ID;
-using Terraria.Audio;
+using TerrariaAmbience.Sounds;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -72,15 +69,15 @@ public class AmbientHandler {
     public SoundEffectInstance CampfireCrackleInstance;
 
     // these two fields will be chosen at either the last dusk or the last dawn respectively, aka pre-emptively chosen.
-    private int _chosenMorningAmbience;
-    private int _chosenEveningAmbience;
-    private int _chosenNightAmbience;
-    private int _chosenDayAmbience;
+    public int morningAmbienceForTheDay;
+    public int eveningAmbienceForTheDay;
+    public int nightAmbienceForTheDay;
+    public int dayAmbienceForTheDay;
 
-    public const int NUM_EVENING_AMBIENCE = 5;
-    public const int NUM_MORNING_AMBIENCE = 5;
-    public const int NUM_NIGHT_AMBIENCE = 5;
-    public const int NUM_DAY_AMBIENCE = 5;
+    public const int NUM_EVENING_AMBIENCE = 6;
+    public const int NUM_MORNING_AMBIENCE = 6;
+    public const int NUM_NIGHT_AMBIENCE = 6;
+    public const int NUM_DAY_AMBIENCE = 6;
 
     // values scraped from decompiled terraria. Main.cs::_minWind,_maxWind,_minRain,_maxRain
     public float MinWind = 0.34f;
@@ -89,7 +86,6 @@ public class AmbientHandler {
     public float MaxRain = 0.5f;
 
     public void Initialize() {
-
         if (Main.dedServ)
             return;
 
@@ -106,7 +102,7 @@ public class AmbientHandler {
 
         ForestMorning = new(mod, AmbientPath + $"biome/forest/morning_{Main.rand.Next(1, NUM_MORNING_AMBIENCE)}", "ForestMorning", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return !player.ZoneDesert && !player.ZoneSkyHeight;
+            return player.ZonePurity || player.ZoneMeteor || (player.ZoneHallow && !player.ZoneDesert);
         });
         ForestDay = new(mod, AmbientPath + $"biome/forest/day_{Main.rand.Next(1, NUM_DAY_AMBIENCE)}", "ForestDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
@@ -115,7 +111,7 @@ public class AmbientHandler {
         });
         ForestEvening = new(mod, AmbientPath + $"biome/forest/evening_{Main.rand.Next(1, NUM_EVENING_AMBIENCE)}", "ForestEvening", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return !player.ZoneDesert && !player.ZoneSkyHeight;
+            return player.ZonePurity || player.ZoneMeteor || (player.ZoneHallow && !player.ZoneDesert);
         });
         ForestNight = new(mod, AmbientPath + $"biome/forest/night_{Main.rand.Next(1, NUM_NIGHT_AMBIENCE)}", "ForestNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
@@ -218,40 +214,42 @@ public class AmbientHandler {
 
     public void HandleEnterWorld() {
         if (Main.raining) {
-            _chosenDayAmbience = AmbienceID.Day_Quiet;
-            ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{_chosenDayAmbience}");
+            dayAmbienceForTheDay = AmbienceID.Day_Quiet;
+            ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{dayAmbienceForTheDay}");
         }
     }
     public static void InitializeAllAmbienceToAvoidRuntimeOverhead() {
         // different for-loops because these values could change.
         // also magic numbers because it's weird to look at an identifier as a loop limit.
         var mod = ModContent.GetInstance<TerrariaAmbience>();
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= NUM_MORNING_AMBIENCE; i++) {
             mod.Assets.Request<SoundEffect>(AmbientPath + $"biome/forest/morning_{i}");
         }
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= NUM_DAY_AMBIENCE; i++) {
             mod.Assets.Request<SoundEffect>(AmbientPath + $"biome/forest/day_{i}");
         }
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= NUM_EVENING_AMBIENCE; i++) {
             mod.Assets.Request<SoundEffect>(AmbientPath + $"biome/forest/evening_{i}");
         }
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= NUM_NIGHT_AMBIENCE; i++) {
             mod.Assets.Request<SoundEffect>(AmbientPath + $"biome/forest/night_{i}");
         }
     }
     public void RandomizeDuskTracks() {
-        _chosenEveningAmbience = Main.rand.Next(1, NUM_EVENING_AMBIENCE + 1);
-        _chosenNightAmbience = Main.rand.Next(1, NUM_NIGHT_AMBIENCE + 1);
-        ForestEvening.ChangeTrack(AmbientPath + $"biome/forest/evening_{_chosenEveningAmbience}");
-        ForestNight.ChangeTrack(AmbientPath + $"biome/forest/night_{_chosenNightAmbience}");
+        eveningAmbienceForTheDay = Main.rand.Next(1, NUM_EVENING_AMBIENCE + 1);
+        nightAmbienceForTheDay = Main.rand.Next(1, NUM_NIGHT_AMBIENCE + 1);
+
+        ForestEvening.ChangeTrack(AmbientPath + $"biome/forest/evening_{eveningAmbienceForTheDay}");
+        ForestNight.ChangeTrack(AmbientPath + $"biome/forest/night_{nightAmbienceForTheDay}");
     }
     public void RandomizeDawnTracks() {
-        _chosenMorningAmbience = Main.rand.Next(1, NUM_MORNING_AMBIENCE + 1);
-        _chosenDayAmbience = Main.rand.Next(1, NUM_DAY_AMBIENCE + 1);
+        morningAmbienceForTheDay = Main.rand.Next(1, NUM_MORNING_AMBIENCE + 1);
+        dayAmbienceForTheDay = Main.rand.Next(1, NUM_DAY_AMBIENCE + 1);
         if (Main.raining)
-            _chosenDayAmbience = AmbienceID.Day_Quiet;
-        ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{_chosenDayAmbience}");
-        ForestMorning.ChangeTrack(AmbientPath + $"biome/forest/morning_{_chosenMorningAmbience}");
+            dayAmbienceForTheDay = AmbienceID.Day_Quiet;
+
+        ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{dayAmbienceForTheDay}");
+        ForestMorning.ChangeTrack(AmbientPath + $"biome/forest/morning_{morningAmbienceForTheDay}");
     }
     public void Update() {
         if (Main.dedServ)
@@ -259,12 +257,6 @@ public class AmbientHandler {
 
         IsWindTooHarsh = Math.Abs(Main.windSpeedCurrent) >= MaxWind;
 
-        if (TerrariaAmbience.JustTurnedDay) {
-            RandomizeDuskTracks();
-        }
-        else if (TerrariaAmbience.JustTurnedNight) {
-            RandomizeDawnTracks();
-        }
         if (Main.gameMenu) {
             Ambiences.ForEach(x => x.MaxVolume = 0);
             return;
@@ -318,7 +310,7 @@ public class AmbientHandler {
             // check X tiles from the player's head.
             var tileSize = 16;
             var tilesToCheck = 30;
-            var waterDepth = player.GetModPlayer<AmbientPlayer>().GetWaterPressureFloat(tilesToCheck * tileSize, player.position);
+            var waterDepth = player.GetModPlayer<AmbientPlayer>().GetWaterPressureFloat(tilesToCheck * tileSize);
 
             float lightMaxThresh = 20;
             float deepMinThresh = 15;
@@ -346,7 +338,7 @@ public class AmbientHandler {
         
         Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<GeneralConfig>().hellVolume;
         var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
-        Ambiences.ForEach(x => x.MaxVolume *= pl.BehindWallMultiplier);
+        Ambiences.ForEach(x => x.MaxVolume *= pl.InRoomAmbientMultiplier);
     }
 }
 public static class AmbienceID {
@@ -355,12 +347,14 @@ public static class AmbienceID {
     public const int Day_BirdsSingingQuieter = 3;
     public const int Day_BirdsSingingQuiet = 4;
     public const int Day_Quiet = 5;
+    public const int Day_BirdsSingingOften = 6;
 
     public const int Morning_CricketsQuiet = 1;
     public const int Morning_CricketsTrillingQuiet = 2;
     public const int Morning_CricketsAndCicadas = 3;
     public const int Morning_CricketsTrillingLoud = 4;
     public const int Morning_QuietTrillingCicadas = 5;
+    public const int Morning_EverythingTrilling = 6;
 
     public const int Night_CricketsQuiet = 1;
     public const int Night_CricketsPersistent = 2;
@@ -368,10 +362,12 @@ public static class AmbienceID {
     public const int Night_CicadasConstant = 4;
     // for some reason this was 4 for quite a while...
     public const int Night_LoudEverything = 5;
+    public const int Night_TrillingCricketsAndFrogs = 6;
 
     public const int Evening_SinewaveCrickets = 1;
     public const int Evening_LoudCricketsWithCicadas = 2;
     public const int Evening_HumidSoundingCrickets = 3;
     public const int Evening_CricketsTrilling = 4;
     public const int Evening_CricketsAndQuietCicadas = 5;
+    public const int Evening_VariousAnimals = 6;
 }

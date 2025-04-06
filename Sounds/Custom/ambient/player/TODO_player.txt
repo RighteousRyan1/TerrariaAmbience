@@ -3,3 +3,4 @@ Crafting sounds...
 - meat grinder, crimson altar (fleshy noise?)
 - water crafting (water scoop sound?)
 - Crystal Ball (shining? idk)
+- Ancient Manipulator

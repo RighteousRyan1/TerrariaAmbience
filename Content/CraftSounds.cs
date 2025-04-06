@@ -11,6 +11,7 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content;
 
@@ -19,64 +20,68 @@ public class CraftSounds : GlobalItem {
     /// <summary>
     /// A list containing all TINKER-ISH CRAFTING STATIONS. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> TinkerStations = new() {
+    public static List<int> TinkerStations = [
         TileID.TinkerersWorkbench
-    };
+    ];
     /// <summary>
     /// A list containing all FLESHY CRAFTING STATIONS. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> FleshyStations = new() {
+    public static List<int> FleshyStations = [
         TileID.MeatGrinder,
         //TileID.DemonAltar // will have to use tile framing manipulation lol.
-    };
-    public static List<int> Altars = new() {
-        TileID.DemonAltar
-    };
+    ];
+    public static List<int> Altars = [
+        TileID.DemonAltar,
+        TileID.LunarCraftingStation
+    ];
     /// <summary>
     /// A list containing all ALCHEMY STATIONS. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> Alchemy = new() {
+    public static List<int> Alchemy = [
         TileID.AlchemyTable,
         TileID.Bottles
-    };
+    ];
     /// <summary>
     /// A list containing all STATIONS WITH SAWS. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> SawStations = new() {
+    public static List<int> SawStations = [
         TileID.Sawmill
-    };
+    ];
     /// <summary>
     /// A list containing all ANVILS. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> Anvils = new() {
+    public static List<int> Anvils = [
         TileID.Anvils,
         TileID.MythrilAnvil
-    };
+    ];
     /// <summary>
     /// A list containing all WORK BENCHES. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> WorkBenches = new() {
+    public static List<int> WorkBenches = [
         TileID.WorkBenches,
         TileID.HeavyWorkBench,
         TileID.TinkerersWorkbench
-    }; // Are good
+    ]; // Are good
     /// <summary>
     /// A list containing all FURNACES. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> Furnaces = new() {
+    public static List<int> Furnaces = [
         TileID.Furnaces,
         TileID.LihzahrdFurnace,
         TileID.GlassKiln
-    };
+    ];
     /// <summary>
     /// A list containing all BOOK RELATED THINGS. Add to this if you wish, mods out there.
     /// </summary>
-    public static List<int> Books = new() {
+    public static List<int> Books = [
         TileID.Bookcases,
         TileID.Books
-    };
+    ];
+    public static List<int> Magical = [
+        TileID.CrystalBall
+    ];
 
-    public static List<List<int>> AllCategories = new() {
+    public static List<List<int>> AllCategories = [
         Altars,
         SawStations,
         Books,
@@ -86,15 +91,27 @@ public class CraftSounds : GlobalItem {
         Alchemy,
         TinkerStations,
         // FleshyStations // no noise for this yet.
+    ];
+    public static Dictionary<List<int>, string> CategoryToDir = new() {
+        [Altars] = AltarsSoundDir,
+        [SawStations] = SawsSoundDir,
+        [Books] = BooksSoundDir,
+        [Furnaces] = FurnaceSoundDir,
+        [WorkBenches] = WorkBenchesSoundDir,
+        [Anvils] = AnvilsSoundDir,
+        [Alchemy] = AlchemySoundDir,
+        [TinkerStations] = TinkerSoundDir,
+        [Magical] = MagicSoundDir
     };
-    public static string WorkBenchesSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_workbench";
-    public static string AnvilsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_anvil";
-    public static string BooksSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_book";
-    public static string FurnaceSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_furnace";
-    public static string AltarsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_demonaltar";
-    public static string AlchemySoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_alchemy{Main.rand.Next(1, 3)}"; // a lil bitta random :zany:
-    public static string SawsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_saws{Main.rand.Next(1, 3)}";
-    public static string TinkerSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting_tinker";
+    public static string WorkBenchesSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/work_bench";
+    public static string AnvilsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/anvil";
+    public static string BooksSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/book";
+    public static string FurnaceSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/furnace";
+    public static string AltarsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/altar";
+    public static string AlchemySoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/alchemy{Main.rand.Next(1, 3)}"; // a lil bitta random :zany:
+    public static string SawsSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/saws{Main.rand.Next(1, 3)}";
+    public static string TinkerSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/tinker";
+    public static string MagicSoundDir => $"{AmbientHandler.AmbientPathWithPrefix}player/crafting/crystal_ball";
 
     public static float UniversalSoundScale = 0.8f;
     public static int LastCraftedConsumable = -1;
@@ -109,37 +126,31 @@ public class CraftSounds : GlobalItem {
         // var pket = mod.GetPacket();
         var wasValidStation = AllCategories.Any(x => x.Intersect(recipe.requiredTile).Any());
         TimeSinceLastCraft = 0;
-
+        
         // a second is probably acceptable.
         // why tf is "TimeSinceLastCraft" shitting its pants? we will never know. ryan out
         if (LastCraftedConsumable != item.type || TimeSinceLastCraft > 60) {
             if (wasValidStation) {
                 var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
                 var dir = string.Empty;
-                if (Anvils.Intersect(recipe.requiredTile).Any())
-                    dir = AnvilsSoundDir;
-                if (WorkBenches.Intersect(recipe.requiredTile).Any())
-                    dir = WorkBenchesSoundDir;
-                if (Furnaces.Intersect(recipe.requiredTile).Any())
-                    dir = FurnaceSoundDir;
-                if (Books.Intersect(recipe.requiredTile).Any())
-                    dir = BooksSoundDir;
-                if (SawStations.Intersect(recipe.requiredTile).Any())
-                    dir = SawsSoundDir;
-                if (TinkerStations.Intersect(recipe.requiredTile).Any())
-                    dir = TinkerSoundDir;
-                if (Alchemy.Intersect(recipe.requiredTile).Any())
-                    dir = AlchemySoundDir;
-                if (Altars.Intersect(recipe.requiredTile).Any())
-                    dir = AltarsSoundDir;
 
-                SoundEngine.PlaySound(new SoundStyle(dir).WithVolumeScale(UniversalSoundScale * volScale), player.Center);
+                var pair = CategoryToDir.FirstOrDefault(x => x.Key.Intersect(recipe.requiredTile).Any());
 
-                if (Main.netMode != NetmodeID.SinglePlayer) {
-                    var p = Mod.GetPacket();
-                    p.WriteVector2(player.Center);
-                    p.Write(dir);
-                    p.Send();
+                if (CategoryToDir.TryGetValue(pair.Key, out string value)) {
+                    dir = value;
+                }
+
+                // no need to send unnecessary packets
+                if (!string.IsNullOrEmpty(dir)) {
+                    SoundEngine.PlaySound(new SoundStyle(dir).WithVolumeScale(UniversalSoundScale * volScale), player.Center);
+
+                    if (Main.netMode == NetmodeID.MultiplayerClient) {
+                        var p = Mod.GetPacket();
+                        p.Write(TAPID.SEND_CRAFT);
+                        p.WriteVector2(player.Center);
+                        p.Write(dir);
+                        p.Send();
+                    }
                 }
             }
         }

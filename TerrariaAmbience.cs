@@ -17,6 +17,9 @@ using System.IO;
 using System.Collections.Generic;
 using Terraria.ModLoader.Core;
 using System.Reflection;
+using TerrariaAmbience.Sounds;
+using TerrariaAmbience.Sounds.SFXEffects;
+using NAudio.Codecs;
 
 namespace TerrariaAmbience;
 
@@ -28,7 +31,6 @@ public partial class TerrariaAmbience : Mod {
             if (message == "AddTilesToList") {
                 Mod mod = args[1] as Mod;
                 string listName = args[2] as string; // Can be Stone, Grass, Sand, Snow, or Dirt (FOR NOW, OR EVER) (UPDATE THIS)
-                // string[] nameStringList = args[3] as string[];
                 object boxedInstance = args[3];
 
                 if (!Main.dedServ) {
@@ -46,13 +48,13 @@ public partial class TerrariaAmbience : Mod {
                         else if (listName == "Metal")
                             TileDetection.AddTilesToList(mod, FootstepHandler.MetalBlocks, s);
                         else if (listName == "Ice")
-                            TileDetection.AddTilesToList(mod, FootstepHandler.IceBlocks, s);
+                            TileDetection.AddTilesToList(mod, FootstepHandler.WeakIceBlocks, s);
                         else if (listName == "Leaf")
                             TileDetection.AddTilesToList(mod, FootstepHandler.LeafBlocks, s);
                         else if (listName == "Glass")
                             TileDetection.AddTilesToList(mod, FootstepHandler.GlassBlocks, s);
                         else if (listName == "GraniteMarble")
-                            TileDetection.AddTilesToList(mod, FootstepHandler.MarblesGranites, s);
+                            TileDetection.AddTilesToList(mod, FootstepHandler.Marbles, s);
                         else if (listName == "SmoothStone")
                             TileDetection.AddTilesToList(mod, FootstepHandler.SmoothStones, s);
                         else if (listName == "Sticky")
@@ -79,13 +81,13 @@ public partial class TerrariaAmbience : Mod {
                         else if (listName == "Metal")
                             TileDetection.AddTilesToList(FootstepHandler.MetalBlocks, i);
                         else if (listName == "Ice")
-                            TileDetection.AddTilesToList(FootstepHandler.IceBlocks, i);
+                            TileDetection.AddTilesToList(FootstepHandler.WeakIceBlocks, i);
                         else if (listName == "Leaf")
                             TileDetection.AddTilesToList(FootstepHandler.LeafBlocks, i);
                         else if (listName == "Glass")
                             TileDetection.AddTilesToList(FootstepHandler.GlassBlocks, i);
                         else if (listName == "GraniteMarble")
-                            TileDetection.AddTilesToList(FootstepHandler.MarblesGranites, i);
+                            TileDetection.AddTilesToList(FootstepHandler.Marbles, i);
                         else if (listName == "SmoothStone")
                             TileDetection.AddTilesToList(FootstepHandler.SmoothStones, i);
                         else if (listName == "Sticky")
@@ -95,6 +97,11 @@ public partial class TerrariaAmbience : Mod {
                 }
 
                 return "Tiles added successfully!";
+            }
+            else if (message == "AddTilesToCraftingStations") {
+                Mod mod = args[1] as Mod;
+                string listName = args[2] as string; // use all crafting station stuff
+                object boxedInstance = args[3];
             }
             else
                 Logger.Error("Call Error: Unknown Message: " + message);
@@ -123,21 +130,8 @@ public partial class TerrariaAmbience : Mod {
 
         MethodDetours.DetourAll();
     }
-
-    public static bool JustTurnedDay;
-    public static bool JustTurnedNight;
-
-    private static bool _curDay;
-    private static bool _oldDay;
     private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime) {
         orig(self, gameTime);
-
-        CraftSounds.TimeSinceLastCraft++;
-
-        _curDay = Main.dayTime;
-
-        JustTurnedDay = !_oldDay && _curDay;
-        JustTurnedNight = _oldDay && !_curDay;
 
         if (!Main.dedServ) {
             GeneralHelpers.ClickHandling();
@@ -155,7 +149,6 @@ public partial class TerrariaAmbience : Mod {
                 return;
             //Ambience.ClampAll();
         }
-        _oldDay = Main.dayTime;
     }
     public override void PostSetupContent() {
         if (!Main.dedServ) {
@@ -199,9 +192,9 @@ public partial class TerrariaAmbience : Mod {
                 TileDetection.AddTilesToList(calamity, FootstepHandler.DirtBlocks,
                     "PlantyMush",
                     "AstralDirt");
-                TileDetection.AddTilesToList(calamity, FootstepHandler.IceBlocks,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.WeakIceBlocks,
                     "AstralIce");
-                TileDetection.AddTilesToList(calamity, FootstepHandler.MarblesGranites,
+                TileDetection.AddTilesToList(calamity, FootstepHandler.Marbles,
                     "StatigelBlock", "StatigelPlatform",
                     "SmoothNavystone",
                     "SmoothBrimstoneSlag");
@@ -243,7 +236,7 @@ public partial class TerrariaAmbience : Mod {
                     "CutStoneBlockSlab", "CutSandstoneBlockSlab", "NagaBlockNew", "CelestialPlatform", "NagaPlatform");
                 TileDetection.AddTilesToList(thor, FootstepHandler.GrassBlocks,
                     "SpookyAstroturf", "CherryAstroturf");
-                TileDetection.AddTilesToList(thor, FootstepHandler.MarblesGranites,
+                TileDetection.AddTilesToList(thor, FootstepHandler.Marbles,
                     "CheckeredBrickTile", "RefinedMarineBlock");
                 TileDetection.AddTilesToList(thor, FootstepHandler.SnowBlocks,
                     "SnowyAstroturf", "CloudSlab");
@@ -251,12 +244,15 @@ public partial class TerrariaAmbience : Mod {
                     "AquamarineGemsparkNew", "ThoriumBrick", "ThoriumBrickBlock", "ThoriumPlatform");
                 TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
             }
+            #endregion
+            #region Spirit Adds
             if (ModLoader.TryGetMod("SpiritMod", out var spirit)) {
                 TileDetection.AddTilesToList(spirit, FootstepHandler.StoneBlocks,
                     "BlastStone");
                 TileDetection.AddTilesToList(spirit, FootstepHandler.GrassBlocks,
                     "BriarGrass");
             }
+            #endregion
             #region SpookyMod
             /*if (ModLoader.TryGetMod("SpookyMod", out var thor)) {
                 TileDetection.AddTilesToList(thor, FootstepHandler.StoneBlocks,
@@ -266,7 +262,6 @@ public partial class TerrariaAmbience : Mod {
                 TileDetection.AddTilesToList(thor, FootstepHandler.SandBlocks, "Brack", "BrackBare");
             }*/
             #endregion
-            #endregion
 
             NPCFootstepHandler.InitializeNPCStepping();
 
@@ -275,6 +270,8 @@ public partial class TerrariaAmbience : Mod {
             DefaultFootstepHandler = new();
             DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
             DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
+
+            ReverbAudioSystem.PrecomputeReverbProperties();
         }
     }
 
@@ -293,17 +290,6 @@ public partial class TerrariaAmbience : Mod {
         DefaultAmbientHandler.CampfireCrackleInstance?.Dispose();
         DefaultAmbientHandler.CampfireCrackleInstance = null;
 
-        // hopefully this removes all of the stupid unload crashes. :|
-        // this is also done in TerrariaAmbienceAPI but let's see if magic happens xd.
-        /*for (int i = 0; i < DefaultAmbientHandler.Ambiences.Count; i++) {
-            DefaultAmbientHandler.Ambiences[i].SoundInstance?.Stop();
-            DefaultAmbientHandler.Ambiences[i].SoundInstance?.Dispose();
-            DefaultAmbientHandler.Ambiences[i] = null;
-        }*/ // works fine now?
-
-        AmbientPlayer.howlInstance?.Dispose();
-        AmbientPlayer.howlInstance = null;
-
         AmbientPlayer.soundSlippyRoughInst?.Dispose();
         AmbientPlayer.soundSlippyRoughInst = null;
         AmbientPlayer.soundSlippySmoothInst?.Dispose();
@@ -320,18 +306,78 @@ public partial class TerrariaAmbience : Mod {
     public float delta_lastPos_playerBottom;
 
     public override void HandlePacket(BinaryReader reader, int whoAmI) {
-        var pos = reader.ReadVector2();
-        var path = reader.ReadString();
+        var packet = reader.ReadInt32();
 
-        if (Main.netMode == NetmodeID.Server) {
-            var p = GetPacket();
-            p.WriteVector2(pos);
-            p.Write(path);
-            p.Send(ignoreClient: whoAmI);
-        }
-        else {
-            var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
-            SoundEngine.PlaySound(new SoundStyle(path).WithVolumeScale(CraftSounds.UniversalSoundScale * volScale), pos);
+        switch (packet) {
+            case TAPID.SEND_CRAFT:
+                if (Main.dedServ) {
+                    var p = GetPacket();
+                    p.Write(packet);
+                    p.WriteVector2(reader.ReadVector2());
+                    p.Write(reader.ReadString());
+                    p.Send(ignoreClient: whoAmI);
+                }
+                else {
+                    var path = reader.ReadString();
+                    var pos = reader.ReadVector2();
+                    var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
+                    SoundEngine.PlaySound(new SoundStyle(path).WithVolumeScale(CraftSounds.UniversalSoundScale * volScale), pos);
+                }
+                break;
+            case TAPID.SEND_AM_AMB:
+                if (Main.dedServ) {
+                    var p = GetPacket();
+                    p.Write(packet);
+                    p.Write(reader.ReadInt32());
+                    p.Write(reader.ReadInt32());
+                }
+                else {
+                    DefaultAmbientHandler.morningAmbienceForTheDay = reader.ReadInt32();
+                    DefaultAmbientHandler.dayAmbienceForTheDay = reader.ReadInt32();
+
+                    DefaultAmbientHandler.ForestMorning.ChangeTrack(AmbientHandler.AmbientPath + 
+                        $"biome/forest/morning_{DefaultAmbientHandler.morningAmbienceForTheDay}");
+                    DefaultAmbientHandler.ForestDay.ChangeTrack(AmbientHandler.AmbientPath + 
+                        $"biome/forest/day_{DefaultAmbientHandler.dayAmbienceForTheDay}");
+                }
+                break;
+            case TAPID.SEND_PM_AMB:
+                if (Main.dedServ) {
+                    var p = GetPacket();
+                    p.Write(packet);
+                    // peak readability
+                    p.Write(reader.ReadInt32());
+                    p.Write(reader.ReadInt32());
+                }
+                else {
+                    DefaultAmbientHandler.eveningAmbienceForTheDay = reader.ReadInt32();
+                    DefaultAmbientHandler.nightAmbienceForTheDay = reader.ReadInt32();
+
+                    DefaultAmbientHandler.ForestEvening.ChangeTrack(AmbientHandler.AmbientPath + 
+                        $"biome/forest/evening_{DefaultAmbientHandler.eveningAmbienceForTheDay}");
+                    DefaultAmbientHandler.ForestNight.ChangeTrack(AmbientHandler.AmbientPath + 
+                        $"biome/forest/night_{DefaultAmbientHandler.nightAmbienceForTheDay}");
+                }
+                break;
+            case TAPID.SEND_AMB_SFX:
+                if (Main.dedServ) {
+                    var p = GetPacket();
+                    p.Write(packet);
+                    p.Write(reader.ReadString());
+                    p.WriteVector2(reader.ReadVector2());
+                    p.Write(reader.ReadSingle());
+                    p.Send();
+                }
+                else {
+                    var path = reader.ReadString();
+                    var pos = reader.ReadVector2();
+                    var pitch = reader.ReadSingle();
+
+                    ImmersiveSoundsSystem.PlaySound(path, pos, pitch);
+                }
+                break;
+            default:
+                throw new Exception("Unidentified.");
         }
     }
 }

@@ -104,55 +104,55 @@ public static class GradientGlobals
 // lowkey created this just to use it for a tiny thing but okay :||||
 public class Gradient
 {
-public Func<float> FuncMin;
-public float Min {
-    get => FuncMin.Invoke();
-}
-public Func<float> FuncMax;
-public float Max {
-    get => FuncMax.Invoke();
-}
-private Func<float> _value;
+    public Func<float> FuncMin;
+    public float Min {
+        get => FuncMin.Invoke();
+    }
+    public Func<float> FuncMax;
+    public float Max {
+        get => FuncMax.Invoke();
+    }
+    private Func<float> _value;
 
-/// <summary>If this value (<see cref="ValueOverride"/>) is <see cref="float.NaN"/>, it will not override.</summary>
-public float ValueOverride = float.NaN;
+    /// <summary>If this value (<see cref="ValueOverride"/>) is <see cref="float.NaN"/>, it will not override.</summary>
+    public float ValueOverride = float.NaN;
 
-public float Value => _value.Invoke();
+    public float Value => _value.Invoke();
 
-public float GradientValue => float.IsNaN(ValueOverride) ? CreateFloat(Value, FuncMin.Invoke(), FuncMax.Invoke()) : ValueOverride;
+    public float GradientValue => float.IsNaN(ValueOverride) ? CreateFloat(Value, FuncMin.Invoke(), FuncMax.Invoke()) : ValueOverride;
 
-public Gradient(Func<float> value, Func<float> min, Func<float> max) {
-    FuncMin = min;
-    FuncMax = max;
-    _value = value;
-}
+    public Gradient(Func<float> value, Func<float> min, Func<float> max) {
+        FuncMin = min;
+        FuncMax = max;
+        _value = value;
+    }
 
-public static implicit operator float(Gradient g) => g.GradientValue;
+    public static implicit operator float(Gradient g) => g.GradientValue;
 
-/// <summary>Just in case you don't want to abuse the garbage collector.</summary>
-public static float CreateFloat(float value, float min, float max) {
-    float mid = (max + min) / 2;
-    float returnValue;
+    /// <summary>Just in case you don't want to abuse the garbage collector.</summary>
+    public static float CreateFloat(float value, float min, float max) {
+        float mid = (max + min) / 2;
+        float returnValue;
 
-    if (value > mid) {
-        var thing = 1f - (value - min) / (max - min) * 2;
-        returnValue = 1f + thing;
+        if (value > mid) {
+            var thing = 1f - (value - min) / (max - min) * 2;
+            returnValue = 1f + thing;
+            return Utils.Clamp(returnValue, 0f, 1f);
+        }
+        returnValue = (value - min) / (max - min) * 2;
         return Utils.Clamp(returnValue, 0f, 1f);
     }
-    returnValue = (value - min) / (max - min) * 2;
-    return Utils.Clamp(returnValue, 0f, 1f);
-}
-/// <summary>Just in case you don't want to abuse the garbage collector.</summary>
-public static double CreateDouble(double value, double min, double max) {
-    double mid = (max + min) / 2;
-    double returnValue;
+    /// <summary>Just in case you don't want to abuse the garbage collector.</summary>
+    public static double CreateDouble(double value, double min, double max) {
+        double mid = (max + min) / 2;
+        double returnValue;
 
-    if (value > mid) {
-        var thing = 1f - (value - min) / (max - min) * 2;
-        returnValue = 1f + thing;
+        if (value > mid) {
+            var thing = 1f - (value - min) / (max - min) * 2;
+            returnValue = 1f + thing;
+            return Utils.Clamp(returnValue, 0f, 1f);
+        }
+        returnValue = (value - min) / (max - min) * 2;
         return Utils.Clamp(returnValue, 0f, 1f);
     }
-    returnValue = (value - min) / (max - min) * 2;
-    return Utils.Clamp(returnValue, 0f, 1f);
-}
 }

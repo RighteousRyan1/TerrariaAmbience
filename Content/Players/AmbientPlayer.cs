@@ -8,33 +8,27 @@ using Terraria.ModLoader;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using Terraria.Audio;
-using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Common.Enums;
+using System.Linq;
+using TerrariaAmbience.Sounds.SFXEffects;
 
 namespace TerrariaAmbience.Content.Players;
 
 public class AmbientPlayer : ModPlayer
 {
     // This class serves the purpose of playing sounds and/or playing footsteps.
-    public int WallsAround => ReverbAudioSystem.WallsAround(Player.Center, new(4, 4), out var coords);
-
+    // public int WallsAround => ReverbAudioSystem.WallsAround(Player.Center, new(4, 4), out var coords);
     private float _multInternal;
-    public float BehindWallMultiplier => MathHelper.Clamp(_multInternal, 0.5f, 1f);
-
-    //public FieldInfo _stormShaderObstruction = typeof(Player).GetField("_stormShaderObstruction", BindingFlags.Instance | BindingFlags.NonPublic);
-    //public float BlizzardVisualIntensity => (float)_stormShaderObstruction.GetValue(Player);
+    public float InRoomAmbientMultiplier => MathHelper.Clamp(_multInternal, 0.2f, 1f);
 
     public bool BehindBackWall_MyStyle;
-
     public bool IsNearCampfire;
 
-    public static SoundEffectInstance thunderInstance;
-    public static SoundEffectInstance howlInstance;
+    public static SoundEffectInstance soundSlippyRoughInst;
+    public static SoundEffectInstance soundSlippySmoothInst;
+    private bool _areSoundsInitialized;
 
     internal int timerUntilValidChestStateChange;
-    public override void OnEnterWorld() {
-        TerrariaAmbience.DefaultAmbientHandler.HandleEnterWorld();
-    }
 
     private int chestStateNew;
     private int chestStateOld; // Same as above.
@@ -49,19 +43,15 @@ public class AmbientPlayer : ModPlayer
     private bool _wet; // old state of player wet
 
     private bool _showReverbTiles;
-
-    private List<string> _ignoredWalls = new() {
-        "fence",
-        "grass",
-        "flower",
-        "leaf"
-    };
+    public override void OnEnterWorld() {
+        TerrariaAmbience.DefaultAmbientHandler.HandleEnterWorld();
+    }
     public override void PreUpdate() {
-        var cfg = ModContent.GetInstance<GeneralConfig>();
-        var cfg2 = ModContent.GetInstance<AudioAdditionsConfig>();
-        var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
+        var genCfg = ModContent.GetInstance<GeneralConfig>();
+        var aaCfg = ModContent.GetInstance<AudioAdditionsConfig>();
+        var servCfg = ModContent.GetInstance<AmbientConfigServer>();
 
-        if (cfg3.newSplashSounds)
+        if (servCfg.newSplashSounds)
             ManagePlayerSplashes();
 
         #region ShowReverbTiles
@@ -70,44 +60,52 @@ public class AmbientPlayer : ModPlayer
             _showReverbTiles = !_showReverbTiles;
 
         if (_showReverbTiles) {
-            if (cfg.debugInterface && cfg2.ugReverbCalculation && cfg2.advancedReverbCalculation && cfg2.isReverbEnabled) {
-                int wallCount = 0;
-                int tileCount = 0;
-                if (Main.GameUpdateCount % 10 == 0) {
-                    if (Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight) {
-                        int wallsNear = ReverbAudioSystem.WallsAround(Player.Center, new Point(15, 15), out List<Point> wallPoints);
-                        int tilesNear = ReverbAudioSystem.TilesAround(Player.Center, new Point(15, 15), out List<Point> tilePoints);
-                        foreach (var tilePos in tilePoints) {
-                            var worldCoords = tilePos.ToVector2() * 16;
-                            var left = new Point(tilePos.X - 1, tilePos.Y);
-                            var right = new Point(tilePos.X + 1, tilePos.Y);
-                            var up = new Point(tilePos.X, tilePos.Y - 1);
-                            var down = new Point(tilePos.X, tilePos.Y + 1);
-                            if (ReverbAudioSystem.CanRaycastTo(Player.Center, left.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, right.ToVector2() * 16)
-                                || ReverbAudioSystem.CanRaycastTo(Player.Center, up.ToVector2() * 16) || ReverbAudioSystem.CanRaycastTo(Player.Center, down.ToVector2() * 16)) {
-                                tileCount++;
-                                if (Main.GameUpdateCount % 10 == 0) {
-                                    Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
-                                }
-                            }
+            if (genCfg.debugInterface && aaCfg.ugReverbCalculation && aaCfg.advancedReverbCalculation && aaCfg.isReverbEnabled) {
+
+                bool isUnderground = Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight;
+                bool shouldDrawDust = Main.GameUpdateCount % 10 == 0;
+
+                if (!isUnderground) return;
+
+                int wallCount = 0, tileCount = 0;
+                Point gridSize = new(15, 15);
+                Vector2 playerCenter = Player.Center;
+
+                int wallsNear = ReverbAudioSystem.WallsAround(playerCenter, gridSize, out List<Point> wallPoints);
+                int tilesNear = ReverbAudioSystem.TilesAround(playerCenter, gridSize, out List<Point> tilePoints);
+
+                foreach (var tilePos in tilePoints) {
+                    Vector2 worldCoords = tilePos.ToVector2() * 16;
+                    Point[] adjacentTiles = {
+                        new(tilePos.X - 1, tilePos.Y), new(tilePos.X + 1, tilePos.Y),
+                        new(tilePos.X, tilePos.Y - 1), new(tilePos.X, tilePos.Y + 1)
+                    };
+
+                    if (adjacentTiles.Any(adj => ReverbAudioSystem.CanRaycastTo(playerCenter, adj.ToVector2() * 16))) {
+                        tileCount++;
+                        if (shouldDrawDust) {
+                            Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
                         }
-                        foreach (var wallPos in wallPoints) {
-                            if (ReverbAudioSystem.CanRaycastTo(Player.Center, wallPos.ToVector2() * 16)) {
-                                wallCount++;
-                                if (Main.GameUpdateCount % 10 == 0) {
-                                    Dust.QuickBox(wallPos.ToVector2() * 16, wallPos.ToVector2() * 16 + new Vector2(16), 0, Color.Red, null);
-                                }
-                            }
+                    }
+                }
+
+                foreach (var wallPos in wallPoints) {
+                    Vector2 worldCoords = wallPos.ToVector2() * 16;
+                    if (ReverbAudioSystem.CanRaycastTo(playerCenter, worldCoords)) {
+                        wallCount++;
+                        if (shouldDrawDust) {
+                            Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Red, null);
                         }
                     }
                 }
             }
         }
         #endregion
-        #region Sound Paths / StepRands / Whatever
+        #region Step/Sound handling
         timerUntilValidChestStateChange++;
         // This is a pretty niche finding for tiles above said player
-        if (cfg.wetStepsEnabled) {
+        // can obviously be optimized... fml
+        if (genCfg.wetStepsEnabled) {
             if (!Player.wet) {
                 Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
                 // i know i can just remove this loop but just in case i want to tweak it again i'll have it like this
@@ -115,7 +113,7 @@ public class AmbientPlayer : ModPlayer
                     for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--) {
                         if (WorldGen.InWorld(i / 16, j / 16)) {
                             Tile tile = Main.tile[i / 16, j / 16];
-                            if (tile.HasTile && tile.CollisionType() == 1) {
+                            if (tile.HasTile && Main.tileSolid[tile.TileType]) {
                                 HasTilesAbove = true;
                                 break;
                             }
@@ -134,7 +132,7 @@ public class AmbientPlayer : ModPlayer
         if (Main.GameUpdateCount % 8 == 0) {
             if (ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) {
                 ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
-                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2;
+                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2; // default reverb calcs are strong
             }
         }
 
@@ -165,67 +163,22 @@ public class AmbientPlayer : ModPlayer
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)
             return;
+
         var tile = Framing.GetTileSafely(Player.Center);
-        var modTile = ModContent.GetModTile(tile.TileType);
 
-        // TODO: this isn't exactly working as planned but that can be fixed.
-        if (modTile is null)
-            BehindBackWall_MyStyle = tile.WallType > 0 && !_ignoredWalls.Contains(TileID.Search.GetName(tile.TileType).ToLower());
-        else // let's hope each modtile's internal name for fences includes "fence"
-            BehindBackWall_MyStyle = tile.WallType > 0 && !_ignoredWalls.Contains(modTile.Name.ToLower());
+        if (ModContent.GetInstance<AudioAdditionsConfig>().floodFillAmbientOcclusion)
+            BehindBackWall_MyStyle = RoomDetectionPlayer.IsInRoom;
+        else
+            BehindBackWall_MyStyle = false;
 
-        if (BehindBackWall_MyStyle) {
-            _multInternal -= 0.0075f;
-        }
-        else {
-            _multInternal += 0.0075f;
-        }
+        if (BehindBackWall_MyStyle)
+            _multInternal -= 0.05f;
+        else
+            _multInternal += 0.05f;
+
         _multInternal = MathHelper.Clamp(_multInternal, 0, 1);
+
         HandleIceScraping();
-        // ^ method above will work in multiplayer eventually... when i care enough.
-        int randX = Main.rand.Next(-1750, 1750);
-        int randY = Main.rand.Next(-1750, 1750);
-        int randC = Main.rand.Next(1, 6);
-        int randD = Main.rand.Next(1, 7);
-        int randF = Main.rand.Next(1, 3);
-        int randM = Main.rand.Next(1, 10);
-
-        string pick = GeneralHelpers.Pick($"close/{randC}", $"distant/{randD}", $"far/{randF}", $"medial/{randM}");
-        string pathToThunder = $"TerrariaAmbience/Sounds/Custom/ambient/rain/thunder/{pick}";
-
-        float mafs = 2000 / (Main.maxRaining * 2);
-        float chance3 = Main.rand.NextFloat(mafs);
-
-        if (Main.raining && !Player.ZoneSnow && Player.ZoneOverworldHeight) {
-            if (chance3 < 2) {
-                var id = SoundEngine.PlaySound(new SoundStyle(pathToThunder, 0, SoundType.Ambient), Player.Center + new Vector2(randX, randY));
-                SoundEngine.TryGetActiveSound(id, out var snd);
-                thunderInstance = snd.Sound;
-                thunderInstance.Volume = Main.ambientVolume * (Player.ZoneDirtLayerHeight ? 0.35f : 0.9f);
-                thunderInstance.Pitch = Main.rand.NextFloat(-0.2f, -0.1f);
-            }
-        }
-        if (!Main.dayTime) {
-            string pathToHowl = $"TerrariaAmbience/Sounds/Custom/ambient/animals/howl";
-
-            int chance = Main.rand.Next(1500);
-            if (Player.ZoneSnow && !Player.ZoneUnderworldHeight && !Player.ZoneRockLayerHeight) {
-                if (chance == 1) {
-                    var id = SoundEngine.PlaySound(new SoundStyle(pathToHowl), Player.Center + new Vector2(randX, randY));
-                    SoundEngine.TryGetActiveSound(id, out var snd);
-                    howlInstance = snd.Sound;
-                    howlInstance.Volume = Main.ambientVolume * 0.1f;
-                    howlInstance.Pitch = Main.rand.NextFloat(-0.4f, -0.1f);
-                }
-            }
-        }
-        if (Player.ZoneDungeon) {
-            int possibleChance = Main.rand.Next(1000);
-            int randX1 = Main.rand.Next(-2250, 2250);
-            int randY1 = Main.rand.Next(-2250, 2250);
-            if (possibleChance == 0)
-                GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/animals/rattling_bones"), Player.Center + new Vector2(randX1, randY1)).Volume = Main.ambientVolume * 0.05f; ;
-        }
 
         if (!TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.IsPlaying())
             TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
@@ -248,12 +201,10 @@ public class AmbientPlayer : ModPlayer
     /// <summary>
     /// Gets distance from surface of water to the player.
     /// </summary>
-    /// <param name="maxTileCheck">The maximum tiles to check above the player.</param>
-    /// <param name="defaultCheckPos">The position to check water pressure for. By default is the player's position.</param>
+    /// <param name="heightCheck">The maximum tiles to check above the player.</param>
+    /// <param name="checkPos">The position to check water pressure for. By default is the player's position.</param>
     /// <returns>The subpixel Y-component distance from the player's head to the surface.</returns>
-    public float GetWaterPressureFloat(int heightCheck, Vector2 checkPos) {
-        return TileUtils.GetWaterPressureFloat(heightCheck, checkPos);
-    }
+    public float GetWaterPressureFloat(int heightCheck) => TileUtils.GetWaterPressureFloat(heightCheck, Player.position);
     /// <summary>
     /// Used for when the "splashes" config is enabled.
     /// </summary>
@@ -388,12 +339,9 @@ public class AmbientPlayer : ModPlayer
         chestStateOld = chestStateNew;
     }
 
-    public static SoundEffectInstance soundSlippyRoughInst;
-
-    public static SoundEffectInstance soundSlippySmoothInst;
-
-    private bool _areSoundsInitialized;
     public void HandleIceScraping() {
+        if (Player.whoAmI != Main.myPlayer) return;
+        // ^ eventually add support for hearing other people
         if (!Main.dedServ) {
             if (!_areSoundsInitialized) {
                 soundSlippyRoughInst = Mod.Assets.Request<SoundEffect>("Sounds/Custom/ambient/player/ice_slide_rough", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value.CreateInstance();
@@ -423,51 +371,6 @@ public class AmbientPlayer : ModPlayer
                 soundSlippySmoothInst.Volume -= 0.01f;
             soundSlippyRoughInst.Volume = MathHelper.Clamp(soundSlippyRoughInst.Volume, 0f, 0.5f);
             soundSlippySmoothInst.Volume = MathHelper.Clamp(soundSlippySmoothInst.Volume, 0f, 0.5f);
-        }
-    }
-}
-public class CampfireDetection : GlobalTile
-{
-    public Vector2 originOfCampfire;
-
-    public float distanceToCampfire;
-
-    public bool isOnRight;
-    public override void NearbyEffects(int i, int j, int type, bool closer)
-    {
-        if (!Main.dedServ)
-        {
-            originOfCampfire.X = i * 16;
-            originOfCampfire.Y = j * 16;
-            Player player = Main.player[Main.myPlayer].GetModPlayer<AmbientPlayer>().Player;
-
-            if (ModContent.GetInstance<GeneralConfig>().campfireSounds)
-            {
-                if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire))
-                {
-                    /*var t = Main.tile[i, j];
-                    var orig = new Vector2(i * 16, j * 16);
-                    Main.NewText(t.frameY);*/
-                    //if (t.frameY <= 18 && t.frameY >= 0)
-                    {
-                        distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
-                        isOnRight = originOfCampfire.X < player.Center.X;
-                        player.GetModPlayer<AmbientPlayer>().IsNearCampfire = true;
-                    }
-                }
-                if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire))
-                {
-                    /*var t = Main.tile[i, j];
-                    var orig = new Vector2(i * 16, j * 16);
-                    Main.NewText(t.frameY);*/
-                    //if (t.frameY <= 54 && t.frameY >= 36)
-                    {
-                        //if (TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance is not null)
-                            //TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
-                        player.GetModPlayer<AmbientPlayer>().IsNearCampfire = false;
-                    }
-                }
-            }
         }
     }
 }

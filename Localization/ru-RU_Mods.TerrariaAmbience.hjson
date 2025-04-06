@@ -1,0 +1,235 @@
+Configs: {
+	AmbientConfigServer: {
+		DisplayName: Серверная конфигурация
+
+		chestSounds: {
+			Label: Звуки открытия и закрытия сундуков
+			Tooltip: Добавляет звуки открытия и закрытия сундуков, проигрываемые для всех на сервере
+		}
+
+		newSplashSounds: {
+			Label: Звуки воды
+			Tooltip: Добавляет новые звуки для взаимодействий с водой, проигрываемые для всех на сервере
+		}
+	}
+
+	AudioAdditionsConfig: {
+		DisplayName: Клиентская конфигурация
+
+		slimySounds: {
+			Label: Звуки слизи
+			Tooltip: Добавляет звуки прыжков и приземлений слизней
+		}
+
+		woodCreaks: {
+			Label: Скрип дерева
+			Tooltip:
+				'''
+				Добавляет звуки прогибающихся под вашим весом деревянных блоков
+				Отключение этой настройки немного улучшает производительность
+				'''
+		}
+
+		dynamicAnimalSounds: {
+			Label: Фоновые звуки животных
+			Tooltip: Добавляет достаточно громкие фоновые звуки животных, меняющиеся в зависимости от биома, в котором вы находитесь
+		}
+
+		Headers.SoundFilters: Звуковые фильтры
+
+		isReverbEnabled: {
+			Label: Реверберация
+			Tooltip: Включает эффект реверберации звуков, интенсивность которой зависит от биома и глубины, на которой вы находитесь
+		}
+
+		ugReverbCalculation: {
+			Label: Улучшенная реверберация в пещерах
+			Tooltip:
+				'''
+				Изменяет параметры реверберации в пещерах
+				Может вызвать проблемы с производительностью на слабых процессорах
+				'''
+		}
+
+		surfaceReverbCalculation: {
+			Label: Улучшенная реверберация на поверхности
+			Tooltip: Изменяет параметры реверберации на поверхности
+		}
+
+		advancedReverbCalculation: {
+			Label: Продвинутый расчёт реверберации
+			Tooltip:
+				'''
+				Улучшает расчёт алгоритмов реверберации
+				Ослабляет зависимость интенсивности реверберации от глубины, на которой вы находитесь
+				'''
+		}
+
+		isSoundDampeningEnabled: {
+			Label: Шумоподавление под водой
+			Tooltip: Приглушает все звуки, когда вы находитесь под водой
+		}
+
+		isSoundOcclusionEnabled: {
+			Label: Окклюзия звуков
+			Tooltip:
+				'''
+				Приглушает звуки, источник которых загорожен блоками
+				Степень приглушённости зависит от расстояния до источника звука и количества блоков между вами и источником
+				'''
+		}
+
+		floodFillAmbientOcclusion: {
+			// Label: Flood Fill Audio Adaption
+			/* Tooltip:
+				'''
+				Ambience will lower in volume if you are in a room with this setting enabled.
+				Disabling this setting can improve performance.
+				''' */
+		}
+	}
+
+	GeneralConfig: {
+		DisplayName: Общая конфигурация
+
+		Headers: {
+			AmbienceAndSounds: Окружение и звуки
+			Debugging: Отладка
+			AmbienceTrackVolume: Громкость звуковых дорожек
+		}
+
+		footsteps: {
+			Label: Звук шагов
+			Tooltip: Добавляет звуки ваших шагов при передвижении
+		}
+
+		campfireSounds: {
+			Label: Звуки костра
+			Tooltip: Добавляет атмосферные звуки костра
+		}
+
+		transitionHarshness: {
+			Label: Резкость переходов между звуковыми дорожками
+			Tooltip:
+				'''
+				Чем меньше это значение, тем плавнее одна звуковая дорожка будет переходить к другой
+				Рекомендуется установить любое значение от 0,01 до 0,075
+				'''
+		}
+
+		areArmorAndVanitySoundsEnabled: {
+			Label: Звуки ношения брони и украшений
+			Tooltip: Добавляет дополнительные звуки вашим движениям, зависящие от надетой брони и украшений
+		}
+
+		debugInterface: {
+			Label: Показывать значения для отладки
+			Tooltip: Включает панель со всеми значениями и условиями для проигрывания звуков, используется для тестирования и разработки
+		}
+
+		overallVolume: {
+			Label: Общая громкость
+			Tooltip: Общая громкость всех звуков из этого мода
+		}
+
+		wetStepsEnabled: {
+			Label: Звуки шагов по мокрым от дождя блокам
+			Tooltip:
+				'''
+				Добавляет звуки шагов по мокрым блокам, ничем не прикрытым во время дождя
+				Отключение этой настройки немного улучшает производительность
+				'''
+		}
+
+		forestVolumes: {
+			Label: Лес
+			Tooltip:
+				'''
+				В порядке сверху вниз:
+
+				– Утро
+				– День
+				– Вечер
+				– Ночь
+				'''
+		}
+
+		snowVolume: {
+			Tooltip: ""
+			Label: Снежный биом
+		}
+
+		jungleVolumes: {
+			Label: Джунгли
+			Tooltip:
+				'''
+				В порядке сверху вниз:
+
+				– День на поверхности
+				– Ночь на поверхности
+				– День под землёй
+				– Ночь под землёй
+				'''
+		}
+
+		evilVolumes: {
+			Label: Биомы мирового зла
+			Tooltip:
+				'''
+				В порядке сверху вниз:
+
+				– Порча
+				– Багрянец
+				'''
+		}
+
+		desertVolume: {
+			Label: Пустыня
+			Tooltip: ""
+		}
+
+		oceanVolume: {
+			Label: Океан
+			Tooltip: ""
+		}
+
+		cavernsVolume: {
+			Label: Пещеры
+			Tooltip: ""
+		}
+
+		hellVolume: {
+			Label: Преисподняя
+			Tooltip: ""
+		}
+
+		breezeVolume: {
+			Label: Ветер
+			Tooltip: ""
+		}
+
+		underwaterVolume: {
+			Label: Под водой
+			Tooltip: ""
+		}
+
+		craftingSoundsVolume: {
+			Label: Громкость звуков создания предметов
+			Tooltip: Установите значение на 0, чтобы выключить их полностью
+		}
+
+		footstepsVolMult: {
+			Label: Громкость шагов
+			Tooltip: Установите значение на 0, чтобы выключить их полностью
+		}
+
+		entityFootstepsVolume: {
+			// Label: Entity Footsteps Volume
+			/* Tooltip:
+				'''
+				Sets the volume of footstep audio for numerous NPCs, including Town NPCs, Zombies, and more.
+				Set to 0 to disable.
+				''' */
+		}
+	}
+}

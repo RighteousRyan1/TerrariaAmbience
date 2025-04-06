@@ -82,26 +82,29 @@ namespace TerrariaAmbience.Core
             orig(self);
             displayable = string.Empty;
 
-            var ambPlayer = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
-
-            bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
-            foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
-                displayable += $"{amb.Name}: {amb.volume}\n";
-            }
-            displayable += $"\nTile Registry (Is player on?):\n";
-            foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
-                var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
-                displayable += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
-                    && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
-                // it doesnt update unless player is on ground... hmmm fix?
-            }
-
-            displayable += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
-                + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<ReverbPlayer>().ReverbFactor}"
-                + $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
-
             if (ModContent.GetInstance<GeneralConfig>().debugInterface) {
                 #region DrawVolume
+
+                var ambPlayer = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
+
+                bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
+                foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
+                    displayable += $"{amb.Name}: {amb.volume:0.####}\n";
+                }
+                displayable += $"\nTile Registry (Is player on?):\n";
+                foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
+                    var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
+                    displayable += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
+                        && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
+                    // it doesnt update unless player is on ground... hmmm fix?
+                }
+
+                displayable += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
+                    + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<ReverbPlayer>().ReverbFactor}"
+                    + $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
+
+                var fontToUse = FontAssets.DeathText.Value;
+
                 if (Main.playerInventory && (Main.mapStyle == 0 || Main.mapStyle == 2))
                     drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 7, 80);
                 if (Main.mapStyle == 1 && Main.playerInventory)
@@ -115,12 +118,12 @@ namespace TerrariaAmbience.Core
                     new Rectangle(
                         (int)drawPos.X - 6,
                         (int)drawPos.Y - 6,
-                        (int)(FontAssets.DeathText.Value.MeasureString(displayable).X * 0.24f),
-                        (int)(FontAssets.DeathText.Value.MeasureString(displayable).Y * 0.23f)), 
+                        (int)(fontToUse.MeasureString(displayable).X * 0.24f),
+                        (int)(fontToUse.MeasureString(displayable).Y * 0.23f)), 
                     Color.SkyBlue * 0.6f);
 
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
-                    FontAssets.DeathText.Value, 
+                    fontToUse, 
                     displayable,
                     position: drawPos, 
                     Color.LightGray, 
@@ -128,6 +131,23 @@ namespace TerrariaAmbience.Core
                     origin: Vector2.Zero, 
                     baseScale: new Vector2(0.225f), 
                     -1, 
+                    1);
+
+                var stepsDetected = TerrariaAmbience.DefaultFootstepHandler.AllSounds.Where(x => x.IsPlayerOnAnyTile).Select(x => x.Name);
+                var text = string.Join(", ", stepsDetected);
+                float scale = 0.25f;
+                var measure = fontToUse.MeasureString(text) * scale;
+                var infoPos = new Vector2(Main.screenWidth / 2, 8);
+
+                ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
+                    fontToUse,
+                    text,
+                    position: infoPos,
+                    Color.LightGray,
+                    0f,
+                    origin: new Vector2(measure.X / 2, 0),
+                    baseScale: new Vector2(scale),
+                    -1,
                     1);
                 #endregion
 
@@ -141,17 +161,18 @@ namespace TerrariaAmbience.Core
                     "\n\nGradients:" +
                     $"\nAllNightPartDay: {GradientGlobals.AllNightPartDay}" +
                     $"\nAllDayPartNight: {GradientGlobals.AllDayPartNight}" +
-                    $"\nBehindWallMultiplier: {ambPlayer.BehindWallMultiplier}";
+                    $"\nBehindWallMultiplier: {ambPlayer.InRoomAmbientMultiplier}" +
+                    $"\nIsInRoom: {RoomDetectionPlayer.IsInRoom}";
                 Vector2 offset = new(-300, 0);
                 Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
                     new Rectangle((int)(drawPos.X + offset.X - 6), 
                     (int)(drawPos.Y + offset.Y - 6), 
-                    (int)(FontAssets.DeathText.Value.MeasureString(txt).X * 0.24f), 
-                    (int)(FontAssets.DeathText.Value.MeasureString(txt).Y * 0.23f)), 
+                    (int)(fontToUse.MeasureString(txt).X * 0.24f), 
+                    (int)(fontToUse.MeasureString(txt).Y * 0.23f)), 
                     Color.DarkOrange * 0.6f);
 
                 ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
-                    FontAssets.DeathText.Value,
+                    fontToUse,
                     txt,
                     drawPos - new Vector2(3, 3) + offset,
                     Color.White,

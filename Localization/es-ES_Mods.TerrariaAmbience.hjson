@@ -84,6 +84,15 @@ Configs: {
 			Label: Sound Occlusion
 			Tooltip: Makes sounds muffled when the Line-of-Sight to the player is blocked, depending on distance and density of the blockage.
 		}
+
+		floodFillAmbientOcclusion: {
+			// Label: Flood Fill Audio Adaption
+			/* Tooltip:
+				'''
+				Ambience will lower in volume if you are in a room with this setting enabled.
+				Disabling this setting can improve performance.
+				''' */
+		}
 	}
 
 	GeneralConfig: {
@@ -227,8 +236,17 @@ Configs: {
 		}
 
 		footstepsVolMult: {
-			// Label: footsteps Vol Mult
-			// Tooltip: ""
+			// Label: Footsteps Volume
+			// Tooltip: Controls volume multiplier of footsteps. Set to zero to not hear any.
+		}
+
+		entityFootstepsVolume: {
+			// Label: Entity Footsteps Volume
+			/* Tooltip:
+				'''
+				Sets the volume of footstep audio for numerous NPCs, including Town NPCs, Zombies, and more.
+				Set to 0 to disable.
+				''' */
 		}
 	}
 }

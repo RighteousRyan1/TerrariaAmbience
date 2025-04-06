@@ -1,127 +1,132 @@
 ﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 
-namespace TerrariaAmbience.Core
+namespace TerrariaAmbience.Core;
+
+public class GeneralConfig : ModConfig
 {
-    public class GeneralConfig : ModConfig
-    {
-        public override ConfigScope Mode => ConfigScope.ClientSide;
-        #region Ambience and Sounds
-        [Header("AmbienceAndSounds")]
-        
-        [DefaultValue(true)]
-        public bool footsteps;
+    public override ConfigScope Mode => ConfigScope.ClientSide;
+    #region Ambience and Sounds
+    [Header("AmbienceAndSounds")]
 
-        [DefaultValue(1f)]
-        public float footstepsVolMult;
+    [DefaultValue(true)]
+    public float entityFootstepsVolume;
 
-        [DefaultValue(true)]
-        public bool campfireSounds;
+    [DefaultValue(true)]
+    public bool footsteps;
 
-        [DefaultValue("0.01")]
-        public string transitionHarshness;
+    [DefaultValue(1f)]
+    public float footstepsVolMult;
 
-        [DefaultValue(true)]
-        public bool areArmorAndVanitySoundsEnabled;
+    [DefaultValue(true)]
+    public bool campfireSounds;
 
-        [DefaultValue(true)]
-        public bool wetStepsEnabled;
+    [DefaultValue("0.01")]
+    public string transitionHarshness;
 
-        [DefaultValue(1f)]
-        public float craftingSoundsVolume;
-        #endregion
+    [DefaultValue(true)]
+    public bool areArmorAndVanitySoundsEnabled;
 
-        #region Debug
-        [Header("Debugging")]
-        [DefaultValue(false)]
-        public bool debugInterface;
-        #endregion
+    [DefaultValue(true)]
+    public bool wetStepsEnabled;
 
-        #region ToggleSounds
-        [Header("AmbienceTrackVolume")]
+    [DefaultValue(1f)]
+    public float craftingSoundsVolume;
+    #endregion
 
-        [DefaultValue(1f)]
-        public float overallVolume;
+    #region Debug
+    [Header("Debugging")]
+    [DefaultValue(false)]
+    public bool debugInterface;
+    #endregion
 
-        [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
-        public float[] forestVolumes = new float[4];
+    #region ToggleSounds
+    [Header("AmbienceTrackVolume")]
 
-        //[DefaultValue(new float[] { 1f, 1f })]
-        //public float[] snowVolumes = new float[2];
-        [DefaultValue(1f)]
-        public float snowVolume;
+    [DefaultValue(1f)]
+    public float overallVolume;
 
-        [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
-        public float[] jungleVolumes = new float[4];
+    [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
+    public float[] forestVolumes = new float[4];
 
-        [DefaultValue(new float[] { 1f, 1f })]
-        public float[] evilVolumes = new float[2];
+    //[DefaultValue(new float[] { 1f, 1f })]
+    //public float[] snowVolumes = new float[2];
+    [DefaultValue(1f)]
+    public float snowVolume;
 
-        [DefaultValue(1f)]
-        public float desertVolume;
+    [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
+    public float[] jungleVolumes = new float[4];
 
-        [DefaultValue(1f)]
-        public float oceanVolume;
+    [DefaultValue(new float[] { 1f, 1f })]
+    public float[] evilVolumes = new float[2];
 
-        [DefaultValue(1f)]
-        public float cavernsVolume;
+    [DefaultValue(1f)]
+    public float desertVolume;
 
-        [DefaultValue(1f)]
-        public float hellVolume;
+    [DefaultValue(1f)]
+    public float oceanVolume;
 
-        [DefaultValue(1f)]
-        public float breezeVolume;
+    [DefaultValue(1f)]
+    public float cavernsVolume;
 
-        [DefaultValue(1f)]
-        public float underwaterVolume;
-        #endregion
+    [DefaultValue(1f)]
+    public float hellVolume;
 
-    }
-    public class AudioAdditionsConfig : ModConfig
-    {
-        public override ConfigScope Mode => ConfigScope.ClientSide;
+    [DefaultValue(1f)]
+    public float breezeVolume;
 
-        [DefaultValue(true)]
-        public bool slimySounds;
+    [DefaultValue(1f)]
+    public float underwaterVolume;
+    #endregion
 
-        [DefaultValue(true)]
-        public bool woodCreaks;
+}
+public class AudioAdditionsConfig : ModConfig
+{
+    public override ConfigScope Mode => ConfigScope.ClientSide;
 
-        [DefaultValue(true)]
-        public bool dynamicAnimalSounds;
+    [DefaultValue(true)]
+    public bool slimySounds;
 
-        [Header("SoundFilters")]
+    [DefaultValue(true)]
+    public bool woodCreaks;
 
-        [DefaultValue(true)]
-        public bool isReverbEnabled;
+    [DefaultValue(true)]
+    public bool dynamicAnimalSounds;
 
-        [DefaultValue(true)]
-        public bool ugReverbCalculation;
+    [Header("SoundFilters")]
 
-        [DefaultValue(true)]
-        public bool surfaceReverbCalculation;
+    [DefaultValue(true)]
+    public bool isReverbEnabled;
 
-        [DefaultValue(true)]
-        public bool advancedReverbCalculation;
+    [DefaultValue(true)]
+    public bool ugReverbCalculation;
 
-        [DefaultValue(true)]
-        public bool isSoundDampeningEnabled;
+    [DefaultValue(true)]
+    public bool surfaceReverbCalculation;
 
-        [DefaultValue(true)]
-        public bool isSoundOcclusionEnabled;
-    }
-    public class AmbientConfigServer : ModConfig
-    {
-        public override ConfigScope Mode => ConfigScope.ServerSide;
-        #region Sound Configs
+    [DefaultValue(true)]
+    public bool advancedReverbCalculation;
 
-        [DefaultValue(true)]
-        public bool chestSounds;
+    [DefaultValue(true)]
+    public bool isSoundDampeningEnabled;
 
-        [ReloadRequired]
-        [DefaultValue(true)]
-        public bool newSplashSounds;
+    [DefaultValue(true)]
+    public bool isSoundOcclusionEnabled;
 
-        #endregion
-    }
+    [DefaultValue(true)]
+    public bool floodFillAmbientOcclusion;
+}
+public class AmbientConfigServer : ModConfig
+{
+    public override ConfigScope Mode => ConfigScope.ServerSide;
+    #region Sound Configs
+
+    [DefaultValue(true)]
+    public bool chestSounds;
+
+    [ReloadRequired]
+    [DefaultValue(true)]
+    public bool newSplashSounds;
+
+    #endregion
 }

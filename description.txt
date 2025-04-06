@@ -1,8 +1,5 @@
-Terraria Ambience is a mod that adds liveliness to your little Terraria world!
-
-You can hear all sorts of things, such as crickets, ocean waves, campfire crackles, underground rumbles, and much more! Explore around a little bit!
-
-Hopefully you can relax a bit more with this mod!
+Terraria Ambience is a mod that adds liveliness to your little Terraria world. You can hear animals, environmental sounds, and more.
+This will allow you to relax in your playthroughs more.
 
 Developers:
 
@@ -11,29 +8,48 @@ Developers:
 
 Most Recent Update:
 
-Add new 'gravel' footstep sounds, a few new variants to wood footsteps, and a new variant to sand footsteps.
-
-Fixed some bugs, including no sounds playing when 'sound occlusion' was disabled. Thank you
-
-Fixed broken compatibility with InfraSonic.
+- Russian localization (thank you @xenofite on Discord)
+- Ambient soundtracks are now synced between players so all players hear the same bits of nature each day
+- Description made less enthusiastic and more objective
+- Super-optimized code. The game should now run much better
+- More crafting sounds (Crystal ball, Ancient Manipulator)
+- More ambient sounds for even more immersion throughout the day
+- Ambience will fade out if you're in a house or enclosed area
+- New snow biome ambient sounds
+- Sound events are now synced across the server
+- Removed rattling bones in the dungeon
+- More config options
+- More footstep sounds (strong ice, metal plating)
 
 ---------------------------
 
-1.4 Update:
+What this mod does:
 
-SO MANY NEW THINGS!
+- Reverb in enclosed spaces
+- Sound occlusion for blocked sounds
+- Audio dampening for underwater audio
+- Many footstep sounds for many different material types, with mod support
+- Crafting sounds that can be heard by everyone, and everyone can hear
+- Sounds for parts of the world that include nature, including the:
+	- Forest
+	- Desert
+	- Corruption/Crimson
+	- Underground/Underworld
+	- Jungle
+	- Ocean
+	- Snow/Ice
+	- And more!
+- Reworks of previously horrendous ambience, such as:
+	- Wind
+	- Rain
+- New audio to make immersion better, such as:
+	- Better thunder
+	- Better blizzards
+	- Campfires
 
-Reverb! You can enter enclosed spaces and hear your beautiful items in reverberated audio! Can be disabled.
-Sound occlusion! If you can't "see" a sound, it will sound muffled or blocked out. Can be disabled.
-Audio dampening! Going underwater makes everything sound dampened! Can be disabled.
+- All aforementioned features work in multiplayer, with InfraSonic support
 
-A WHOLE lot of new footstep sounds! (Metal, Marble/Granite, Smooth Stones, Leaves, Ice, Glass, and more!), a lot of the sounds were just outright replaced.
-Slimes now make sounds when jumping and landing. Can be disabled.
-
-There are now 2D positional audios that update as you go around the world, these consist of crickets, owls, and other forest critters.
-Sounds now play when sliding on ice.
-
-Audio smooth-transition. As you get closer to space, ambient tracks will grow quiet. As you go into the underground, the sound of caves grows louder.
+---------------------------
 
 Sound Credits:
 
@@ -44,3 +60,4 @@ globofonia
 wjoojoo
 JoelAudio
 MegaShroom
+straget

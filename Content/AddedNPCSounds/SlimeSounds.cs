@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework;
 using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
+using TerrariaAmbience.Sounds.SFXEffects;
 
 namespace TerrariaAmbience.Content.AddedNPCSounds
 {
