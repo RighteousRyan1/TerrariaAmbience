@@ -25,6 +25,9 @@ namespace TerrariaAmbience;
 
 public partial class TerrariaAmbience : Mod {
     // TODO: add all other types to the call
+
+    public const float DEFAULT_FPS = 60f;
+    public static float WorkaroundDeltaTime;
     public override object Call(params object[] args) {
         try {
             string message = args[0] as string;
@@ -148,6 +151,8 @@ public partial class TerrariaAmbience : Mod {
             if (Main.gameMenu)
                 return;
             //Ambience.ClampAll();
+
+            WorkaroundDeltaTime = MathF.Round(60f * (float)gameTime.ElapsedGameTime.TotalSeconds * 1000) / 1000;
         }
     }
     public override void PostSetupContent() {

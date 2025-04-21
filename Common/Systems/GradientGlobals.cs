@@ -73,19 +73,32 @@ public static class GradientGlobals
         RainIntensityForRainHeavy = GradientCapped(Main.cloudAlpha, 0.5f, 1.5f);
 
         Hell = Gradient.CreateFloat(Main.LocalPlayer.Center.Y, (Main.maxTilesY - 300) * 16, Main.maxTilesY * 16);
-        SkyToUnderground = (float)Gradient.CreateDouble(Main.LocalPlayer.Center.Y, Main.worldSurface * 16 * 0.35f, Main.worldSurface * 1.05f * 16);
+
+        // oldMinY = Main.worldSurface * 16 * 0.55f
+        // oldMaxY = Main.worldSurface * 1.3f * 16
+        // using spawnTile is a much better approach!
+        // but if something like the "Drow challenge" is enabled, prevent its use
+        float useMin, useMax;
+        if (Main.spawnTileY > Main.worldSurface) {
+            useMin = (float)Main.worldSurface * 16 * 0.55f;
+            useMax = (float)Main.worldSurface * 1.3f * 16;
+        } else {
+            useMin = Main.spawnTileY * 16 * 0.5f;
+            useMax = Main.spawnTileY * 16 * 1.5f;
+        }
+        SkyToUnderground = (float)Gradient.CreateDouble(Main.LocalPlayer.Center.Y, useMin, useMax);
         Underground = (float)Gradient.CreateDouble(Main.LocalPlayer.Center.Y, Main.worldSurface * 16, (Main.maxTilesY - 150) * 16);
         if (Main.dayTime) {
-            FromEvening = (float)Gradient.CreateDouble(Main.time, Main.dayLength - 4000, Main.dayLength + 4000); // * Gradient_SkyToUnderground;
-            FromMorning = (float)Gradient.CreateDouble(Main.time, -5000, 8000); // * Gradient_SkyToUnderground; // accidental?
-            FromNoon = (float)Gradient.CreateDouble(Main.time, 0, Main.dayLength); // * Gradient_SkyToUnderground;
+            FromEvening = (float)Gradient.CreateDouble(Main.time, Main.dayLength - 4000, Main.dayLength + 4000) * SkyToUnderground;
+            FromMorning = (float)Gradient.CreateDouble(Main.time, -5000, 8000) * SkyToUnderground; // accidental?
+            FromNoon = (float)Gradient.CreateDouble(Main.time, 0, Main.dayLength) * SkyToUnderground;
             FromMidnight = 0;
 
-            AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -4000, Main.dayLength + 4000);
+            AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -4000, Main.dayLength + 4000) * SkyToUnderground;
             if (Main.time < Main.dayLength / 2)
-                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -Main.nightLength - 4000, 4000);
+                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -Main.nightLength - 4000, 4000) * SkyToUnderground;
             else
-                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, Main.dayLength - 4000, Main.dayLength + Main.nightLength + 4000);
+                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, Main.dayLength - 4000, Main.dayLength + Main.nightLength + 4000) * SkyToUnderground;
         }
         else {
             FromEvening = (float)Gradient.CreateDouble(Main.time, -4000, 4000) * SkyToUnderground;
@@ -94,10 +107,10 @@ public static class GradientGlobals
             FromMidnight = (float)Gradient.CreateDouble(Main.time, 0, Main.nightLength) * SkyToUnderground;
 
             if (Main.time < Main.nightLength / 2)
-                AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -Main.dayLength - 4000, 4000);
+                AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -Main.dayLength - 4000, 4000) * SkyToUnderground;
             else
-                AllDayPartNight = (float)Gradient.CreateDouble(Main.time, Main.nightLength - 4000, Main.dayLength + 4000);
-            AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -4000, Main.nightLength + 4000);
+                AllDayPartNight = (float)Gradient.CreateDouble(Main.time, Main.nightLength - 4000, Main.dayLength + 4000) * SkyToUnderground;
+            AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -4000, Main.nightLength + 4000) * SkyToUnderground;
         }
     }
 }

@@ -28,6 +28,9 @@ public class GeneralConfig : ModConfig
     public bool areArmorAndVanitySoundsEnabled;
 
     [DefaultValue(true)]
+    public bool showAmbientForecastUi;
+
+    [DefaultValue(true)]
     public bool wetStepsEnabled;
 
     [DefaultValue(1f)]

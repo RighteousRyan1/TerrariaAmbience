@@ -60,8 +60,15 @@ public class FootstepHandler {
         Stone = new(mod, "Sounds/Custom/steps/stone/step", 8, "Stone", [.. StoneBlocks]);
         Snow = new(mod, "Sounds/Custom/steps/snow/step", 11, "Snow", [.. SnowBlocks]);
         Wet = new(mod, "Sounds/Custom/steps/wet/step", 3, "Wet", 0.2f, 0.4f) {
+            UseAnyTile = true,
             FootstepConditions = (p) => {
-                return !p.GetModPlayer<AmbientPlayer>().HasTilesAbove && Main.raining && !p.wet && !p.ZoneSnow && p.ZoneOverworldHeight;
+                var tBelow = Main.tile[(int)p.Bottom.X / 16, (int)(p.Bottom.Y + 8) / 16];
+
+                var mPlayer = p.GetModPlayer<AmbientPlayer>();
+                var canDoSoundsFromRain = !mPlayer.HasTilesAbove && Main.raining && !p.wet && !p.ZoneSnow && !p.ZoneDesert && p.ZoneOverworldHeight;
+                var isWalkingOnWater = (!Main.tileSolid[tBelow.TileType] || !tBelow.HasTile) && tBelow.LiquidAmount > 0 && (p.waterWalk || p.waterWalk2);
+                var eitherIsMet = canDoSoundsFromRain || isWalkingOnWater;
+                return eitherIsMet;
             }
         };
         Dirt = new(mod, "Sounds/Custom/steps/dirt/step", 6, "Dirt", [.. DirtBlocks]);
@@ -116,8 +123,9 @@ public class FootstepHandler {
 
         WoodFilled = new(mod, "Sounds/Custom/steps/wood/step", 7, "Wood") {
             FootstepConditions = (p) => {
-                bool isNotOnAnyOtherTile = (AllTileLists.All(list => !list.Contains(PlayerTileChecker.TileId)) && PlayerTileChecker.TileId < TileID.Count) ||
-                (PlayerTileChecker.TileId > TileID.Count && FilledWood.Contains(PlayerTileChecker.TileId));
+                /*bool isNotOnAnyOtherTile = (AllTileLists.All(list => !list.Contains(PlayerTileChecker.TileId)) && PlayerTileChecker.TileId < TileID.Count) ||
+                (PlayerTileChecker.TileId > TileID.Count && FilledWood.Contains(PlayerTileChecker.TileId));*/
+                bool isNotOnAnyOtherTile = !AllSounds.Any(x => !x.IsPlayerOnAnyTile && (x.FootstepConditions is null || x.FootstepConditions.Invoke(p)));
                 return isNotOnAnyOtherTile && p.velocity.Y == 0;
             }
         };

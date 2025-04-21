@@ -280,8 +280,8 @@ public class ReverbAudioSystem : ModSystem
     }
 
     static void SetFilterValues(Vector2 fromV2, Vector2 offset, ref float occlusion, ref float rvGain, ref float dampening, ref bool shouldDampen, float reverbActual, bool playerUnderwater) {
-        float dist = Vector2.Distance(Main.LocalPlayer.Center, fromV2 + offset);
-        bool hasLOS = CanRaycastTo(Main.LocalPlayer.Center, fromV2 + offset);
+        float dist = Vector2.Distance(Main.LocalPlayer.Top, fromV2 + offset);
+        bool hasLOS = CanRaycastTo(Main.LocalPlayer.Top, fromV2 + offset);
 
         occlusion = hasLOS ? 1f : Math.Max(0.01f, 1f - dist / 1000);
         rvGain = reverbActual;

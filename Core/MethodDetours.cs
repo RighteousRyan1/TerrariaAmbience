@@ -162,6 +162,7 @@ namespace TerrariaAmbience.Core
                     $"\nAllNightPartDay: {GradientGlobals.AllNightPartDay}" +
                     $"\nAllDayPartNight: {GradientGlobals.AllDayPartNight}" +
                     $"\nBehindWallMultiplier: {ambPlayer.InRoomAmbientMultiplier}" +
+                    $"\nSkyToUnderground: {GradientGlobals.SkyToUnderground}" +
                     $"\nIsInRoom: {RoomDetectionPlayer.IsInRoom}";
                 Vector2 offset = new(-300, 0);
                 Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
@@ -216,10 +217,9 @@ namespace TerrariaAmbience.Core
             string server = $"Discord Server";
 
             var click2Activate = new Rectangle((int)posX + 330, (int)posY, 12, 20);
-            if (Main.menuMode == 0)
+            if (Main.menuMode == 0 && AmbientDisplaySystem.Arrow is not null)
             {
-                var texture = mod.Assets.Request<Texture2D>("Content/UI/UIButtonRight", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                Main.spriteBatch.SafeDraw(texture,
+                Main.spriteBatch.SafeDraw(AmbientDisplaySystem.Arrow,
                     new Vector2(posX + 330, posY), null, Color.White, 0f, Vector2.Zero, 0.6f,
                     !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
             }

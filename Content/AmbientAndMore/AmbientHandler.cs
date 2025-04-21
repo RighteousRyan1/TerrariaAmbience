@@ -239,6 +239,9 @@ public class AmbientHandler {
         eveningAmbienceForTheDay = Main.rand.Next(1, NUM_EVENING_AMBIENCE + 1);
         nightAmbienceForTheDay = Main.rand.Next(1, NUM_NIGHT_AMBIENCE + 1);
 
+        SyncAmbienceSystem.curEveningAmb = eveningAmbienceForTheDay;
+        SyncAmbienceSystem.curNightAmb = nightAmbienceForTheDay;
+
         ForestEvening.ChangeTrack(AmbientPath + $"biome/forest/evening_{eveningAmbienceForTheDay}");
         ForestNight.ChangeTrack(AmbientPath + $"biome/forest/night_{nightAmbienceForTheDay}");
     }
@@ -247,6 +250,9 @@ public class AmbientHandler {
         dayAmbienceForTheDay = Main.rand.Next(1, NUM_DAY_AMBIENCE + 1);
         if (Main.raining)
             dayAmbienceForTheDay = AmbienceID.Day_Quiet;
+
+        SyncAmbienceSystem.curMorningAmb = morningAmbienceForTheDay;
+        SyncAmbienceSystem.curDayAmb = dayAmbienceForTheDay;
 
         ForestDay.ChangeTrack(AmbientPath + $"biome/forest/day_{dayAmbienceForTheDay}");
         ForestMorning.ChangeTrack(AmbientPath + $"biome/forest/morning_{morningAmbienceForTheDay}");
@@ -344,7 +350,7 @@ public class AmbientHandler {
 public static class AmbienceID {
     public const int Day_BirdsAndCrowsLoud = 1;
     public const int Day_BirdsSinging = 2;
-    public const int Day_BirdsSingingQuieter = 3;
+    public const int Day_BirdsSingingLoud = 3;
     public const int Day_BirdsSingingQuiet = 4;
     public const int Day_Quiet = 5;
     public const int Day_BirdsSingingOften = 6;
@@ -353,7 +359,7 @@ public static class AmbienceID {
     public const int Morning_CricketsTrillingQuiet = 2;
     public const int Morning_CricketsAndCicadas = 3;
     public const int Morning_CricketsTrillingLoud = 4;
-    public const int Morning_QuietTrillingCicadas = 5;
+    public const int Morning_CicadasAndBugs = 5;
     public const int Morning_EverythingTrilling = 6;
 
     public const int Night_CricketsQuiet = 1;
@@ -364,7 +370,7 @@ public static class AmbienceID {
     public const int Night_LoudEverything = 5;
     public const int Night_TrillingCricketsAndFrogs = 6;
 
-    public const int Evening_SinewaveCrickets = 1;
+    public const int Evening_SinewaveCicadas = 1;
     public const int Evening_LoudCricketsWithCicadas = 2;
     public const int Evening_HumidSoundingCrickets = 3;
     public const int Evening_CricketsTrilling = 4;

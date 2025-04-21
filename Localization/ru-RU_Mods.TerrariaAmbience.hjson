@@ -231,5 +231,10 @@ Configs: {
 				Set to 0 to disable.
 				''' */
 		}
+
+		showAmbientForecastUi: {
+			// Label: Show Ambient Forecast UI
+			// Tooltip: Enables/disables the ambient forecast UI next to the hotbar
+		}
 	}
 }

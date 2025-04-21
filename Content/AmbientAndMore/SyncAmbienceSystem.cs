@@ -15,43 +15,52 @@ public class SyncAmbienceSystem : ModSystem {
     public static bool JustTurnedDay;
     public static bool JustTurnedNight;
 
-    private static bool _curDay;
-    private static bool _oldDay;
+    static bool _curDay;
+    static bool _curNight;
+
+    public static int curMorningAmb;
+    public static int curDayAmb;
+    public static int curEveningAmb;
+    public static int curNightAmb;
+
+    static bool _didInitNextLoop;
     public override void PostUpdateEverything() {
+        if (!_didInitNextLoop) {
+            if (!Main.dedServ) {
+                if (Main.dayTime) {
+                    TerrariaAmbience.DefaultAmbientHandler?.RandomizeDuskTracks();
+                }
+                else {
+                    TerrariaAmbience.DefaultAmbientHandler?.RandomizeDawnTracks();
+                }
+            }
+            else {
+                if (Main.dayTime) {
+                    CreateEveningNight(out var e, out var n);
+                    SendPM(e, n);
+                }
+                else {
+                    CreateMorningDay(out var m, out var d);
+                    SendAM(m, d);
+                }
+            }
+        }
+        _didInitNextLoop = !Main.gameMenu;
+
         _curDay = Main.dayTime;
         CraftSounds.TimeSinceLastCraft++;
 
-        JustTurnedDay = !_oldDay && _curDay;
-        JustTurnedNight = _oldDay && !_curDay;
+        JustTurnedDay = !_curNight && _curDay;
+        JustTurnedNight = _curNight && !_curDay;
 
         if (Main.dedServ) {
             if (JustTurnedDay) {
                 CreateEveningNight(out var evening, out var night);
-
-                if (Main.dedServ) {
-                    var mp = ModContent.GetInstance<TerrariaAmbience>().GetPacket();
-
-                    Console.WriteLine("Sending even " + evening);
-                    Console.WriteLine("Sending night " + night);
-
-                    mp.Write(TAPID.SEND_PM_AMB);
-                    mp.Write(evening);
-                    mp.Write(night);
-                    mp.Send();
-                }
+                SendPM(evening, night);
             }
             else if (JustTurnedNight) {
                 CreateMorningDay(out var morning, out var day);
-
-                if (Main.dedServ) {
-                    var mp = ModContent.GetInstance<TerrariaAmbience>().GetPacket();
-                    Console.WriteLine("Sending morn " + morning);
-                    Console.WriteLine("Sending day " + day);
-                    mp.Write(TAPID.SEND_AM_AMB);
-                    mp.Write(morning);
-                    mp.Write(day);
-                    mp.Send();
-                }
+                SendAM(morning, day);
             }
         }
         else if (Main.netMode == NetmodeID.SinglePlayer) {
@@ -63,7 +72,7 @@ public class SyncAmbienceSystem : ModSystem {
             }
         }
 
-        _oldDay = Main.dayTime;
+        _curNight = Main.dayTime;
     }
 
     public static void CreateMorningDay(out int morning, out int day) {
@@ -71,9 +80,36 @@ public class SyncAmbienceSystem : ModSystem {
         day = Main.rand.Next(1, AmbientHandler.NUM_DAY_AMBIENCE + 1);
         if (Main.raining)
             day = AmbienceID.Day_Quiet;
+
+        curDayAmb = day;
+        curMorningAmb = morning;
     }
     public static void CreateEveningNight(out int evening, out int night) {
         evening = Main.rand.Next(1, AmbientHandler.NUM_EVENING_AMBIENCE + 1);
         night = Main.rand.Next(1, AmbientHandler.NUM_NIGHT_AMBIENCE + 1);
+
+        curEveningAmb = evening;
+        curNightAmb = night;
+    }
+
+    public static void SendAM(int morning, int day) {
+        var mp = ModContent.GetInstance<TerrariaAmbience>().GetPacket();
+        //Console.WriteLine("Sending morn " + morning);
+        //Console.WriteLine("Sending day " + day);
+        mp.Write(TAPID.SEND_AM_AMB);
+        mp.Write(morning);
+        mp.Write(day);
+        mp.Send();
+    }
+    public static void SendPM(int evening, int night) {
+        var mp = ModContent.GetInstance<TerrariaAmbience>().GetPacket();
+
+        //Console.WriteLine("Sending even " + evening);
+        //Console.WriteLine("Sending night " + night);
+
+        mp.Write(TAPID.SEND_PM_AMB);
+        mp.Write(evening);
+        mp.Write(night);
+        mp.Send();
     }
 }

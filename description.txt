@@ -8,18 +8,13 @@ Developers:
 
 Most Recent Update:
 
-- Russian localization (thank you @xenofite on Discord)
-- Ambient soundtracks are now synced between players so all players hear the same bits of nature each day
-- Description made less enthusiastic and more objective
-- Super-optimized code. The game should now run much better
-- More crafting sounds (Crystal ball, Ancient Manipulator)
-- More ambient sounds for even more immersion throughout the day
-- Ambience will fade out if you're in a house or enclosed area
-- New snow biome ambient sounds
-- Sound events are now synced across the server
-- Removed rattling bones in the dungeon
-- More config options
-- More footstep sounds (strong ice, metal plating)
+- Made 'wet' footsteps play when walking on water
+- Fix harsh ambient transitioning from day to night
+- Ambience is now much more clear on the surface
+
+- Added ambient track data UI
+    - Can be disabled in the config
+- Ambient soundtracks / sound events are now synced between players so all players hear the same bits of nature each day
 
 ---------------------------
 

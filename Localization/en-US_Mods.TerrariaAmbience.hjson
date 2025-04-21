@@ -153,7 +153,7 @@ Configs: {
 			Label: Wet Steps
 			Tooltip:
 				'''
-				Whether or not to have wet footstep sounds when it is raining and the player is under a roof.
+				Whether or not to have wet footstep sounds when it is raining and the player is not under a roof.
 				Do know that there is a *little* bit of performance gain from disabling this.
 				'''
 		}
@@ -247,6 +247,11 @@ Configs: {
 				Sets the volume of footstep audio for numerous NPCs, including Town NPCs, Zombies, and more.
 				Set to 0 to disable.
 				'''
+		}
+
+		showAmbientForecastUi: {
+			Label: Show Ambient Forecast UI
+			Tooltip: Enables/disables the ambient forecast UI next to the hotbar
 		}
 	}
 }
