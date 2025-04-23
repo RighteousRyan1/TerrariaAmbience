@@ -35,14 +35,14 @@ public class SyncAmbienceSystem : ModSystem {
                 }
             }
             else {
-                if (Main.dayTime) {
+                //if (Main.dayTime) {
                     CreateEveningNight(out var e, out var n);
                     SendPM(e, n);
-                }
-                else {
+                //}
+                //else {
                     CreateMorningDay(out var m, out var d);
                     SendAM(m, d);
-                }
+                //}
             }
         }
         _didInitNextLoop = !Main.gameMenu;
@@ -74,7 +74,6 @@ public class SyncAmbienceSystem : ModSystem {
 
         _curNight = Main.dayTime;
     }
-
     public static void CreateMorningDay(out int morning, out int day) {
         morning = Main.rand.Next(1, AmbientHandler.NUM_MORNING_AMBIENCE + 1);
         day = Main.rand.Next(1, AmbientHandler.NUM_DAY_AMBIENCE + 1);
@@ -110,6 +109,14 @@ public class SyncAmbienceSystem : ModSystem {
         mp.Write(TAPID.SEND_PM_AMB);
         mp.Write(evening);
         mp.Write(night);
+        mp.Send();
+    }
+
+    public static void AskForAmbiences() {
+        var mp = ModContent.GetInstance<TerrariaAmbience>().GetPacket();
+
+        mp.Write(TAPID.AMB_ASK);
+
         mp.Send();
     }
 }

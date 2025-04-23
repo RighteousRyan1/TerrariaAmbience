@@ -11,6 +11,7 @@ using Terraria.Audio;
 using TerrariaAmbience.Common.Enums;
 using System.Linq;
 using TerrariaAmbience.Sounds.SFXEffects;
+using TerrariaAmbience.Content.AmbientAndMore;
 
 namespace TerrariaAmbience.Content.Players;
 
@@ -45,6 +46,11 @@ public class AmbientPlayer : ModPlayer
     private bool _showReverbTiles;
     public override void OnEnterWorld() {
         TerrariaAmbience.DefaultAmbientHandler.HandleEnterWorld();
+
+        if (Main.netMode == NetmodeID.SinglePlayer) return;
+
+        SyncAmbienceSystem.AskForAmbiences();
+        // Main.NewText("Asking...");
     }
     public override void PreUpdate() {
         var genCfg = ModContent.GetInstance<GeneralConfig>();

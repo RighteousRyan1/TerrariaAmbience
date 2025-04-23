@@ -94,11 +94,13 @@ public class FootstepHandler {
         };
 
         Armor = new(mod, "Sounds/Custom/steps/armor/heavy", 9, "Armor") {
+            UseAnyTile = true,
             FootstepConditions = (p) => {
                 return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
             }
         };
         Vanity = new(mod, "Sounds/Custom/steps/armor/light", 6, "Vanity") {
+            UseAnyTile = true,
             FootstepConditions = (p) => {
                 return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
             }
@@ -113,7 +115,7 @@ public class FootstepHandler {
                 return !p.ZoneBeach;
             }
         };
-        SandRough = new(mod, "Sounds/Custom/steps/sand_crunchy/step", 11, "SandRough", 0.1f, 0.3f, [.. SandBlocks]) {
+        SandRough = new(mod, "Sounds/Custom/steps/sand_crunchy/step", 11, "RoughSand", 0.1f, 0.3f, [.. SandBlocks]) {
             FootstepConditions = (p) => {
                 return p.ZoneBeach;
             }
@@ -121,16 +123,9 @@ public class FootstepHandler {
 
         // wood.
 
-        WoodFilled = new(mod, "Sounds/Custom/steps/wood/step", 7, "Wood") {
-            FootstepConditions = (p) => {
-                /*bool isNotOnAnyOtherTile = (AllTileLists.All(list => !list.Contains(PlayerTileChecker.TileId)) && PlayerTileChecker.TileId < TileID.Count) ||
-                (PlayerTileChecker.TileId > TileID.Count && FilledWood.Contains(PlayerTileChecker.TileId));*/
-                bool isNotOnAnyOtherTile = !AllSounds.Any(x => !x.IsPlayerOnAnyTile && (x.FootstepConditions is null || x.FootstepConditions.Invoke(p)));
-                return isNotOnAnyOtherTile && p.velocity.Y == 0;
-            }
-        };
-        WoodHollow = new(mod, "Sounds/Custom/steps/wood_blunt/step", 11, "WoodBlunt", 0.15f, 0.3f, [.. BluntWood]);
-        WoodDeck = new(mod, "Sounds/Custom/steps/wood_deck/step", 11, "WoodDeck", 0.125f, 0.275f, [.. DeckWood]);
+        WoodFilled = new(mod, "Sounds/Custom/steps/wood/step", 7, "Filled Wood", [.. FilledWood]);
+        WoodHollow = new(mod, "Sounds/Custom/steps/wood_blunt/step", 11, "Blunt Wood", 0.15f, 0.3f, [.. BluntWood]);
+        WoodDeck = new(mod, "Sounds/Custom/steps/wood_deck/step", 11, "Deck Wood", 0.125f, 0.275f, [.. DeckWood]);
 
         AllSounds = [];
         foreach (var fld in GetType().GetFields().Where(x => x.FieldType.TypeHandle.Equals(typeof(FootstepSound).TypeHandle))) {
@@ -398,15 +393,16 @@ public class FootstepHandler {
     ];
     public static List<int> StickyBlocks { get; private set; } =
     [
-            TileID.Mud,
-            TileID.SlimeBlock,
-            TileID.PinkSlimeBlock,
-            TileID.FrozenSlimeBlock,
-            TileID.BeeHive,
-            TileID.Hive,
-            TileID.HoneyBlock,
-            TileID.CrispyHoneyBlock,
-            TileID.FleshBlock
+        TileID.Mud,
+        TileID.SlimeBlock,
+        TileID.PinkSlimeBlock,
+        TileID.FrozenSlimeBlock,
+        TileID.BeeHive,
+        TileID.Hive,
+        TileID.HoneyBlock,
+        TileID.CrispyHoneyBlock,
+        TileID.FleshBlock,
+        TileID.MushroomBlock
     ];
     public static List<int> BluntWood { get; private set; } =
     [
@@ -418,11 +414,14 @@ public class FootstepHandler {
         TileID.Ebonwood,
         TileID.Pearlwood,
         TileID.Shadewood,
-        // TileID.DynastyWood
+        TileID.BlueDynastyShingles,
+        TileID.RedDynastyShingles
     ];
     public static List<int> FilledWood { get; private set; } =
     [
         // mods can add their tiles here. by default blocks that are not registered will not play a sound now.
+        TileID.LivingWood,
+        TileID.DynastyWood
     ];
     public static List<int> DeckWood { get; private set; } =
     [
@@ -459,8 +458,11 @@ public class FootstepHandler {
         StickyBlocks,
         GemBlocks,
 
+        FilledWood,
         BluntWood,
         DeckWood,
+
         GravelBlocks
     ];
+    
 }

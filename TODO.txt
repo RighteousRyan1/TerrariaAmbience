@@ -1,1 +1,4 @@
-- Sync Ambiences across the server
+- Support High FPS Support via TAAPI
+- landing footstep volume depends on old velocity
+- ambience in snow biome is affected by wind speed?
+- IL edit out thunder? or replace the sound so it isn't as obnoxious when it plays.

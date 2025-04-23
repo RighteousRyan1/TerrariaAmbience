@@ -8,6 +8,8 @@ Developers:
 
 Most Recent Update:
 
+- Fix some footsteps not working/being silent
+- Sync ambience upon joining server for all players
 - Made 'wet' footsteps play when walking on water
 - Fix harsh ambient transitioning from day to night
 - Ambience is now much more clear on the surface

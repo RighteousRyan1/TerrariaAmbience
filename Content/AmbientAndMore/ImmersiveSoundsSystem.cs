@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Microsoft.Xna.Framework.Audio;
 using TerrariaAmbience.Sounds.SFXEffects;
-using NAudio.Codecs;
 using Terraria.ID;
 using System.Collections.Generic;
 using System;

@@ -12,4 +12,6 @@ public static class TAPID {
     public const int SEND_PM_AMB = 1;
     public const int SEND_AM_AMB = 2;
     public const int SEND_AMB_SFX = 3;
+    public const int AMB_ASK = 4;
+    public const int AMB_GET = 5;
 }
