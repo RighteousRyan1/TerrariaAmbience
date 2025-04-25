@@ -104,23 +104,19 @@ public class AmbientHandler {
 
         ForestMorning = new(mod, AmbientPath + $"biome/forest/morning_{Main.rand.Next(1, NUM_MORNING_AMBIENCE)}", "ForestMorning", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x)) || (player.ZoneHallow && !player.ZoneDesert);
         });
         ForestDay = new(mod, AmbientPath + $"biome/forest/day_{Main.rand.Next(1, NUM_DAY_AMBIENCE)}", "ForestDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return (player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x)) || (player.ZoneHallow && !player.ZoneDesert)) &&
                     Main.dayTime;
         });
         ForestEvening = new(mod, AmbientPath + $"biome/forest/evening_{Main.rand.Next(1, NUM_EVENING_AMBIENCE)}", "ForestEvening", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x)) || (player.ZoneHallow && !player.ZoneDesert);
         });
         ForestNight = new(mod, AmbientPath + $"biome/forest/night_{Main.rand.Next(1, NUM_NIGHT_AMBIENCE)}", "ForestNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return (player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x))) && !Main.dayTime;
         });
 
@@ -131,67 +127,55 @@ public class AmbientHandler {
 
         Desert = new(mod, AmbientPath + "biome/desert/critters", "Desert", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneDesert || ModdedDeserts.Any(x => player.InModBiome(x));
         });
 
         SnowDay = new(mod, AmbientPath + "biome/snow/day", "SnowDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return ((player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(x => player.InModBiome(x))) && Main.dayTime;
         });
         SnowNight = new(mod, AmbientPath + "biome/snow/night", "SnowNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return ((player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(x => player.InModBiome(x))) && !Main.dayTime;
         });
         SnowAggro = new(mod, AmbientPath + "biome/snow/windy", "SnowAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return ((player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(x => player.InModBiome(x))) && Main.raining;
         });
         EvilsCrimson = new(mod, AmbientPath + "biome/crimson/rumbles", "EvilsCrimson", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneCrimson || ModdedEvilCrimsons.Any(x => player.InModBiome(x));
         });
         EvilsCorruption = new(mod, AmbientPath + "biome/corruption/roars", "EvilsCorruption", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneCorrupt || ModdedEvilCorruptions.Any(x => player.InModBiome(x));
         });
 
         JungleDay = new(mod, AmbientPath + "biome/jungle/day", "JungleDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
         });
         JungleNight = new(mod, AmbientPath + "biome/jungle/night", "JungleNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
         });
         JungleUndergroundDay = new(mod, AmbientPath + "biome/jungle/underground_day", "JungleUndergroundDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
         });
         JungleUndergroundNight = new(mod, AmbientPath + "biome/jungle/underground_night", "JungleUndergroundNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            if (Main.gameMenu) return false;
             return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
         });
 
         BeachCalm = new(mod, AmbientPath + "biome/beach/waves_calm", "BeachCalm", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
 
-            if (Main.gameMenu) return false;
             return (player.ZoneBeach && !player.ZoneRockLayerHeight) || ModdedBeaches.Any(x => player.InModBiome(x));
         });
         BeachAggro = new(mod, AmbientPath + "biome/beach/waves_aggro", "BeachAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
 
-            if (Main.gameMenu) return false;
             return (player.ZoneBeach && !player.ZoneRockLayerHeight) || ModdedBeaches.Any(x => player.InModBiome(x));
         });
         Hell = new(mod, AmbientPath + "biome/hell/rumbles", "Hell", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
@@ -201,13 +185,11 @@ public class AmbientHandler {
         Underwater = new(mod, AmbientPath + "environment/underwater_loop", "Underwater", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
 
-            if (Main.gameMenu) return false;
             return player.IsWaterSuffocating();
         });
         UnderwaterDeep = new(mod, AmbientPath + "environment/underwater_loop-deep", "UnderwaterDeep", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
 
-            if (Main.gameMenu) return false;
             return player.IsWaterSuffocating();
         });
         RainLight = new(mod, AmbientPath + "rain/light", "RainLight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
