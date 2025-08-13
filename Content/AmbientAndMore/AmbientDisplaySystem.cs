@@ -59,7 +59,7 @@ public class AmbientDisplaySystem : ModSystem
         Arrow = Mod.Assets.Request<Texture2D>("Content/UI/UIButtonRight", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
     }
     public override void PostDrawInterface(SpriteBatch spriteBatch) {
-        var cfg = ModContent.GetInstance<GeneralConfig>();
+        var cfg = ModContent.GetInstance<UIConfig>();
 
         if (!cfg.showAmbientForecastUi)
             return;

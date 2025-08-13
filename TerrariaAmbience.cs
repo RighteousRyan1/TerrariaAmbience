@@ -186,10 +186,9 @@ public partial class TerrariaAmbience : Mod {
         Main.versionNumber = _versCache;
     }
 
-    private void UnloadAllSFXSoWeCanAvoidStupidCrashesThatHappenOnUnload() {
+    static void UnloadAllSFXSoWeCanAvoidStupidCrashesThatHappenOnUnload() {
         // if null, nothing in this mod has even loaded yet xd
-        if (DefaultAmbientHandler != null)
-            return;
+        if (DefaultAmbientHandler == null) return;
         DefaultAmbientHandler.CampfireCrackleInstance?.Dispose();
         DefaultAmbientHandler.CampfireCrackleInstance = null;
 
@@ -317,7 +316,7 @@ public partial class TerrariaAmbience : Mod {
                     SyncAmbienceSystem.curEveningAmb = e;
                     SyncAmbienceSystem.curNightAmb = n;
 
-                    // Main.NewText($"Synced ambiences: {m}, {d}, {e}, {n}");
+                    //Main.NewText($"Synced ambiences: {m}, {d}, {e}, {n}");
                 }
                 break;
             default:

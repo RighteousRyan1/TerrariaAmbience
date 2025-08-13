@@ -45,7 +45,10 @@ Configs: {
 			Tooltip: Przełącz dźwięki (dość głośne), które odtwarzają się i mają dynamiczne aktualizacje dźwięku na podstawie lokalizacji w stosunku do gracza.
 		}
 
-		Headers.SoundFilters: Filtry dźwięku
+		Headers: {
+			SoundFilters: Filtry dźwięku
+			// NewSounds: New Sounds Header
+		}
 
 		isReverbEnabled: {
 			Label: Pogłos
@@ -102,6 +105,7 @@ Configs: {
 			AmbienceAndSounds: Otoczenie i dźwięki
 			Debugging: Debugowanie
 			AmbienceTrackVolume: Głośność ścieżki otoczenia
+			// AmbienceTrackVolumes: Ambience Track Volumes Header
 		}
 
 		footsteps: {
@@ -252,6 +256,48 @@ Configs: {
 		showAmbientForecastUi: {
 			// Label: Show Ambient Forecast UI
 			// Tooltip: Enables/disables the ambient forecast UI next to the hotbar
+		}
+	}
+
+	InventorySoundsConfig: {
+		// DisplayName: Inventory Sounds Config
+
+		useItemSwapSounds: {
+			// Label: Use Sounds on Item Change
+			// Tooltip: Have this set to 'On' if you want to hear sounds while changing held items.
+		}
+
+		volumeMultiplier: {
+			// Label: Sound Multiplier
+			// Tooltip: Change the overall volume of inventory sounds.
+		}
+
+		enabledDynamicSoundsSystem: {
+			// Label: Dynamic Inventory Sounds
+			/* Tooltip:
+				'''
+				Whether or not the dynamic inventory sounds system is enabled or not.
+				If disabled, regular 'grab' sounds will be used.
+				''' */
+		}
+	}
+
+	UIConfig: {
+		// DisplayName: UI Config
+
+		Headers: {
+			// MainMenu: Main Menu
+			// In-game: In-game
+		}
+
+		showMainMenuUi: {
+			// Label: Show Main Menu UI
+			// Tooltip: Whether or not to show the Discord server promotion/disclaimer on the main menu.
+		}
+
+		showAmbientForecastUi: {
+			// Label: Show Ambient Forecast UI
+			// Tooltip: Whether or not to display the ambient forecast UI near the hotbar
 		}
 	}
 }

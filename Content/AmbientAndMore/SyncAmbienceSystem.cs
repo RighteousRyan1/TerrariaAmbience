@@ -103,8 +103,8 @@ public class SyncAmbienceSystem : ModSystem {
     public static void SendPM(int evening, int night) {
         var mp = ModContent.GetInstance<TerrariaAmbience>().GetPacket();
 
-        //Console.WriteLine("Sending even " + evening);
-        //Console.WriteLine("Sending night " + night);
+        Console.WriteLine("Sending even " + evening);
+        Console.WriteLine("Sending night " + night);
 
         mp.Write(TAPID.SEND_PM_AMB);
         mp.Write(evening);

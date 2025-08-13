@@ -45,7 +45,10 @@ Configs: {
 			Tooltip: Toggle the (somewhat loud) sounds that play and have dynamic sound updating based on location-to-player panning.
 		}
 
-		Headers.SoundFilters: Sound Filters
+		Headers: {
+			SoundFilters: Sound Filters
+			NewSounds: New Sounds Header
+		}
 
 		isReverbEnabled: {
 			Label: Reverb
@@ -102,6 +105,7 @@ Configs: {
 			AmbienceAndSounds: Ambience And Sounds
 			Debugging: Debugging
 			AmbienceTrackVolume: Ambient Track Volume
+			AmbienceTrackVolumes: Ambience Track Volumes Header
 		}
 
 		footsteps: {
@@ -252,6 +256,48 @@ Configs: {
 		showAmbientForecastUi: {
 			Label: Show Ambient Forecast UI
 			Tooltip: Enables/disables the ambient forecast UI next to the hotbar
+		}
+	}
+
+	InventorySoundsConfig: {
+		DisplayName: Inventory Sounds Config
+
+		useItemSwapSounds: {
+			Label: Use Sounds on Item Change
+			Tooltip: Have this set to 'On' if you want to hear sounds while changing held items.
+		}
+
+		volumeMultiplier: {
+			Label: Sound Multiplier
+			Tooltip: Change the overall volume of inventory sounds.
+		}
+
+		enabledDynamicSoundsSystem: {
+			Label: Dynamic Inventory Sounds
+			Tooltip:
+				'''
+				Whether or not the dynamic inventory sounds system is enabled or not.
+				If disabled, regular 'grab' sounds will be used.
+				'''
+		}
+	}
+
+	UIConfig: {
+		DisplayName: UI Config
+
+		Headers: {
+			MainMenu: Main Menu
+			In-game: In-game
+		}
+
+		showMainMenuUi: {
+			Label: Show Main Menu UI
+			Tooltip: Whether or not to show the Discord server promotion/disclaimer on the main menu.
+		}
+
+		showAmbientForecastUi: {
+			Label: Show Ambient Forecast UI
+			Tooltip: Whether or not to display the ambient forecast UI near the hotbar
 		}
 	}
 }

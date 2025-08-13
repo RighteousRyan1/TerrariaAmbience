@@ -12,8 +12,7 @@ using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience.Content.Players;
 
-public class RoomDetectionPlayer : ModSystem
-{
+public class RoomDetectionPlayer : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
     private const int MAX_ROOM_WIDTH = 100;
     private const int MAX_ROOM_HEIGHT = 100;
@@ -178,8 +177,8 @@ public class RoomDetectionPlayer : ModSystem
         queue.Enqueue(new Point(x, y));
     }
 
-    private bool _wasInRoom = false;
-    private RoomDetails _currentRoom = new();
+    // bool _wasInRoom = false;
+    readonly RoomDetails _currentRoom = new();
 
     public static bool IsInRoom { get; private set; }
 
@@ -199,11 +198,10 @@ public class RoomDetectionPlayer : ModSystem
             Main.NewText("Left enclosed space");
         }*/
 
-        _wasInRoom = IsInRoom;
+        // _wasInRoom = IsInRoom;
     }
 }
-public class RoomDetails
-{
+public class RoomDetails {
     public int Width { get; set; }
     public int Height { get; set; }
     public int Area { get; set; }
@@ -211,5 +209,5 @@ public class RoomDetails
     public int MinY { get; set; }
     public int MaxX { get; set; }
     public int MaxY { get; set; }
-    public bool WallsSatisfied { get; set; } = true;
+    public bool WallsSatisfied { get; set; } // = true..?
 }

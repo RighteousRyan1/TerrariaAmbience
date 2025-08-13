@@ -35,7 +35,6 @@ internal class MethodDetours
         On_Main.DrawInterface_30_Hotbar += Main_DrawInterface_30_Hotbar;
         On_IngameOptions.DrawRightSide += DrawVolumeValues;
         // MenuDetours.On_AddMenuButtons += MenuDetours_On_AddMenuButtons;
-        
         active = true;
         posY = 4;
     }
@@ -45,10 +44,10 @@ internal class MethodDetours
         // GeneralHelpers.AddMainMenuButton("Ambience Menu", delegate { Main.menuMode = 999; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
         orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
     }
-    private static bool oldHover;
-    private static bool hovering;
+    static bool oldHover;
+    static bool hovering;
     // disposing sounds in draw code?
-    private static bool DrawVolumeValues(On_IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
+    static bool DrawVolumeValues(On_IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
     {
         Rectangle hoverPos = new((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
         if (i == 14)
@@ -73,9 +72,9 @@ internal class MethodDetours
         }
         return orig(sb, txt, i, anchor, offset, scale, colorScale, over);
     }
-    #region Shitcode i will never rework
-    private static Vector2 drawPos;
-    private static string displayable;
+
+    static Vector2 drawPos;
+    static string displayable;
     private static void Main_DrawInterface_30_Hotbar(On_Main.orig_DrawInterface_30_Hotbar orig, Main self)
     {
         orig(self);
@@ -203,12 +202,10 @@ internal class MethodDetours
             #endregion
         }
     }
-    #region Shameless Variable Naming
-    private static float posX;
-    private static float posY;
-    private static bool active;
-    #endregion
-    private static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
+    static float posX;
+    static float posY;
+    static bool active;
+    static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
     {
         Mod mod = ModContent.GetInstance<TerrariaAmbience>();
 
@@ -262,8 +259,8 @@ internal class MethodDetours
             }
         }
         posX += active ? 20f : -20f;
-
-        if (Main.menuMode == 0) {
+        
+        if (Main.menuMode == 0 && ModContent.GetInstance<UIConfig>().showMainMenuUi) {
             ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
             ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
 
@@ -292,5 +289,4 @@ internal class MethodDetours
         orig(self, gameTime);
         //Main.spriteBatch.End();
     }
-    #endregion
 }

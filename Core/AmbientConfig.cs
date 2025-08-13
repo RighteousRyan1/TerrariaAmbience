@@ -3,8 +3,18 @@ using Terraria.ModLoader.Config;
 
 namespace TerrariaAmbience.Core;
 
-public class GeneralConfig : ModConfig
-{
+public class UIConfig : ModConfig {
+    public override ConfigScope Mode => ConfigScope.ClientSide;
+
+    [Header("MainMenu")]
+    [DefaultValue(true)]
+    public bool showMainMenuUi;
+
+    [Header("In-game")]
+    [DefaultValue(true)]
+    public bool showAmbientForecastUi;
+}
+public class GeneralConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     #region Ambience and Sounds
     [Header("AmbienceAndSounds")]
@@ -28,9 +38,6 @@ public class GeneralConfig : ModConfig
     public bool areArmorAndVanitySoundsEnabled;
 
     [DefaultValue(true)]
-    public bool showAmbientForecastUi;
-
-    [DefaultValue(true)]
     public bool wetStepsEnabled;
 
     [DefaultValue(1f)]
@@ -44,7 +51,7 @@ public class GeneralConfig : ModConfig
     #endregion
 
     #region ToggleSounds
-    [Header("AmbienceTrackVolume")]
+    [Header("AmbienceTrackVolumes")]
 
     [DefaultValue(1f)]
     public float overallVolume;
@@ -52,8 +59,6 @@ public class GeneralConfig : ModConfig
     [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
     public float[] forestVolumes = new float[4];
 
-    //[DefaultValue(new float[] { 1f, 1f })]
-    //public float[] snowVolumes = new float[2];
     [DefaultValue(1f)]
     public float snowVolume;
 
@@ -81,12 +86,11 @@ public class GeneralConfig : ModConfig
     [DefaultValue(1f)]
     public float underwaterVolume;
     #endregion
-
 }
-public class AudioAdditionsConfig : ModConfig
-{
+public class AudioAdditionsConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
+    [Header("NewSounds")]
     [DefaultValue(true)]
     public bool slimySounds;
 
@@ -119,8 +123,7 @@ public class AudioAdditionsConfig : ModConfig
     [DefaultValue(true)]
     public bool floodFillAmbientOcclusion;
 }
-public class AmbientConfigServer : ModConfig
-{
+public class AmbientConfigServer : ModConfig {
     public override ConfigScope Mode => ConfigScope.ServerSide;
     #region Sound Configs
 

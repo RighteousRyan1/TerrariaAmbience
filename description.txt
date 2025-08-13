@@ -8,17 +8,9 @@ Developers:
 
 Most Recent Update:
 
-- Step sounds now scale with walking speed / landing speed
-- Some modded biomes now have ambience (Calamity, Spirit, Spooky)
-- Fix some footsteps not working/being silent
-- Sync ambience upon joining server for all players
-- Made 'wet' footsteps play when walking on water
-- Fix harsh ambient transitioning from day to night
-- Ambience is now much more clear on the surface
-
-- Added ambient track data UI
-    - Can be disabled in the config
-- Ambient soundtracks / sound events are now synced between players so all players hear the same bits of nature each day
+- Inventory sounds! + config
+- Mod unload crash fix (?)
+- More config options
 
 ---------------------------
 

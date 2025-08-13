@@ -17,37 +17,30 @@ public class ReverbAudioSystem : ModSystem
     private static HashSet<int> _noReverbTiles = [];
 
     private static HashSet<string> _noReverbNames = [
-        "dirt", "sand", "silt", "slush", "grass",
-        "fence", "leaf", "flower", "leaves"
+        "silt", "slush", "grass",
+        "fence", "leaf", "flower", "leaves", "snow"
     ];
     private static HashSet<string> _lowReverbNames = [
-        "dirt", "sand", "silt", "slush", "grass",
-        "fence", "leaf", "flower", "leaves"
+        "dirt", "sand", "slush", "glass", "plank", "mud"
     ];
     // support mods soon too...
     public static void PrecomputeReverbProperties() {
         for (int i = 0; i < WallID.Search.Count; i++) {
 
             string name = WallID.Search.GetName(i).ToLower();
-            if (name.Contains("dirt") || name.Contains("sand") ||
-                name.Contains("silt") || name.Contains("slush") ||
-                name.Contains("grass") || name.Contains("fence") ||
-                name.Contains("leaf") || name.Contains("flower") ||
-                name.Contains("leaves"))
+            if (_noReverbNames.Contains(name))
                 _noReverbWalls.Add(i);
 
             // "planked" if this does not work well
-            else if (name.Contains("wood") || name.Contains("plank") || name.Contains("snow"))
+            else if (_lowReverbNames.Contains(name))
                 _lowReverbWalls.Add(i);
         }
 
         for (int i = 0; i < TileID.Search.Count; i++) {
             string name = TileID.Search.GetName(i).ToLower();
-            if (name.Contains("dirt") || name.Contains("sand") ||
-                name.Contains("silt") || name.Contains("slush") ||
-                name.Contains("grass") || name.Contains("leaf"))
+            if (_noReverbNames.Contains(name))
                 _noReverbTiles.Add(i);
-            else if (name.Contains("wood") || name.Contains("plank"))
+            else if (_lowReverbNames.Contains(name))
                 _lowReverbTiles.Add(i);
         }
     }
