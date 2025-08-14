@@ -1,18 +1,12 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content;
-using ReLogic.Graphics;
-using Microsoft.Xna.Framework.Audio;
 using Terraria.ID;
 using Terraria.UI.Chat;
 using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework.Input;
-using System.Reflection;
 using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -21,7 +15,6 @@ using System.Data;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbienceAPI.Common;
 using TerrariaAmbience.Common.Systems;
-using TerrariaAmbience.Sounds;
 
 namespace TerrariaAmbience.Core;
 

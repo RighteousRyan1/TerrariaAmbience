@@ -25,7 +25,7 @@ public partial class TerrariaAmbience : Mod {
     // TODO: add all other types to the call
 
     public const float DEFAULT_FPS = 60f;
-    public static float WorkaroundDeltaTime;
+    public static float WorkaroundDeltaTime { get; private set; }
     public override object Call(params object[] args) {
         try {
             string message = args[0] as string;
@@ -113,7 +113,7 @@ public partial class TerrariaAmbience : Mod {
         return "Call Failed";
     }
 
-    private string _versCache;
+    string _versCache;
 
     public static AmbientHandler DefaultAmbientHandler;
     public static FootstepHandler DefaultFootstepHandler;
@@ -136,48 +136,42 @@ public partial class TerrariaAmbience : Mod {
     private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime) {
         orig(self, gameTime);
 
-        if (!Main.dedServ) {
-            GeneralHelpers.ClickHandling();
-            GeneralHelpers.UpdateButtons();
+        if (Main.dedServ) return;
+        GeneralHelpers.ClickHandling();
+        GeneralHelpers.UpdateButtons();
 
-            DefaultAmbientHandler?.Update();
-            DefaultFootstepHandler?.Update();
+        DefaultAmbientHandler?.Update();
+        DefaultFootstepHandler?.Update();
 
-            //Ambience.DoUpdate_Ambience();
-            //Ambience.UpdateVolume();
+        GradientGlobals.Update();
 
-            GradientGlobals.Update();
+        if (Main.gameMenu)
+            return;
 
-            if (Main.gameMenu)
-                return;
-            //Ambience.ClampAll();
-
-            WorkaroundDeltaTime = MathF.Round(60f * (float)gameTime.ElapsedGameTime.TotalSeconds * 1000) / 1000;
-        }
+        WorkaroundDeltaTime = MathF.Round(60f * (float)gameTime.ElapsedGameTime.TotalSeconds * 1000) / 1000;
     }
     public override void PostSetupContent() {
         DefaultAmbientHandler = new();
 
-        dbg_modBiomes = ModContent.GetContent<ModBiome>().ToList();
+        dbg_modBiomes = [.. ModContent.GetContent<ModBiome>()];
     }
 
     // sadly we put this here since ModSystem.PostSetupContent runs after the mod's
     public override void PostAddRecipes() {
-        if (!Main.dedServ) {
-            MenuDetours.Init();
+        if (Main.dedServ) return;
 
-            SoundChanges.Init();
+        MenuDetours.Init();
+        SoundChanges.Init();
 
-            DefaultFootstepHandler = new();
+        DefaultFootstepHandler = new();
 
-            NPCFootstepHandler.InitializeNPCStepping();
+        NPCFootstepHandler.InitializeNPCStepping();
 
-            var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-            DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
-            DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
+        var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+        DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
+        DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
 
-            ReverbAudioSystem.PrecomputeReverbProperties();
-        }
+        ReverbAudioSystem.PrecomputeReverbProperties();
     }
 
     public override void Unload() {

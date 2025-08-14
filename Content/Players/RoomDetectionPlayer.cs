@@ -44,72 +44,56 @@ public class RoomDetectionPlayer : ModSystem {
     /// <param name="requireWalls">Whether to require player-placed walls in the enclosed space</param>
     /// <returns>True if in enclosed space with walls, false otherwise</returns>
     public static bool IsPlayerInEnclosedSpace(Player player, RoomDetails roomDetails = null, bool requireWalls = true) {
-        int playerTileX = (int)(player.Center.X / 16);
-        int playerTileY = (int)(player.Center.Y / 16);
+        int originX = (int)(player.Center.X / 16);
+        int originY = (int)(player.Center.Y / 16);
 
-        var tile = Main.tile[playerTileX, playerTileY];
-        // bool isTileSolid = IsTileSolid(tile);
-
-        bool hasValidWall = tile.WallType > 0;
-
-        // prevent IOOB checks
-        if (!WorldGen.InWorld(playerTileX, playerTileY))
+        if (!WorldGen.InWorld(originX, originY))
             return false;
 
-        /*bool isInPermeableTile = tile.HasTile &&
-            (tile.TileType == TileID.OpenDoor || tile.TileType == TileID.ClosedDoor ||
-            tile.TileType == TileID.Platforms);*/
-
-        /*if (isTileSolid && isInPermeableTile)
-            return false;*/
-
-        // HasTile check is necessary since doors that do not have walls behind them may make this check return false.
-        if (requireWalls && !hasValidWall && !tile.HasTile)
-            return false;
-
+        // visited is a window around the player
         bool[,] visited = new bool[MAX_ROOM_WIDTH * 2, MAX_ROOM_HEIGHT * 2];
+        Queue<Point> queue = new();
 
-        Queue<Point> queue = [];
-
-        // queue the player position first
-        queue.Enqueue(new Point(playerTileX, playerTileY));
+        // seed
+        queue.Enqueue(new Point(originX, originY));
         visited[MAX_ROOM_WIDTH, MAX_ROOM_HEIGHT] = true;
 
-        int minX = playerTileX;
-        int maxX = playerTileX;
-        int minY = playerTileY;
-        int maxY = playerTileY;
+        int minX = originX, maxX = originX;
+        int minY = originY, maxY = originY;
         int areaCount = 0;
         bool reachedEdge = false;
         bool foundMissingWall = false;
 
         while (queue.Count > 0) {
-            Point current = queue.Dequeue();
-            int x = current.X;
-            int y = current.Y;
-
+            var dq = queue.Dequeue();
+            int x = dq.X, y = dq.Y;
             areaCount++;
 
             // update bounds
-            minX = Math.Min(minX, x);
-            maxX = Math.Max(maxX, x);
-            minY = Math.Min(minY, y);
-            maxY = Math.Max(maxY, y);
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
 
-            // Check if tile has a valid wall
-            if (requireWalls && !hasValidWall && !tile.HasTile) {
-                //foundMissingWall = true;
-                // immediately fail if any tile lacks a wall... will save performance
-                return false;
-                // or...
-                // continue filling but mark as not enclosed
-                // reachedEdge = true;
-                // or...
-                // continue filling and mark this tile as the closet valid tile without a wall
-
+            if (!WorldGen.InWorld(x, y)) {
+                reachedEdge = true;
+                break;
             }
 
-            // ensure that it's smaller than our checked dimensions
+            // current tile & properties
+            Tile cur = Main.tile[x, y];
+            bool curSolid = IsTileSolid(cur);
+            bool curHasWall = cur.WallType > 0;
+
+            // If we require walls, then any *non-solid* interior tile that lacks a wall invalidates the room.
+            // (We ignore solid tiles for wall requirement; doors/walls handled in IsTileSolid.)
+            if (requireWalls && !curSolid && !curHasWall) {
+                foundMissingWall = true;
+                // we can bail early to save time; no need to keep filling
+                break;
+            }
+
+            // bounds/area limits
             if (areaCount > MAX_ROOM_AREA ||
                 (maxX - minX) > MAX_ROOM_WIDTH ||
                 (maxY - minY) > MAX_ROOM_HEIGHT) {
@@ -117,22 +101,21 @@ public class RoomDetectionPlayer : ModSystem {
                 break;
             }
 
-            // check for world edge
+            // proximity to world edge
             if (x <= 5 || x >= Main.maxTilesX - 5 || y <= 5 || y >= Main.maxTilesY - 5) {
                 reachedEdge = true;
                 break;
             }
 
-            // check in cardinal directions
-            CheckAndEnqueue(x + 1, y, queue, visited, requireWalls);
-            CheckAndEnqueue(x - 1, y, queue, visited, requireWalls);
-            CheckAndEnqueue(x, y + 1, queue, visited, requireWalls);
-            CheckAndEnqueue(x, y - 1, queue, visited, requireWalls);
+            // enqueue neighbors (we pass origin to compute visited indices correctly)
+            CheckAndEnqueue(x + 1, y, originX, originY, queue, visited);
+            CheckAndEnqueue(x - 1, y, originX, originY, queue, visited);
+            CheckAndEnqueue(x, y + 1, originX, originY, queue, visited);
+            CheckAndEnqueue(x, y - 1, originX, originY, queue, visited);
         }
 
         bool isEnclosed = !reachedEdge && (!requireWalls || !foundMissingWall);
 
-        // give the details of the room if one is passed in
         if (roomDetails != null && isEnclosed) {
             roomDetails.Width = maxX - minX + 1;
             roomDetails.Height = maxY - minY + 1;
@@ -147,32 +130,34 @@ public class RoomDetectionPlayer : ModSystem {
         return isEnclosed;
     }
 
-    private static void CheckAndEnqueue(int x, int y, Queue<Point> queue, bool[,] visited, bool requireWalls) {
-        var tile = Main.tile[x, y];
+    // Note: now independent of requireWalls; we only handle flood frontier here.
+    // We also use originX/originY to compute the "visited window" indices.
+    private static void CheckAndEnqueue(int x, int y, int originX, int originY, Queue<Point> queue, bool[,] visited) {
 
-        int relX = x + MAX_ROOM_WIDTH - (int)(Main.LocalPlayer.position.X / 16);
-        int relY = y + MAX_ROOM_HEIGHT - (int)(Main.LocalPlayer.position.Y / 16);
+        if (!WorldGen.InWorld(x, y))
+            return;
+
+        Tile tile = Main.tile[x, y];
+
+        var isSolid = IsTileSolid(tile);
+
+        //if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.U))
+        //    if (Main.GameUpdateCount % 60 == 0)
+        //        Dust.QuickBox(new Vector2(x * 16, y * 16), new Vector2(x * 16 + 16, y * 16 + 16), 1, isSolid ? Color.Red : Color.Lime, null);
+
+        // stop flood at solid tiles
+        if (isSolid)
+            return;
+
+        int relX = x - originX + MAX_ROOM_WIDTH;
+        int relY = y - originY + MAX_ROOM_HEIGHT;
 
         if (relX < 0 || relX >= MAX_ROOM_WIDTH * 2 || relY < 0 || relY >= MAX_ROOM_HEIGHT * 2)
             return;
 
-        // skip this tile if it's been visisted already
         if (visited[relX, relY])
             return;
 
-        // skip outside of the world bounds
-        if (!WorldGen.InWorld(x, y))
-            return;
-
-        // skip if solid
-        if (IsTileSolid(tile)) {
-            // literal mario_cumming checks
-            // Main.NewText(TileID.Search.GetName(tile.TileType));
-            // Main.NewText(TileID.Search.GetName(tile.TileType) + ": " + Main.tileSolidTop[tile.TileType] + " " + Main.tileSolid[tile.TileType]);
-            return;
-        }
-
-        // set as visited
         visited[relX, relY] = true;
         queue.Enqueue(new Point(x, y));
     }

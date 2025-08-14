@@ -32,7 +32,7 @@ public class AmbientDisplaySystem : ModSystem
         [AmbienceID.Day_BirdsSingingLoud] = "Loud singing birds",
         [AmbienceID.Day_BirdsSingingQuiet] = "Quiet singing birds",
         [AmbienceID.Day_Quiet] = "Quiet crickets and bugs",
-        [AmbienceID.Day_BirdsSingingOften] = "persistent singing birds",
+        [AmbienceID.Day_BirdsSingingOften] = "Persistent singing birds",
     };
     public static Dictionary<int, string> FlavorsEvening = new() {
         [0] = "Not loaded",
@@ -73,6 +73,7 @@ public class AmbientDisplaySystem : ModSystem
         var mouseOver = rect.Contains(Main.MouseScreen.ToPoint());
 
         if (mouseOver) {
+            Main.isMouseLeftConsumedByUI = true;
             if (Main.mouseLeft && Main.mouseLeftRelease) {
                 _show = !_show;
                 SoundEngine.PlaySound(SoundID.MenuTick);

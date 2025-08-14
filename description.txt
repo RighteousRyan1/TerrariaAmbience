@@ -8,7 +8,7 @@ Developers:
 
 Most Recent Update:
 
-- Inventory sounds! + config
+- Inventory sounds + more config options
 - Mod unload crash fix (?)
 - More config options
 

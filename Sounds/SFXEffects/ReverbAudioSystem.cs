@@ -11,35 +11,46 @@ namespace TerrariaAmbience.Sounds.SFXEffects;
 
 public class ReverbAudioSystem : ModSystem
 {
-    private static HashSet<int> _lowReverbWalls = [];
-    private static HashSet<int> _lowReverbTiles = [];
-    private static HashSet<int> _noReverbWalls = [];
-    private static HashSet<int> _noReverbTiles = [];
+    static HashSet<int> _lowReverbWalls = [];
+    static HashSet<int> _lowReverbTiles = [];
+    static HashSet<int> _noReverbWalls = [];
+    static HashSet<int> _noReverbTiles = [];
 
-    private static HashSet<string> _noReverbNames = [
-        "silt", "slush", "grass",
-        "fence", "leaf", "flower", "leaves", "snow"
+    // no reverb set is prioritized over the low reverb set
+    // so that if something like BambooFence exists, it will be considered as to compute no reverb
+    static HashSet<string> _noReverbNames = [
+        "silt", "slush", "grass", "mud", "clay",
+        "grass", "leaf", "leaves", "flower", "vine", "moss",
+        "snow", "ash", "fence"
     ];
-    private static HashSet<string> _lowReverbNames = [
-        "dirt", "sand", "slush", "glass", "plank", "mud"
+    static HashSet<string> _lowReverbNames = [
+        "dirt", "sand", "slush", "glass", "plank", "mud",
+
+        "sand", "silt", "dirt", "plank", "bamboo", "glass",
+        "ice", "tin", "wood"
     ];
     // support mods soon too...
     public static void PrecomputeReverbProperties() {
+        // compute wall reverb properties
         for (int i = 0; i < WallID.Search.Count; i++) {
-
             string name = WallID.Search.GetName(i).ToLower();
+
             if (_noReverbNames.Contains(name))
                 _noReverbWalls.Add(i);
 
-            // "planked" if this does not work well
+            // only runs if it doesn't exist in the no reverb set to go in-hand with the comment left above _noReverbNames
             else if (_lowReverbNames.Contains(name))
                 _lowReverbWalls.Add(i);
         }
 
+        // compute tile reverb properties
         for (int i = 0; i < TileID.Search.Count; i++) {
             string name = TileID.Search.GetName(i).ToLower();
+
             if (_noReverbNames.Contains(name))
                 _noReverbTiles.Add(i);
+
+            // same here as well
             else if (_lowReverbNames.Contains(name))
                 _lowReverbTiles.Add(i);
         }
@@ -231,6 +242,7 @@ public class ReverbAudioSystem : ModSystem
                 if (!raycast1 && !raycast2)
                     continue;
 
+                // for now, we assume that tiles and walls are "high reverb" if they aren't in the low reverb set or the no reverb set
                 if (!_lowReverbTiles.Contains(tileType) && !_noReverbTiles.Contains(tileType)) {
                     highReverbSurfaces++;
                 }
