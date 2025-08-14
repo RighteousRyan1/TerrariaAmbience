@@ -1,18 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\tModLoader.targets" />
-  <PropertyGroup>
-    <AssemblyName>TerrariaAmbience</AssemblyName>
-    <TargetFramework>net8.0</TargetFramework>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="TerrariaAmbienceAPI">
-      <HintPath>lib\TerrariaAmbienceAPI.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <Import Project="..\tModLoader.targets" />
+	
+        <PropertyGroup>
+            <AssemblyName>TerrariaAmbience</AssemblyName>
+            <TargetFramework>net8.0</TargetFramework>
+            <PlatformTarget>AnyCPU</PlatformTarget>
+            <LangVersion>latest</LangVersion>
+			<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        </PropertyGroup>
+    
+	    <PropertyGroup>
+			<PublicizerClearCacheOnClean>true</PublicizerClearCacheOnClean>
+	    </PropertyGroup>
+
+	    <ItemGroup>
+			<Publicize Include="FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+	    </ItemGroup>
+	
+	    <ItemGroup>
+            <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+                <PrivateAssets>all</PrivateAssets>
+                <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            </PackageReference>
+            <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
+        </ItemGroup>
+	
+	
+        <ItemGroup>
+            <Reference Include="TerrariaAmbienceAPI">
+            <HintPath>lib\TerrariaAmbienceAPI.dll</HintPath>
+            </Reference>
+        </ItemGroup>
+	
+	
 </Project>

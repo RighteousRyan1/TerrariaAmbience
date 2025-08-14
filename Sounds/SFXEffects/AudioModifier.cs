@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Audio;
 using System.Reflection;
 using Terraria;
 using Terraria.Audio;
+using Terraria.ModLoader;
 using TerrariaAmbience.Sounds.SFXEffects.FAudioHacks;
 
 namespace TerrariaAmbience.Sounds.SFXEffects;
@@ -43,17 +44,15 @@ public static class AudioModifier
     }
     public static SoundEffectInstance ApplyReverbReturnInstance(this SoundEffectInstance instance, float rvGain) {
         try {
-            /*FAudio.FAudioFXReverbParameters p = default;
-            p.WetDryMix = 40f;
-            p.DecayTime = 2.2f;
-            p.RoomSize = 0.85f;
+            FAudioReverbController.RvInit();
+            rvGain = 1f;
+            var test = Main.MouseScreen.X / 10;
+            FAudioReverbController.TAReverbParams.DecayTime = 0.1f;
 
-            // FReverbController.EnsureAttached(instance);
+            ModContent.GetInstance<TerrariaAmbience>().Logger.Info(test);
+            FAudioReverbController.ApplyCustomReverb(instance, rvGain);
 
-            // THIS IS SOME SHIT
-            FReverbController.SetParameters(in p); 
-
-            return instance;*/ 
+            return instance;
             rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
             if (instance != null)
                 ReverbInfo?.Invoke(instance, [rvGain]);
