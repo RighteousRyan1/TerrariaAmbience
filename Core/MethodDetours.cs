@@ -94,7 +94,8 @@ internal class MethodDetours {
                 $"\n    DecayTime: {latest.Reverb.DecayTime}" +
                 $"\n    RoomSize: {latest.Reverb.RoomSize}" +
                 $"\n    RefDelay: {latest.Reverb.ReflectionsDelay}" +
-                $"\n    EarlyDiff: {latest.Reverb.EarlyDiffusion}" + 
+                $"\n    EarlyDiff: {latest.Reverb.EarlyDiffusion}" +
+                $"\n    RoomFreq: {latest.Reverb.RoomFilterFreq}" + 
                 $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
             var fontToUse = FontAssets.DeathText.Value;

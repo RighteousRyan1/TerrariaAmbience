@@ -7,13 +7,13 @@ using Terraria.ModLoader;
 namespace TerrariaAmbience.Content.InventorySounds;
 public static class ItemClassifier {
     static readonly HashSet<int> CoinTypes = [
-            ItemID.PlatinumCoin, ItemID.GoldCoin, ItemID.SilverCoin,
-            ItemID.LuckyCoin, ItemID.CopperCoin
+        ItemID.PlatinumCoin, ItemID.GoldCoin, ItemID.SilverCoin,
+        ItemID.LuckyCoin, ItemID.CopperCoin
     ];
 
     static readonly HashSet<int> SpellBookTypes = [
-            ItemID.WaterBolt, ItemID.GoldenShower, ItemID.CrystalStorm,
-            ItemID.CursedFlames, ItemID.SpellTome
+        ItemID.WaterBolt, ItemID.GoldenShower, ItemID.CrystalStorm,
+        ItemID.CursedFlames, ItemID.SpellTome
     ];
     static readonly HashSet<int> WateryTypes = [
         ItemID.BottomlessBucket,

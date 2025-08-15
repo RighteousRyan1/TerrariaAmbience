@@ -8,7 +8,11 @@ Developers:
 
 Most Recent Update:
 
+- Improved reverb tenfold! 
+	- There are now room sizes, bounce delays, and more! Check out differently sized rooms and see how it reacts!
+- Changed/improved the crimson ambient track (prone to change?)
 - Inventory sounds + more config options
+- Improved the ambience to sound effect balance to make the sliders work more evenly
 - Mod unload crash fix (?)
 - More config options
 

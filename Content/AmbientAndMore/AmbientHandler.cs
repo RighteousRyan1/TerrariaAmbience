@@ -91,8 +91,6 @@ public class AmbientHandler {
 
         var mod = ModContent.GetInstance<TerrariaAmbience>();
 
-        // TODO: remove gamemenu check once API is fixed (once i get home xd lol xdlol)
-
         BreezeLight = new(mod, AmbientPath + "environment/breeze_light", "BreezeLight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
             return player.ZoneOverworldHeight && !player.ZoneSkyHeight;
@@ -283,18 +281,22 @@ public class AmbientHandler {
 
         IsWindTooHarsh = Math.Abs(Main.windSpeedCurrent) >= MaxWind;
 
-        if (Main.gameMenu) {
-            Ambiences.ForEach(x => x.MaxVolume = 0);
-            return;
+        bool isHarshOk = float.TryParse(ModContent.GetInstance<GeneralConfig>().transitionHarshness, out var harshness);
+
+        foreach (var amb in Ambiences) {
+            if (Main.gameMenu)
+                amb.MaxVolume = 0f; // no ambience in the main menu.
+
+            if (!isHarshOk) continue;
+            TransitionHarshness = harshness;
+            amb.VolumeStep = harshness;
         }
 
-        // Make a "master volume" for ambiences.
-        if (float.TryParse(ModContent.GetInstance<GeneralConfig>().transitionHarshness, out float harshness)) {
-            Ambiences.ForEach(x => x.VolumeStep = TransitionHarshness);
-            TransitionHarshness = harshness;
-        }
-        else
+        if (Main.gameMenu) return;
+
+        if (!isHarshOk)
             ModContent.GetInstance<GeneralConfig>().transitionHarshness = "0.01"; // a failsafe in case the player is stupid
+
         ForestMorning.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMorning * ModContent.GetInstance<GeneralConfig>().forestVolumes[0];
         ForestDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromNoon * ModContent.GetInstance<GeneralConfig>().forestVolumes[1];
         ForestEvening.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromEvening * ModContent.GetInstance<GeneralConfig>().forestVolumes[2];
@@ -311,12 +313,10 @@ public class AmbientHandler {
         SnowAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.RainIntensityForSnow * GradientGlobals.WindSpeedsHigh *  ModContent.GetInstance<GeneralConfig>().snowVolume;
         // make quieter / bandpass filter when inside
         Desert.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().desertVolume;
-        if (Desert.SoundInstance != null)
-            Desert.SoundInstance.Pitch = Main.dayTime ? 0f : -0.1f;
-        if (!Underwater.AreConditionsMet)
-            Underwater.VolumeStep = TransitionHarshness * 2.5f;
-        else
-            Underwater.VolumeStep = TransitionHarshness;
+
+        if (Desert.SoundInstance != null) Desert.SoundInstance.Pitch = Main.dayTime ? 0f : -0.1f;
+        if (!Underwater.AreConditionsMet) Underwater.VolumeStep = TransitionHarshness * 2.5f;
+        else Underwater.VolumeStep = TransitionHarshness;
 
         EvilsCorruption.MaxVolume = 1f;
         EvilsCrimson.MaxVolume = 1f;
@@ -353,8 +353,6 @@ public class AmbientHandler {
             UnderwaterDeep.MaxVolume = underwaterDeepGradient;
         }
 
-        // Main.NewText(EvilsCorruption.AreConditionsMet + ", " + EvilsCorruption.IsPlaying);
-
         BeachCalm.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().oceanVolume;
         BeachAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsHigh * ModContent.GetInstance<GeneralConfig>().oceanVolume;
         
@@ -363,6 +361,8 @@ public class AmbientHandler {
         CavernLayer.MaxVolume = GradientGlobals.Underground * ModContent.GetInstance<GeneralConfig>().cavernsVolume * 0.4f;
         
         Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<GeneralConfig>().hellVolume;
+
+        // idk how to avoid looping again
         var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
         Ambiences.ForEach(x => x.MaxVolume *= pl.InRoomAmbientMultiplier);
     }
