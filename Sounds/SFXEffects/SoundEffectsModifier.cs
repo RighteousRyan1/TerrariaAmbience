@@ -16,7 +16,6 @@ public class SoundEffectsModifier : ModSystem
 		TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Stop();
 	}
 	public override void Load() {
-		AudioModifier.CacheReflection();
 		On_ActiveSound.Play += ActiveSound_Play;
 		//On_ActiveSound.Update += UpdateActiveSoundFilters;
 	}
@@ -29,7 +28,7 @@ public class SoundEffectsModifier : ModSystem
 			if (!sfx.Position.HasValue) continue;
 			var param = ReverbAudioSystem.CreateAudioFX(sfx.Position.Value);
 
-			if (badStyles.Contains(sfx.Style)) continue;
+			if (SoundsThatIgnoreFilters.Contains(sfx.Style)) continue;
 
 			self.ApplyReverb(param.ReverbGain / 2);
 			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
@@ -41,27 +40,21 @@ public class SoundEffectsModifier : ModSystem
 
 	private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self) {
 		orig(self);
-		var vol = self.Sound.Volume;
+
+		// dont apply filters to sounds without positions
+        if (!self.Position.HasValue) return;
+
+        var vol = self.Sound.Volume;
 
 		self.Sound.Volume = 0;
 		if (self.Sound is DynamicSoundEffectInstance)
 			dynamicSfxActiveSounds.Add(self);
 
-		if (!self.Position.HasValue) return;
-
-		bool containsIgnoreablePos = badStyles.Contains(self.Style);
+		bool ignoresFilters = SoundsThatIgnoreFilters.Contains(self.Style);
         // var param = ReverbAudioSystem.CreateAudioFX(self.Position.Value);
         var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
-        //if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0) || weirdStyles.Contains(self.Style))
-        //	param.ReverbGain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().LatestParams.ReverbGain;
-        /*if (sDamp) {
-			if (!badStyles.Contains(self.Style))
-				self.Sound.ApplyReverbReturnInstance(gain / 2)
-					.ApplyLowPassFilterReturnInstance(occ)
-					.ApplyBandPassFilter(damp);
-			return;
-		}*/
-        if (!badStyles.Contains(self.Style)) {
+
+        if (!ignoresFilters) {
 			self.Sound.ApplyReverb(param.ReverbGain / 2, param);
 			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
 				self.Sound.ApplyLowPassFilter(param.LowPassIntensity);
@@ -73,8 +66,7 @@ public class SoundEffectsModifier : ModSystem
 		self.Sound.Volume = vol;
 	}
 
-	public static List<SoundStyle> badStyles = new()
-	{
+	public static List<SoundStyle> SoundsThatIgnoreFilters = [
 		SoundID.Grab,
 		SoundID.MenuOpen,
 		SoundID.MenuClose,
@@ -82,16 +74,7 @@ public class SoundEffectsModifier : ModSystem
 		SoundID.Chat,
 		SoundID.Research,
 		SoundID.ResearchComplete
-	};
-	public static List<SoundStyle> weirdStyles = [
-		SoundID.DoorClosed,
-		SoundID.DoorOpen,
 	];
-	public static float occludeAmount;
-	public static float reverbActual;
-	public static int soundX;
-	public static int soundY;
-	public static int showTime;
 }
 public struct FilterParams {
     public float ReverbGain;

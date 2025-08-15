@@ -171,8 +171,7 @@ public class RoomDetectionPlayer : ModSystem {
         // 4 times a second might be excessive...? idk.
         // now every frame. but make it configurable, methinks
 
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().floodFillAmbientOcclusion)
-            return;
+        if (!ModContent.GetInstance<AudioAdditionsConfig>().floodFillAmbientOcclusion) return;
 
         IsInRoom = IsPlayerInEnclosedSpace(Main.LocalPlayer, _currentRoom);
 

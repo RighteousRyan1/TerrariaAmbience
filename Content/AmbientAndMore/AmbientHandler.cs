@@ -212,7 +212,7 @@ public class AmbientHandler {
         }
     }
 
-    public void AddModBiomeTo(Mod mod, List<ModBiome> registry, params string[] biomeInternalNames) {
+    public static void AddModBiomeTo(Mod mod, List<ModBiome> registry, params string[] biomeInternalNames) {
         foreach (string tile in biomeInternalNames) {
             if (mod.TryFind<ModBiome>(tile, out var found))
                 registry.Add(found);

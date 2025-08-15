@@ -78,7 +78,7 @@ internal class MethodDetours {
 
             column1 += $"Ambience Name/Volume:";
             foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
-                column1 += $"\n{amb.Name}: {amb.volume:0.####}";
+                column1 += $"\n{amb.Name}: {amb.Volume:0.###}";
             }
             column2 += $"Tile Registry (Is player on?):\n";
             foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {

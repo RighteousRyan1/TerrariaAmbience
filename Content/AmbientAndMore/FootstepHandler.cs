@@ -134,22 +134,22 @@ public class FootstepHandler {
     }
 
     public void Update() {
-        if (!Main.gameMenu) {
-            for (int i = 0; i < AllSounds.Count; i++) {
-                if (AllSounds[i] is null)
-                    continue;
-                AllSounds[i].VolumeMultiplier = ModContent.GetInstance<GeneralConfig>().footstepsVolMult;
-            }
-            var vol = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetArmorStepVolume();
-            Armor.LandVolume = vol;
-            Armor.StepVolume = vol / 2;
+        if (Main.gameMenu) return;
 
-            var vol1 = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetVanityStepVolume();
-            Vanity.LandVolume = vol1;
-            Vanity.StepVolume = vol1 / 2;
-
-            // TODO: make landing step volumes scale based on fall speed?
+        for (int i = 0; i < AllSounds.Count; i++) {
+            if (AllSounds[i] is null)
+                continue;
+            AllSounds[i].VolumeMultiplier = ModContent.GetInstance<GeneralConfig>().footstepsVolMult;
         }
+        var vol = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetArmorStepVolume();
+        Armor.LandVolume = vol;
+        Armor.StepVolume = vol / 2;
+
+        var vol1 = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetVanityStepVolume();
+        Vanity.LandVolume = vol1;
+        Vanity.StepVolume = vol1 / 2;
+
+        // TODO: make landing step volumes scale based on fall speed?
         AllSounds.ForEach(x => {
             if (x is null) return;
             x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footsteps;

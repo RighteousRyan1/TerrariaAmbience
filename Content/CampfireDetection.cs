@@ -9,30 +9,30 @@ namespace TerrariaAmbience.Content;
 
 public class CampfireDetection : GlobalTile
 {
-    public Vector2 originOfCampfire;
+    public static Vector2 CampfirePos;
 
-    public float distanceToCampfire;
+    public static float CampfireDistance;
+    public static bool IsCampfireOnTheRight;
 
-    public bool isOnRight;
+    public static bool IsNearCampfire;
     public override void NearbyEffects(int i, int j, int type, bool closer) {
-        if (Main.dedServ)
-            return;
-        originOfCampfire.X = i * 16;
-        originOfCampfire.Y = j * 16;
+        if (Main.dedServ) return;
+        if (!ModContent.GetInstance<GeneralConfig>().campfireSounds) return;
+
+        CampfirePos.X = i * 16;
+        CampfirePos.Y = j * 16;
 
         Player player = Main.player[Main.myPlayer].GetModPlayer<AmbientPlayer>().Player;
 
-        if (!ModContent.GetInstance<GeneralConfig>().campfireSounds)
-            return;
         if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire)) {
             /*var t = Main.tile[i, j];
             var orig = new Vector2(i * 16, j * 16);
             Main.NewText(t.frameY);*/
             //if (t.frameY <= 18 && t.frameY >= 0)
             {
-                distanceToCampfire = Vector2.Distance(originOfCampfire, player.Center);
-                isOnRight = originOfCampfire.X < player.Center.X;
-                player.GetModPlayer<AmbientPlayer>().IsNearCampfire = true;
+                CampfireDistance = Vector2.Distance(CampfirePos, player.Center);
+                IsCampfireOnTheRight = CampfirePos.X < player.Center.X;
+                IsNearCampfire = true;
             }
         }
         // hacky ahh...
@@ -44,7 +44,7 @@ public class CampfireDetection : GlobalTile
             {
                 //if (TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance is not null)
                 //TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
-                player.GetModPlayer<AmbientPlayer>().IsNearCampfire = false;
+                IsNearCampfire = false;
             }
         }
     }

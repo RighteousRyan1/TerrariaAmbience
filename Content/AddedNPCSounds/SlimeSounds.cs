@@ -14,92 +14,96 @@ using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SFXEffects;
 
-namespace TerrariaAmbience.Content.AddedNPCSounds
-{
-    // TODO: fix ass lag
-    public class SlimeSounds : GlobalNPC
-    {
-        public override bool InstancePerEntity => true;
+namespace TerrariaAmbience.Content.AddedNPCSounds;
 
-        public Vector2 oldVelocityReal;
-        public override void PostAI(NPC npc) {
-            if (Main.dedServ) return;
-            if (!ModContent.GetInstance<AudioAdditionsConfig>().slimySounds) return;
-            if (!npc.FullName.Contains("slime", StringComparison.CurrentCultureIgnoreCase)) return;
+// TODO: fix ass lag
+public class SlimeSounds : GlobalNPC {
+    public override bool InstancePerEntity => true;
 
-            var vel = npc.velocity;
-            //var param = ReverbAudioSystem.CreateAudioFX(npc.Center);
-            float volume = oldVelocityReal.Y / 30f;
+    public Vector2 oldVelocity;
 
-            SoundStyle soundStyle = default;
+    public static HashSet<int> Slimes = [];
 
-            if (vel.Y == 0 && oldVelocityReal.Y != 0) {
-                int oneOrTwo = Main.rand.Next(1, 3);
-                soundStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}") {
-                    Volume = MathHelper.Clamp(oldVelocityReal.Y, 0f, 1f),
-                    PitchVariance = 0.1f,
-                };
-            }
-            else if (vel.Y != 0 && oldVelocityReal.Y == 0f) {
-                soundStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump") {
-                    Volume = 0.5f,
-                    PitchVariance = 0.1f
-                };
-            }
+    public static void PopulateSlimes() {
+        for (int i = 0; i < NPCLoader.NPCCount; i++) {
+            var sample = ContentSamples.NpcsByNetId[i];
 
-            oldVelocityReal = vel;
+            if (!sample.FullName.Contains("slime", StringComparison.CurrentCultureIgnoreCase)) continue;
 
-            if (soundStyle == default) return;
-
-            var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
-
-            if (param.BandPassEnabled)
-                GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity).ApplyBandPassFilter(param.BandPassIntensity);
-            else
-                GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);
-
-            /*if (param.BandPassEnabled)
-                GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity).ApplyBandPassFilter(param.BandPassIntensity);
-            else
-                GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);*/
-
+            Slimes.Add(i);
         }
     }
+    public override void PostAI(NPC npc) {
+        if (Main.dedServ) return;
+        if (!ModContent.GetInstance<AudioAdditionsConfig>().slimySounds) return;
 
-    public class SplashingSounds : GlobalNPC
-    {
-        public override bool InstancePerEntity => true;
-        private bool _wet;
-        public override void PostAI(NPC npc)
-        {
-            var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
+        if (!Slimes.Contains(npc.type)) return;
 
-            if (cfg3.newSplashSounds)
-                HandleSplashing(npc);
+        var vel = npc.velocity;
+
+        SoundStyle soundStyle = default;
+
+        if (vel.Y == 0 && oldVelocity.Y != 0) {
+            int oneOrTwo = Main.rand.Next(1, 3);
+            soundStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}") {
+                Volume = MathHelper.Clamp(oldVelocity.Y / 30f, 0f, 1f),
+                PitchVariance = 0.1f,
+            };
+        }
+        else if (vel.Y != 0 && oldVelocity.Y == 0f) {
+            soundStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump") {
+                Volume = 0.5f,
+                PitchVariance = 0.1f
+            };
         }
 
-        public void HandleSplashing(NPC npc)
-        {
-            bool justWet = npc.wet && !_wet;
-            bool justUnwet = !npc.wet && _wet;
+        oldVelocity = vel;
 
-            if (justWet || justUnwet)
-            {
-                var vel = npc.velocity.Y;
+        if (soundStyle == default) return;
 
-                const float loud_thresh = 10f;
+        var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
 
-                var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= loud_thresh ? "heavy" : "light")}");
+        if (param.BandPassEnabled)
+            GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity).ApplyBandPassFilter(param.BandPassIntensity);
+        else
+            GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);
 
-                if (vel < 10f)
-                    soundSplash.Volume = vel / loud_thresh / 4;
-                if (vel == 0)
-                    soundSplash.Volume = 0.1f;
+        /*if (param.BandPassEnabled)
+            GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity).ApplyBandPassFilter(param.BandPassIntensity);
+        else
+            GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);*/
 
-                SoundEngine.PlaySound(soundSplash, npc.position);
-            }
+    }
+}
+public class SplashingSounds : GlobalNPC {
+    public override bool InstancePerEntity => true;
+    bool _wet;
+    public override void PostAI(NPC npc) {
+        var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
 
-            _wet = npc.wet;
+        if (cfg3.newSplashSounds)
+            HandleSplashing(npc);
+    }
+
+    public void HandleSplashing(NPC npc) {
+        bool justWet = npc.wet && !_wet;
+        bool justUnwet = !npc.wet && _wet;
+
+        if (justWet || justUnwet) {
+            var vel = npc.velocity.Y;
+
+            const float loud_thresh = 10f;
+
+            var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= loud_thresh ? "heavy" : "light")}");
+
+            if (vel < 10f)
+                soundSplash.Volume = vel / loud_thresh / 4;
+            if (vel == 0)
+                soundSplash.Volume = 0.1f;
+
+            SoundEngine.PlaySound(soundSplash, npc.position);
         }
+
+        _wet = npc.wet;
     }
 }

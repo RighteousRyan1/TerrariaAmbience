@@ -368,7 +368,7 @@ public class ReverbAudioSystem : ModSystem
         fParam.BandPassIntensity = (playerUnderwater && !underWater) ? 0.0175f : (underWater && playerUnderwater) ? 0.01f : 0.025f;
     }
 
-    public static int CountTilesTouched(Point start, Point end, Func<Tile, bool>? predicate = null) {
+    public static int CountTilesTouched(Point start, Point end, Func<Tile, bool> predicate = null) {
         int count = 0;
 
         int x0 = start.X;
@@ -388,7 +388,7 @@ public class ReverbAudioSystem : ModSystem
             if (WorldGen.InWorld(x0, y0)) {
                 Tile tile = Main.tile[x0, y0];
 
-                if (predicate.Invoke(tile) == true)
+                if (predicate?.Invoke(tile) == true)
                     count++;
             }
 
@@ -409,9 +409,4 @@ public class ReverbAudioSystem : ModSystem
         return count;
     }
 
-}
-public struct RoomReverbInfo {
-    public int Area;
-    public List<Point> Perimeter;
-    public List<Point> Tiles;
 }

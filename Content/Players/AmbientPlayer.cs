@@ -22,9 +22,6 @@ public class AmbientPlayer : ModPlayer
     private float _multInternal;
     public float InRoomAmbientMultiplier => MathHelper.Clamp(_multInternal, 0.2f, 1f);
 
-    public bool BehindBackWall_MyStyle;
-    public bool IsNearCampfire;
-
     public static SoundEffectInstance soundSlippyRoughInst;
     public static SoundEffectInstance soundSlippySmoothInst;
     private bool _areSoundsInitialized;
@@ -33,6 +30,18 @@ public class AmbientPlayer : ModPlayer
 
     private int chestStateNew;
     private int chestStateOld; // Same as above.
+
+    public static HashSet<int> NonArmoryArmors = [];
+
+    public static void DetermineNonArmoryArmors() {
+        for (int i = 0; i < ItemID.Search.Count; i++) {
+            var item = ItemID.Search.GetName(i);
+
+            if (!item.Contains("wood", StringComparison.InvariantCultureIgnoreCase)) continue;
+            
+            NonArmoryArmors.Add(i);
+        }
+    }
 
     /// <summary>
     /// For the use of rain. Not modifiable publically due to potential anomalies happening otherwise.
@@ -50,9 +59,10 @@ public class AmbientPlayer : ModPlayer
         if (Main.netMode == NetmodeID.SinglePlayer) return;
 
         SyncAmbienceSystem.AskForAmbiences();
-        // Main.NewText("Asking...");
     }
     public override void PreUpdate() {
+        if (Main.soundVolume == 0) return; 
+
         var genCfg = ModContent.GetInstance<GeneralConfig>();
         var aaCfg = ModContent.GetInstance<AudioAdditionsConfig>();
         var servCfg = ModContent.GetInstance<AmbientConfigServer>();
@@ -108,76 +118,75 @@ public class AmbientPlayer : ModPlayer
         }
         #endregion
         #region Step/Sound handling
-        timerUntilValidChestStateChange++;
-        // This is a pretty niche finding for tiles above said player
-        // can obviously be optimized... fml
-        if (genCfg.wetStepsEnabled) {
-            if (!Player.wet) {
-                Tile playerTile = Main.tile[(int)Player.Center.X / 16, (int)Player.Center.Y / 16];
-                // i know i can just remove this loop but just in case i want to tweak it again i'll have it like this
-                for (int i = (int)Player.Top.X/* - 1*/; i < Player.Top.X /*+ 1*/; i++) {
-                    for (int j = (int)Player.Top.Y - 1; playerTile.WallType <= 0 ? j > Player.Top.Y - 350 : j > Player.Top.Y - 600; j--) {
-                        if (WorldGen.InWorld(i / 16, j / 16)) {
-                            Tile tile = Main.tile[i / 16, j / 16];
-                            if (tile.HasTile && Main.tileSolid[tile.TileType]) {
-                                HasTilesAbove = true;
-                                break;
-                            }
-                            else {
-                                HasTilesAbove = false;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else {
+
+        if (genCfg.wetStepsEnabled)
+            HandleWetSteps();
+        else
             // this essentially just works as a way to not have wet sounds play. no need to do extra magic.
             HasTilesAbove = true;
-        }
-        if (Main.GameUpdateCount % 8 == 0) {
-            if (ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) {
-                var param = ReverbAudioSystem.CreateAudioFX(Player.Center);
-                Player.GetModPlayer<ReverbPlayer>().LatestParams = param;
-            }
-        }
+
+        UpdateReverbParams(8);
 
         // this is left in because my reverb system thinks that the sound originates from within a tile.
         #endregion
         // HandleContainerOpenings(ContainerContext.Chest, out var opened);
-        chestStateNew = Player.chest;
-        if (Main.soundVolume > 0f) {
-            if (ModContent.GetInstance<AmbientConfigServer>().chestSounds) {
-                if (timerUntilValidChestStateChange > 10) {
-                    if (chestStateNew >= -1) {
-                        if ((chestStateNew != chestStateOld) && chestStateNew > -1) {
-                            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open") { Volume = 0.25f }, Player.Center);
-                        }
-                        if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1) {
-                            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
-                        }
-                        else if ((chestStateNew != chestStateOld) && chestStateOld > -1) {
-                            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
-                        }
-                    }
-                }
-            }
-        }
-        chestStateOld = chestStateNew;
+        
+        ManageChestSounds();
+
         Player.runSoundDelay = 100;
+    }
+    void ManageChestSounds() {
+        if (!ModContent.GetInstance<AmbientConfigServer>().chestSounds) return;
+
+        timerUntilValidChestStateChange++;
+        if (timerUntilValidChestStateChange < 60) return;
+        if (chestStateNew < -1) return;
+
+        chestStateNew = Player.chest;
+
+        if ((chestStateNew != chestStateOld) && chestStateNew > -1)
+            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open") { Volume = 0.25f }, Player.Center);
+        else if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1)
+            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
+        else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
+            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
+
+        chestStateOld = chestStateNew;
+    }
+    void HandleWetSteps() {
+        // This is a pretty niche finding for tiles above said player
+        // can obviously be optimized... fml
+
+        if (Player.wet) return;
+
+        int checkX = (int)Player.Top.X / 16;
+        int checkStartY = (int)Player.Top.Y / 16;
+        int checkEndY = (int)Player.Top.Y / 16 - 30;
+
+        for (int j = checkStartY; j > checkEndY; j--) {
+            // don't bother checking further
+            if (!WorldGen.InWorld(checkX, j)) break;
+
+            Tile tile = Main.tile[checkX, j];
+
+            // check for solid tiles only
+            if (!tile.HasTile || !Main.tileSolid[tile.TileType]) continue;
+
+            HasTilesAbove = true;
+        }
+    }
+    void UpdateReverbParams(uint time) {
+        if (!ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) return;
+        if (Main.GameUpdateCount % time != 0) return;
+
+        var param = ReverbAudioSystem.CreateAudioFX(Player.Center);
+        Player.GetModPlayer<ReverbPlayer>().LatestParams = param;
     }
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)
             return;
 
-        var tile = Framing.GetTileSafely(Player.Center);
-
-        if (ModContent.GetInstance<AudioAdditionsConfig>().floodFillAmbientOcclusion)
-            BehindBackWall_MyStyle = RoomDetectionPlayer.IsInRoom;
-        else
-            BehindBackWall_MyStyle = false;
-
-        if (BehindBackWall_MyStyle)
+        if (RoomDetectionPlayer.IsInRoom)
             _multInternal -= 0.05f;
         else
             _multInternal += 0.05f;
@@ -186,13 +195,14 @@ public class AmbientPlayer : ModPlayer
 
         HandleIceScraping();
 
+        // why is this shit here
         if (!TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.IsPlaying())
             TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
         float maxDist = 780f;
         float campfireVolumeScalar = 0.75f;
-        if (IsNearCampfire && ModContent.GetInstance<GeneralConfig>().campfireSounds) {
-            cracklePan = (ModContent.GetInstance<CampfireDetection>().distanceToCampfire / maxDist) * (ModContent.GetInstance<CampfireDetection>().isOnRight ? -1 : 1) / 2;
-            crackleVolume = 1f - ModContent.GetInstance<CampfireDetection>().distanceToCampfire / maxDist * campfireVolumeScalar;
+        if (ModContent.GetInstance<GeneralConfig>().campfireSounds && CampfireDetection.IsNearCampfire) {
+            cracklePan = (CampfireDetection.CampfireDistance / maxDist) * (CampfireDetection.IsCampfireOnTheRight ? -1 : 1) / 2;
+            crackleVolume = 1f - CampfireDetection.CampfireDistance / maxDist * campfireVolumeScalar;
         }
         else
             crackleVolume = 0f;
@@ -247,19 +257,17 @@ public class AmbientPlayer : ModPlayer
         float determinedValue = 0f;
 
         // 10 <= x <= 12 == vanity armor
-        bool isWood(Item item) {
-            if (ItemID.Search.TryGetName(item.type, out var name)) {
-                return name.ToLower().Contains("wood");
-            }
-            return false;
+        bool isNotMetallic(Item item) {
+            return NonArmoryArmors.Contains(item.type);
         }
         bool hasVanityCovering(int context) {
             return !Player.armor[context + 10].IsAir;
         }
 
+        // what the sigma. (ryan, 2025)
         if (hasHeadArmor) {
             if (!head.vanity) {
-                if (!isWood(head)) {
+                if (!isNotMetallic(head)) {
                     if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.HeadSlot)) {
                         determinedValue *= 1.25f + 0.05f;
                     }
@@ -268,7 +276,7 @@ public class AmbientPlayer : ModPlayer
         }
         if (hasChestArmor) {
             if (!chest.vanity) {
-                if (!isWood(chest)) {
+                if (!isNotMetallic(chest)) {
                     if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.ChestSlot)) {
                         determinedValue += 0.05f;
                     }
@@ -277,7 +285,7 @@ public class AmbientPlayer : ModPlayer
         }
         if (hasLegArmor) {
             if (!legs.vanity) {
-                if (!isWood(legs)) {
+                if (!isNotMetallic(legs)) {
                     if (!hasVanityCovering(GeneralHelpers.IDs.ArmorSlotID.LegSlot)) {
                         determinedValue += 0.01f;
                     }

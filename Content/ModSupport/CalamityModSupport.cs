@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria.ModLoader;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Core;
@@ -80,9 +78,9 @@ public class CalamityModSupport : ModSystem {
             Console.WriteLine();
 
             var dah = TerrariaAmbience.DefaultAmbientHandler;
-            dah.AddModBiomeTo(mod, dah.ModdedBeaches, "SulphurousSeaBiome", "AcidRainBiome");
-            dah.AddModBiomeTo(mod, dah.ModdedTundras, "AstralIce");
-            dah.AddModBiomeTo(mod, dah.ModdedDeserts, "AstralDesert", "AstralCaveDesert");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedBeaches, "SulphurousSeaBiome", "AcidRainBiome");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedTundras, "AstralIce");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedDeserts, "AstralDesert", "AstralCaveDesert");
         }
     }
 }

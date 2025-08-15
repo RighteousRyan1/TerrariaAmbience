@@ -18,6 +18,7 @@ using System.Reflection;
 using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Sounds.SFXEffects;
 using TerrariaAmbience.Common.Systems;
+using TerrariaAmbience.Content.AddedNPCSounds;
 
 namespace TerrariaAmbience;
 
@@ -126,6 +127,8 @@ public partial class TerrariaAmbience : Mod {
         Main.versionNumber += $", Terraria Ambience v{Version}";
 
         AmbientHandler.InitializeAllAmbienceToAvoidRuntimeOverhead();
+        AmbientPlayer.DetermineNonArmoryArmors();
+        SlimeSounds.PopulateSlimes();
         // calls DefaultAmbientHandler.Initialize() via the ctor
         // Ambience.Initialize();
 
