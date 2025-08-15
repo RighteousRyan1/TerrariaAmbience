@@ -21,8 +21,8 @@ public class SpiritModSupport : ModSystem {
             Console.WriteLine();
 
             var dah = TerrariaAmbience.DefaultAmbientHandler;
-            dah.AddModBiomeTo(mod, dah.ModdedForests, "BriarSurfaceBiome", "BriarUndergroundBiome");
-            dah.AddModBiomeTo(mod, dah.ModdedEvilCorruptions, "CemeteryBiome");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedForests, "BriarSurfaceBiome", "BriarUndergroundBiome");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedEvilCorruptions, "CemeteryBiome");
         }
     }
 }
