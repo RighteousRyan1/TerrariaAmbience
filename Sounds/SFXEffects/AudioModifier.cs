@@ -30,88 +30,24 @@ public static class AudioModifier
     }
     public const string FILTER_ISSUE_WARNING = "Error applying sound filters. Check the pins in the [c/FFFF00:#bug-reports] channel in the [c/5865F2:Discord] server in the top left of the main menu.";
 
-    public static float ApplyReverb(this SoundEffectInstance instance, float rvGain) {
-        try {
-            rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
-            if (instance != null)
-                ReverbInfo?.Invoke(instance, [rvGain]);
-            return rvGain;
-        }
-        catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
-            return 0f;
-        }
-    }
-    public static SoundEffectInstance ApplyReverbReturnInstance(this SoundEffectInstance instance, float rvGain) {
+    public static SoundEffectInstance ApplyReverb(this SoundEffectInstance instance, float rvGain, FilterParams param = default) {
         try {
             FAudioReverbController.RvInit();
-            rvGain = 1f;
-            var test = Main.MouseScreen.X / 10;
-            FAudioReverbController.TAReverbParams.DecayTime = 0.1f;
 
-            ModContent.GetInstance<TerrariaAmbience>().Logger.Info(test);
-            FAudioReverbController.ApplyCustomReverb(instance, rvGain);
+            FAudioReverbController.ApplyCustomReverb(instance, rvGain, param);
 
             return instance;
-            rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
+            /*rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
             if (instance != null)
                 ReverbInfo?.Invoke(instance, [rvGain]);
-            return instance;
+            return instance;*/
         }
         catch {
             Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
             return instance;
         }
     }
-    public static DynamicSoundEffectInstance ApplyReverbReturnDynamicInstance(this DynamicSoundEffectInstance instance, float rvGain) {
-        try {
-            rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
-            if (instance != null)
-                ReverbInfo?.Invoke(instance, [rvGain]);
-            return instance;
-        }
-        catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
-            return instance;
-        }
-    }
-    public static ActiveSound ApplyReverbOnActiveSound(this ActiveSound sound, float rvGain) {
-        try {
-            rvGain = MathHelper.Clamp(rvGain, 0f, 1f);
-            if (sound.Sound != null)
-                ReverbInfo?.Invoke(sound.Sound, [rvGain]);
-            return sound;
-        }
-        catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
-            return sound;
-        }
-    }
-    public static float ApplyLowPassFilter(this SoundEffectInstance instance, float cutoff) {
-        try {
-            cutoff = MathHelper.Clamp(cutoff, 0f, 1f);
-            if (instance != null)
-                LowPassInfo?.Invoke(instance, [cutoff]);
-            return cutoff;
-        }
-        catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
-            return cutoff;
-        }
-    }
-    public static SoundEffectInstance ApplyLowPassFilterReturnInstance(this SoundEffectInstance instance, float cutoff) {
-        try {
-            cutoff = MathHelper.Clamp(cutoff, 0f, 1f);
-            if (instance != null)
-                LowPassInfo?.Invoke(instance, [cutoff]);
-            return instance;
-        }
-        catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
-            return instance;
-        }
-    }
-    public static DynamicSoundEffectInstance ApplyLowPassFilterReturnDynamicInstance(this DynamicSoundEffectInstance instance, float cutoff) {
+    public static SoundEffectInstance ApplyLowPassFilter(this SoundEffectInstance instance, float cutoff) {
         try {
             cutoff = MathHelper.Clamp(cutoff, 0f, 1f);
             if (instance != null)
@@ -136,18 +72,6 @@ public static class AudioModifier
         }
     }
     public static SoundEffectInstance ApplyBandPassFilter(this SoundEffectInstance instance, float center) {
-        try {
-            center = MathHelper.Clamp(center, -1f, 1f);
-            if (instance != null)
-                BandPassInfo?.Invoke(instance, [center]);
-            return instance;
-        }
-        catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
-            return instance;
-        }
-    }
-    public static DynamicSoundEffectInstance ApplyBandPassFilterReturnDynamic(this DynamicSoundEffectInstance instance, float center) {
         try {
             center = MathHelper.Clamp(center, -1f, 1f);
             if (instance != null)

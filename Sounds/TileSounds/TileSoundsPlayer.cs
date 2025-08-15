@@ -33,15 +33,17 @@ public class TileSoundsPlayer : ModPlayer {
                 int rand = Main.rand.Next(1, 8);
                 Vector2 worldPos = tileCoord.ToVector2().ToWorldCoordinates();
 
-                ReverbAudioSystem.CreateAudioFX(worldPos, out var r, out var o, out var d, out var sd, new Vector2(0, -16));
+                // var param = ReverbAudioSystem.CreateAudioFX(worldPos, new Vector2(0, -16));
+
+                var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
 
                 WoodCreak = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}") {
                     PitchVariance = 0.1f,
                     Volume = 0.04f,
                 };
 
-                var soundInstance = GeneralHelpers.PlaySound(WoodCreak, worldPos).ApplyReverbReturnInstance(r).ApplyLowPassFilterReturnInstance(o);
-                if (sd) soundInstance.ApplyBandPassFilter(d);
+                var soundInstance = GeneralHelpers.PlaySound(WoodCreak, worldPos).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);
+                if (param.BandPassEnabled) soundInstance.ApplyBandPassFilter(param.BandPassIntensity);
             }
         }
     }

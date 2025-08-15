@@ -137,8 +137,8 @@ public class AmbientPlayer : ModPlayer
         }
         if (Main.GameUpdateCount % 8 == 0) {
             if (ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) {
-                ReverbAudioSystem.CreateAudioFX(Player.Center, out var reverb, out float occ, out float dampening, out bool sOcclude);
-                Player.GetModPlayer<ReverbPlayer>().ReverbFactor = reverb / 2; // default reverb calcs are strong
+                var param = ReverbAudioSystem.CreateAudioFX(Player.Center);
+                Player.GetModPlayer<ReverbPlayer>().LatestParams = param;
             }
         }
 

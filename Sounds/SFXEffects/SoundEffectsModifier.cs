@@ -27,59 +27,50 @@ public class SoundEffectsModifier : ModSystem
 		foreach (var sfx in dynamicSfxActiveSounds) {
 			if (sfx.Sound is not DynamicSoundEffectInstance self) continue;
 			if (!sfx.Position.HasValue) continue;
-			bool containsIgnoreablePos = badStyles.Contains(sfx.Style);
-			ReverbAudioSystem.CreateAudioFX(sfx.Position.Value, out float gain, out float occ, out float damp, out bool sDamp);
-			if (!ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled)
-				gain = 0f;
-			if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
-				occ = 0f;
-			if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-				gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-			if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled) {
+			var param = ReverbAudioSystem.CreateAudioFX(sfx.Position.Value);
 
-				sDamp = false;
-				damp = 0f;
-			}
 			if (badStyles.Contains(sfx.Style)) continue;
-			self.ApplyReverbReturnInstance(gain / 2);
+
+			self.ApplyReverb(param.ReverbGain / 2);
 			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
-				self.ApplyLowPassFilterReturnInstance(occ);
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && sDamp)
-				self.ApplyBandPassFilter(damp);
+				self.ApplyLowPassFilter(param.LowPassIntensity);
+			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && param.BandPassEnabled)
+				self.ApplyBandPassFilter(param.BandPassIntensity);
 		}
 	}
 
 	private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self) {
 		orig(self);
+		var vol = self.Sound.Volume;
+
+		self.Sound.Volume = 0;
 		if (self.Sound is DynamicSoundEffectInstance)
 			dynamicSfxActiveSounds.Add(self);
 
 		if (!self.Position.HasValue) return;
 
 		bool containsIgnoreablePos = badStyles.Contains(self.Style);
-		ReverbAudioSystem.CreateAudioFX(self.Position.Value, out float gain, out float occ, out float damp, out bool sDamp);
-		if (!ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled)
-			gain = 0f;
-		if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled) {
-			sDamp = false;
-			damp = 0f;
-		}
-		if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0))
-			gain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().ReverbFactor;
-		/*if (sDamp) {
+        // var param = ReverbAudioSystem.CreateAudioFX(self.Position.Value);
+        var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
+        //if (containsIgnoreablePos && Main.LocalPlayer.grappling[0] == 1 || (Main.LocalPlayer.itemAnimation > 0 && Main.LocalPlayer.HeldItem.pick > 0) || weirdStyles.Contains(self.Style))
+        //	param.ReverbGain = Main.player[Main.myPlayer].GetModPlayer<ReverbPlayer>().LatestParams.ReverbGain;
+        /*if (sDamp) {
 			if (!badStyles.Contains(self.Style))
 				self.Sound.ApplyReverbReturnInstance(gain / 2)
 					.ApplyLowPassFilterReturnInstance(occ)
 					.ApplyBandPassFilter(damp);
 			return;
 		}*/
-		if (!badStyles.Contains(self.Style)) {
-			self.Sound.ApplyReverbReturnInstance(gain / 2);
+        if (!badStyles.Contains(self.Style)) {
+			self.Sound.ApplyReverb(param.ReverbGain / 2, param);
 			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
-				self.Sound.ApplyLowPassFilterReturnInstance(occ);
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && sDamp)
-				self.Sound.ApplyBandPassFilter(damp);
+				self.Sound.ApplyLowPassFilter(param.LowPassIntensity);
+			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && param.BandPassEnabled)
+				self.Sound.ApplyBandPassFilter(param.BandPassIntensity);
 		}
+
+		// hacky but ok???
+		self.Sound.Volume = vol;
 	}
 
 	public static List<SoundStyle> badStyles = new()
@@ -92,9 +83,22 @@ public class SoundEffectsModifier : ModSystem
 		SoundID.Research,
 		SoundID.ResearchComplete
 	};
+	public static List<SoundStyle> weirdStyles = [
+		SoundID.DoorClosed,
+		SoundID.DoorOpen,
+	];
 	public static float occludeAmount;
 	public static float reverbActual;
 	public static int soundX;
 	public static int soundY;
 	public static int showTime;
+}
+public struct FilterParams {
+    public float ReverbGain;
+    public FAudio.FAudioFXReverbParameters Reverb;
+
+    public float LowPassIntensity;
+	public bool LowPassEnabled;
+    public float BandPassIntensity;
+	public bool BandPassEnabled;
 }

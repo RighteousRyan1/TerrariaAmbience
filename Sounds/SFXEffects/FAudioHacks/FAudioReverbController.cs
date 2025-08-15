@@ -38,7 +38,7 @@ public class FAudioReverbController {
         RoomSize = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_SIZE
     };
 
-    public unsafe static void ApplyCustomReverb(SoundEffectInstance inst, float rvGain) {
+    public unsafe static void ApplyCustomReverb(SoundEffectInstance inst, float rvGain, FilterParams param) {
         var handle = inst.handle;
 
         if (handle == IntPtr.Zero) {
@@ -46,7 +46,7 @@ public class FAudioReverbController {
         }
 
         if (!inst.usingReverb) {
-            ReverbAttach(handle);
+            ReverbAttach(handle, param.Reverb);
             inst.usingReverb = true;
         }
 
@@ -60,32 +60,9 @@ public class FAudioReverbController {
         FAudio.FAudioVoice_SetOutputMatrix(handle, SoundEffect.Device().ReverbVoice, inst.dspSettings.SrcChannelCount, 1, inst.dspSettings.pMatrixCoefficients, 0);
     }
 
-    public static FAudio.FAudioFXReverbParameters TAReverbParams = new() {
-        WetDryMix = 100f,
-        ReflectionsDelay = 7,
-        ReverbDelay = 11,
-        RearDelay = FAudio.FAUDIOFX_REVERB_DEFAULT_REAR_DELAY,
-        PositionLeft = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION,
-        PositionRight = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION,
-        PositionMatrixLeft = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION_MATRIX,
-        PositionMatrixRight = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION_MATRIX,
-        EarlyDiffusion = 15,
-        LateDiffusion = 15,
-        LowEQGain = 8,
-        LowEQCutoff = 4,
-        HighEQGain = 8,
-        HighEQCutoff = 6,
-        RoomFilterFreq = 5000f,
-        RoomFilterMain = -10f,
-        RoomFilterHF = -1f,
-        ReflectionsGain = -26.0200005f,
-        ReverbGain = 10.0f,
-        DecayTime = 1.49000001f,
-        Density = 100.0f,
-        RoomSize = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_SIZE
-    };
-
     static bool _init;
+
+    // something about this code controls the ability for multiple reverb states to be allowed at once
     public unsafe static void RvInit() {
         if (_init)
             return;
@@ -122,12 +99,13 @@ public class FAudioReverbController {
         FNAPlatform.Free(reverbChain->pEffectDescriptors);
         FNAPlatform.Free(chainPtr);
     }
-    unsafe static void ReverbAttach(IntPtr handle) {
+    unsafe static void ReverbAttach(IntPtr handle, FAudio.FAudioFXReverbParameters param) {
         var device = SoundEffect.Device();
 
-        var rvbParams = TAReverbParams;
+        var rvbParams = param;
         FAudio.FAudioFXReverbParameters* rvbParamsPtr = &rvbParams;
 
+        // effectIndex could be useful for tracking multiple reverbs
         FAudio.FAudioVoice_SetEffectParameters(device.ReverbVoice, 0, (IntPtr)rvbParamsPtr, (uint)MarshalHelper.SizeOf<FAudio.FAudioFXReverbParameters>(), 0);
 
         device.reverbSends = new FAudio.FAudioVoiceSends();

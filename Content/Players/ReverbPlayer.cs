@@ -1,8 +1,9 @@
 ﻿using Terraria.ModLoader;
+using TerrariaAmbience.Sounds.SFXEffects;
 
 namespace TerrariaAmbience.Content.Players;
 
 public class ReverbPlayer : ModPlayer
 {
-    public float ReverbFactor { get; set; }
+    public FilterParams LatestParams { get; set; }
 }

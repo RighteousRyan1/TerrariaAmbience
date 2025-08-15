@@ -1,27 +1,28 @@
 using Microsoft.Xna.Framework;
-using Terraria;
-using Terraria.ModLoader;
-using Terraria.ID;
-using Terraria.UI.Chat;
-using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Graphics;
-using System.Linq;
 using Microsoft.Xna.Framework.Input;
-using TerrariaAmbience.Helpers;
+using ReLogic.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Linq;
+using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
-using System.Diagnostics;
-using System.Data;
-using TerrariaAmbience.Content.AmbientAndMore;
-using TerrariaAmbienceAPI.Common;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.UI.Chat;
 using TerrariaAmbience.Common.Systems;
+using TerrariaAmbience.Content.AmbientAndMore;
+using TerrariaAmbience.Content.Players;
+using TerrariaAmbience.Helpers;
+using TerrariaAmbienceAPI.Common;
 
 namespace TerrariaAmbience.Core;
 
-internal class MethodDetours
-{
-    public static void DetourAll()
-    {
+internal class MethodDetours {
+    public static void DetourAll() {
         ContentInstance.Register(new GeneralHelpers());
 
         On_Main.DrawMenu += Main_DrawMenu;
@@ -32,33 +33,26 @@ internal class MethodDetours
         posY = 4;
     }
 
-    public static void MenuDetours_On_AddMenuButtons(MenuDetours.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons)
-    {
+    public static void MenuDetours_On_AddMenuButtons(MenuDetours.Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons) {
         // GeneralHelpers.AddMainMenuButton("Ambience Menu", delegate { Main.menuMode = 999; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
         orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
     }
     static bool oldHover;
     static bool hovering;
     // disposing sounds in draw code?
-    static bool DrawVolumeValues(On_IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over)
-    {
+    static bool DrawVolumeValues(On_IngameOptions.orig_DrawRightSide orig, SpriteBatch sb, string txt, int i, Vector2 anchor, Vector2 offset, float scale, float colorScale, Color over) {
         Rectangle hoverPos = new((int)anchor.X - 65, (int)anchor.Y + 119, 275, 15);
-        if (i == 14)
-        {
+        if (i == 14) {
             hovering = hoverPos.Contains(Main.MouseScreen.ToPoint());
         }
 
-        if (!oldHover && hovering)
-        {
+        if (!oldHover && hovering) {
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
         oldHover = hovering;
-        if (IngameOptions.category == 2)
-        {
-            if (i == 3)
-            {
-                if (Main.FrameSkipMode == Terraria.Enums.FrameSkipMode.Subtle)
-                {
+        if (IngameOptions.category == 2) {
+            if (i == 3) {
+                if (Main.FrameSkipMode == Terraria.Enums.FrameSkipMode.Subtle) {
                     txt = "Frame Skip Subtle (WARNING)";
                 }
             }
@@ -67,11 +61,13 @@ internal class MethodDetours
     }
 
     static Vector2 drawPos;
-    static string displayable;
-    private static void Main_DrawInterface_30_Hotbar(On_Main.orig_DrawInterface_30_Hotbar orig, Main self)
-    {
+    static string column1;
+    static string column2;
+
+    private static void Main_DrawInterface_30_Hotbar(On_Main.orig_DrawInterface_30_Hotbar orig, Main self) {
         orig(self);
-        displayable = string.Empty;
+        column1 = string.Empty;
+        column2 = string.Empty;
 
         if (ModContent.GetInstance<GeneralConfig>().debugInterface) {
             #region DrawVolume
@@ -79,19 +75,27 @@ internal class MethodDetours
             var ambPlayer = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
 
             bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
+
+            column1 += $"Ambience Name/Volume:";
             foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
-                displayable += $"{amb.Name}: {amb.volume:0.####}\n";
+                column1 += $"\n{amb.Name}: {amb.volume:0.####}";
             }
-            displayable += $"\nTile Registry (Is player on?):\n";
+            column2 += $"Tile Registry (Is player on?):\n";
             foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
                 var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
-                displayable += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
+                column2 += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
                     && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
                 // it doesnt update unless player is on ground... hmmm fix?
             }
-            displayable += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
-                + $"\nPlayer Reverb Gain: {Main.LocalPlayer.GetModPlayer<ReverbPlayer>().ReverbFactor}"
-                + $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
+            var latest = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
+            column2 += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
+                + $"\nPlayer Filters: "+ 
+                $"\n    ReverbGain: {latest.ReverbGain}" +
+                $"\n    DecayTime: {latest.Reverb.DecayTime}" +
+                $"\n    RoomSize: {latest.Reverb.RoomSize}" +
+                $"\n    RefDelay: {latest.Reverb.ReflectionsDelay}" +
+                $"\n    EarlyDiff: {latest.Reverb.EarlyDiffusion}" + 
+                $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
             var fontToUse = FontAssets.DeathText.Value;
 
@@ -103,25 +107,51 @@ internal class MethodDetours
                 drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 5, 80);
             if ((Main.mapStyle == 0 || Main.mapStyle == 2) && !Main.playerInventory)
                 drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 20, 80);
-            drawPos.X -= FontAssets.DeathText.Value.MeasureString(displayable).X * 0.24f;
-            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
+
+            drawPos.X -= FontAssets.DeathText.Value.MeasureString(column1).X * 0.24f;
+            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(
                     (int)drawPos.X - 6,
                     (int)drawPos.Y - 6,
-                    (int)(fontToUse.MeasureString(displayable).X * 0.24f),
-                    (int)(fontToUse.MeasureString(displayable).Y * 0.23f)), 
+                    (int)(fontToUse.MeasureString(column1).X * 0.24f),
+                    (int)(fontToUse.MeasureString(column1).Y * 0.23f)),
                 Color.SkyBlue * 0.6f);
 
             ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
-                fontToUse, 
-                displayable,
-                position: drawPos, 
-                Color.LightGray, 
-                0f, 
-                origin: Vector2.Zero, 
-                baseScale: new Vector2(0.225f), 
-                -1, 
+                fontToUse,
+                column1,
+                position: drawPos,
+                Color.LightGray,
+                0f,
+                origin: Vector2.Zero,
+                baseScale: new Vector2(0.225f),
+                -1,
                 1);
+
+            #region DrawColumn2
+
+            drawPos.X -= 200;
+
+            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle(
+                   (int)drawPos.X - 6,
+                   (int)drawPos.Y - 6,
+                    (int)(fontToUse.MeasureString(column2).X * 0.24f),
+                    (int)(fontToUse.MeasureString(column2).Y * 0.23f)),
+                Color.SkyBlue * 0.6f);
+
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
+                fontToUse,
+                column2,
+                position: drawPos,
+                Color.LightGray,
+                0f,
+                origin: Vector2.Zero,
+                baseScale: new Vector2(0.225f),
+                -1,
+                1);
+
+            #endregion
 
             var stepsDetected = TerrariaAmbience.DefaultFootstepHandler.AllSounds.Where(x => x.IsPlayerOnAnyTile).Select(x => x.Name);
             var text = string.Join(", ", stepsDetected);
@@ -157,18 +187,19 @@ internal class MethodDetours
                 $"\nSkyToUnderground: {GradientGlobals.SkyToUnderground}" +
                 $"\nIsInRoom: {RoomDetectionPlayer.IsInRoom}" +
                 $"\nModBiome(s): {(b.Count > 0 ? string.Join(", ", b.Select(x => x.Name)) : "N/A")}";
-            Vector2 offset = new(-300, 0);
-            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
-                new Rectangle((int)(drawPos.X + offset.X - 6), 
-                (int)(drawPos.Y + offset.Y - 6), 
-                (int)(fontToUse.MeasureString(txt).X * 0.24f), 
-                (int)(fontToUse.MeasureString(txt).Y * 0.23f)), 
+
+            drawPos.X -= 300;
+            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle((int)(drawPos.X - 6),
+                (int)(drawPos.Y - 6),
+                (int)(fontToUse.MeasureString(txt).X * 0.24f),
+                (int)(fontToUse.MeasureString(txt).Y * 0.23f)),
                 Color.DarkOrange * 0.6f);
 
             ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
                 fontToUse,
                 txt,
-                drawPos - new Vector2(3, 3) + offset,
+                drawPos - new Vector2(3, 3),
                 Color.White,
                 0f,
                 Vector2.Zero,
@@ -176,8 +207,7 @@ internal class MethodDetours
 
             if (GeneralHelpers.KeyPress(Keys.L))
                 new ActiveSound(SoundID.ZombieMoan, Main.MouseWorld);
-            if (GeneralHelpers.KeyPress(Keys.K))
-            {
+            if (GeneralHelpers.KeyPress(Keys.K)) {
                 int choice = Main.rand.Next(0, 2);
                 if (choice == 1)
                     AudioLoopsSystem.grassCritters[Main.rand.Next(AudioLoopsSystem.grassCritters.Length)]?.Play(Main.MouseWorld, 0.75f);
@@ -198,8 +228,7 @@ internal class MethodDetours
     static float posX;
     static float posY;
     static bool active;
-    static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime)
-    {
+    static void Main_DrawMenu(On_Main.orig_DrawMenu orig, Main self, GameTime gameTime) {
         Mod mod = ModContent.GetInstance<TerrariaAmbience>();
 
         posX = MathHelper.Clamp(posX, -325, -16);
@@ -208,43 +237,33 @@ internal class MethodDetours
         string server = $"Discord Server";
 
         var click2Activate = new Rectangle((int)posX + 330, (int)posY, 12, 20);
-        if (Main.menuMode == 0 && AmbientDisplaySystem.Arrow is not null)
-        {
+        if (Main.menuMode == 0 && AmbientDisplaySystem.Arrow is not null) {
             Main.spriteBatch.SafeDraw(AmbientDisplaySystem.Arrow,
                 new Vector2(posX + 330, posY), null, Color.White, 0f, Vector2.Zero, 0.6f,
                 !active ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 1f);
         }
-        var rect = new Rectangle((int)posX + 223, (int)posY, (int)(FontAssets.DeathText.Value.MeasureString(server).X * 0.35f), 
+        var rect = new Rectangle((int)posX + 223, (int)posY, (int)(FontAssets.DeathText.Value.MeasureString(server).X * 0.35f),
             (int)(FontAssets.DeathText.Value.MeasureString(server).Y * 0.25f));
         // Main.spriteBatch.Draw(Main.magicPixel, click2Activate, Color.White * 0.35f);
         bool hovering = rect.Contains(Main.MouseScreen.ToPoint());
         bool hoverAct = click2Activate.Contains(Main.MouseScreen.ToPoint());
 
-        if (Main.menuMode == 0)
-        {
-            if (hoverAct)
-            {
-                if (Main.mouseRight)
-                {
-                    if (Main.MouseScreen.Y < Main.screenHeight && Main.MouseScreen.Y > 0)
-                    {
+        if (Main.menuMode == 0) {
+            if (hoverAct) {
+                if (Main.mouseRight) {
+                    if (Main.MouseScreen.Y < Main.screenHeight && Main.MouseScreen.Y > 0) {
                         posY = Main.MouseScreen.Y - 10;
                     }
                 }
-                if (Main.mouseLeft && Main.mouseLeftRelease)
-                {
+                if (Main.mouseLeft && Main.mouseLeftRelease) {
                     SoundEngine.PlaySound(SoundID.MenuTick);
                     active = !active;
                 }
             }
-            if (hovering)
-            {
-                if (Main.mouseLeft && Main.mouseLeftRelease)
-                {
-                    if (active)
-                    {
-                        Process.Start(new ProcessStartInfo("https://discord.gg/pT2BzSG")
-                        {
+            if (hovering) {
+                if (Main.mouseLeft && Main.mouseLeftRelease) {
+                    if (active) {
+                        Process.Start(new ProcessStartInfo("https://discord.gg/pT2BzSG") {
                             UseShellExecute = true
                         });
                     }
@@ -252,7 +271,7 @@ internal class MethodDetours
             }
         }
         posX += active ? 20f : -20f;
-        
+
         if (Main.menuMode == 0 && ModContent.GetInstance<UIConfig>().showMainMenuUi) {
             ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, viewPost, new Vector2(posX, posY), Color.LightGray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
             ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.DeathText.Value, server, new Vector2(posX + (int)(FontAssets.DeathText.Value.MeasureString(viewPost).X * 0.35f) + 10, posY), hovering ? Color.White : Color.Gray, 0f, Vector2.Zero, new Vector2(0.35f, 0.35f), 0, 1);
