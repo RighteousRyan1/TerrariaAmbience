@@ -35,8 +35,8 @@ public class SpookyModSupport : ModSystem {
             Console.WriteLine();
 
             var dah = TerrariaAmbience.DefaultAmbientHandler;
-            dah.AddModBiomeTo(mod, dah.ModdedForests, "SpookyBiome");
-            dah.AddModBiomeTo(mod, dah.ModdedEvilCorruptions, "CemeteryBiome");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedForests, "SpookyBiome");
+            AmbientHandler.AddModBiomeTo(mod, dah.ModdedEvilCorruptions, "CemeteryBiome");
         }
     }
 }

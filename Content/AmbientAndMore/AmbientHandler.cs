@@ -9,8 +9,7 @@ using System.Linq;
 using System;
 using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
-using Terraria.ID;
-using TerrariaAmbience.Sounds;
+using TerrariaAmbience.Sounds.SFXEffects.FAudioHacks;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -24,45 +23,45 @@ public class AmbientHandler {
 
     public float TransitionHarshness;
 
-    public ModAmbience BreezeLight;
-    public ModAmbience BreezeHeavy;
+    public ModStreamedAmbience BreezeLight;
+    public ModStreamedAmbience BreezeHeavy;
 
-    public ModAmbience ForestMorning;
-    public ModAmbience ForestDay;
-    public ModAmbience ForestEvening;
-    public ModAmbience ForestNight;
+    public ModStreamedAmbience ForestMorning;
+    public ModStreamedAmbience ForestDay;
+    public ModStreamedAmbience ForestEvening;
+    public ModStreamedAmbience ForestNight;
 
-    public ModAmbience Desert;
+    public ModStreamedAmbience Desert;
 
-    public ModAmbience SnowDay;
-    public ModAmbience SnowNight;
+    public ModStreamedAmbience SnowDay;
+    public ModStreamedAmbience SnowNight;
     // when it's snowy AND windy!
-    public ModAmbience SnowAggro;
+    public ModStreamedAmbience SnowAggro;
 
-    public ModAmbience JungleDay;
-    public ModAmbience JungleNight;
-    public ModAmbience JungleUndergroundDay; // aka swamp
-    public ModAmbience JungleUndergroundNight;
+    public ModStreamedAmbience JungleDay;
+    public ModStreamedAmbience JungleNight;
+    public ModStreamedAmbience JungleUndergroundDay; // aka swamp
+    public ModStreamedAmbience JungleUndergroundNight;
 
-    public ModAmbience BeachCalm;
+    public ModStreamedAmbience BeachCalm;
     // when it's watery AND windy!
-    public ModAmbience BeachAggro;
+    public ModStreamedAmbience BeachAggro;
 
-    public ModAmbience EvilsCrimson;
-    public ModAmbience EvilsCorruption;
+    public ModStreamedAmbience EvilsCrimson;
+    public ModStreamedAmbience EvilsCorruption;
 
-    public ModAmbience CavernLayer;
+    public ModStreamedAmbience CavernLayer;
 
-    public ModAmbience Hell;
+    public ModStreamedAmbience Hell;
 
-    public ModAmbience Underwater;
-    public ModAmbience UnderwaterDeep;
+    public ModStreamedAmbience Underwater;
+    public ModStreamedAmbience UnderwaterDeep;
 
-    public ModAmbience RainLight;
-    public ModAmbience RainMed;
-    public ModAmbience RainHeavy;
+    public ModStreamedAmbience RainLight;
+    public ModStreamedAmbience RainMed;
+    public ModStreamedAmbience RainHeavy;
 
-    public List<ModAmbience> Ambiences { get; private set; }
+    public List<ModStreamedAmbience> Ambiences { get; private set; }
 
     // since ModAmbience can't really do campfire stuff. lul.
     // well it technically could...
@@ -207,8 +206,8 @@ public class AmbientHandler {
 
         // finally, we add all of them via reflection because manual labor is stupid.
         Ambiences = [];
-        foreach (var fld in GetType().GetFields().Where(x => x.FieldType.TypeHandle.Equals(typeof(ModAmbience).TypeHandle))) {
-            Ambiences.Add((ModAmbience)fld.GetValue(this));
+        foreach (var fld in GetType().GetFields().Where(x => x.FieldType.TypeHandle.Equals(typeof(ModStreamedAmbience).TypeHandle))) {
+            Ambiences.Add((ModStreamedAmbience)fld.GetValue(this));
         }
     }
 
@@ -351,6 +350,13 @@ public class AmbientHandler {
 
             Underwater.MaxVolume = underwaterLightGradient;
             UnderwaterDeep.MaxVolume = underwaterDeepGradient;
+        }
+
+        foreach (var amb in Ambiences) {
+            var mlp = Main.LocalPlayer.GetModPlayer<ReverbPlayer>();
+            amb.SoundInstance?.INTERNAL_applyReverb(1f);
+            //if (amb.SoundInstance != null)
+            //    FAudioReverbController.ApplyCustomReverb(amb.SoundInstance, mlp.LatestParams.ReverbGain, mlp.LatestParams);
         }
 
         // Main.NewText(EvilsCorruption.AreConditionsMet + ", " + EvilsCorruption.IsPlaying);
