@@ -55,20 +55,6 @@ Configs: {
 			Tooltip: Sprawia, że dźwięki mają współczynnik pogłosu zależny od środowiska lub głębokości, w zależności od ustawień pogłosu, które masz włączone.
 		}
 
-		ugReverbCalculation: {
-			Label: Ulepszone obliczenia pogłosu (Podziemia)
-			Tooltip:
-				'''
-				"W warstwie jaskiń matematyka obliczania pogłosu jest nieco zmieniona.
-				Włączona może stanowić problemem dla procesorów o niższej wydajności.
-				'''
-		}
-
-		surfaceReverbCalculation: {
-			Label: Ulepszone obliczenia pogłosu (Powierzchnia)
-			Tooltip: Przełącz obliczenia pogłosu na powierzchni.
-		}
-
 		advancedReverbCalculation: {
 			Label: Zaawansowane obliczenia pogłosu
 			Tooltip:

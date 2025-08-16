@@ -5,7 +5,7 @@ using TerrariaAmbience.Helpers;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Microsoft.Xna.Framework.Audio;
-using TerrariaAmbience.Sounds.SFXEffects;
+using TerrariaAmbience.Sounds.SoundFilters;
 using Terraria.ID;
 using System.Collections.Generic;
 using System;

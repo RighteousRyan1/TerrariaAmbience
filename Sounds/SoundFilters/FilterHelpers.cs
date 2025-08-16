@@ -2,14 +2,12 @@
 using Microsoft.Xna.Framework.Audio;
 using System.Reflection;
 using Terraria;
-using Terraria.Audio;
-using Terraria.ModLoader;
-using TerrariaAmbience.Sounds.SFXEffects.FAudioHacks;
+using TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
 
-namespace TerrariaAmbience.Sounds.SFXEffects;
+namespace TerrariaAmbience.Sounds.SoundFilters;
 
-public static class AudioModifier {
-    public const string FILTER_ISSUE_WARNING = "Error applying sound filters. Check the pins in the [c/FFFF00:#bug-reports] channel in the [c/5865F2:Discord] server in the top left of the main menu.";
+public static class FilterHelpers {
+    public const string FILTER_ISSUE_WARNING = "Error applying sound filter for {0}. Check the pins in the [c/FFFF00:#bug-reports] channel in the [c/5865F2:Discord] server in the top left of the main menu.";
 
     public static SoundEffectInstance ApplyReverb(this SoundEffectInstance instance, float gain, FilterParams param = default) {
         try {
@@ -20,7 +18,7 @@ public static class AudioModifier {
             return instance;
         }
         catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
+            Main.NewText(string.Format(FILTER_ISSUE_WARNING, "Reverb"), Color.Red);
             return instance;
         }
     }
@@ -32,7 +30,7 @@ public static class AudioModifier {
             return instance;
         }
         catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
+            Main.NewText(string.Format(FILTER_ISSUE_WARNING, "LowPass"), Color.Red);
             return instance;
         }
     }
@@ -44,7 +42,7 @@ public static class AudioModifier {
             return instance;
         }
         catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
+            Main.NewText(string.Format(FILTER_ISSUE_WARNING, "HighPass"), Color.Red);
             return instance;
         }
     }
@@ -56,7 +54,7 @@ public static class AudioModifier {
             return instance;
         }
         catch {
-            Main.NewText(FILTER_ISSUE_WARNING, Color.Red);
+            Main.NewText(string.Format(FILTER_ISSUE_WARNING, "BandPass"), Color.Red);
             return instance;
         }
     }

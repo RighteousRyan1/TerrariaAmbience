@@ -1,12 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content;
-using TerrariaAmbience.Content.AmbientAndMore;
-using TerrariaAmbience.Content.Players;
 
 namespace TerrariaAmbience.Core;
 

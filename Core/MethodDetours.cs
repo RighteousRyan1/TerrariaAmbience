@@ -17,6 +17,7 @@ using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Content.Players;
 using TerrariaAmbience.Helpers;
+using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbienceAPI.Common;
 
 namespace TerrariaAmbience.Core;
@@ -87,7 +88,7 @@ internal class MethodDetours {
                     && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
                 // it doesnt update unless player is on ground... hmmm fix?
             }
-            var latest = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
+            var latest = SoundFilterSystem.LatestParams;
             column2 += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
                 + $"\nPlayer Filters: "+ 
                 $"\n    ReverbGain: {latest.ReverbGain}" +
@@ -95,7 +96,6 @@ internal class MethodDetours {
                 $"\n    RoomSize: {latest.Reverb.RoomSize}" +
                 $"\n    RefDelay: {latest.Reverb.ReflectionsDelay}" +
                 $"\n    EarlyDiff: {latest.Reverb.EarlyDiffusion}" +
-                $"\n    RoomFreq: {latest.Reverb.RoomFilterFreq}" + 
                 $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
             var fontToUse = FontAssets.DeathText.Value;
@@ -224,6 +224,37 @@ internal class MethodDetours {
                 }
             }
             #endregion
+
+            // draw reverb material registry
+            txt = "Wall Insulators:";
+            drawPos.X -= 300;
+
+            for (int i = 0; i < SoundFilterSystem.lowReverbWalls.Count; i++) {
+                var lowR = SoundFilterSystem.lowReverbWalls.ElementAt(i);
+                var wallName = WallID.Search.GetName(lowR);
+
+                if (i % 3 == 0) txt += Environment.NewLine;
+                txt += $"{wallName}";
+
+            }
+
+            Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle((int)(drawPos.X - 6),
+                (int)(drawPos.Y - 6),
+                (int)(fontToUse.MeasureString(txt).X * 0.24f),
+                (int)(fontToUse.MeasureString(txt).Y * 0.23f)),
+                Color.DarkMagenta * 0.6f
+            );
+
+            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
+                fontToUse,
+                txt,
+                drawPos - new Vector2(3, 3),
+                Color.White,
+                0f,
+                Vector2.Zero,
+                new Vector2(0.225f), -1, 1
+            );
         }
     }
     static float posX;

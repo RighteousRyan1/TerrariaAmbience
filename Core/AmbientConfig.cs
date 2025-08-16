@@ -106,12 +106,6 @@ public class AudioAdditionsConfig : ModConfig {
     public bool isReverbEnabled;
 
     [DefaultValue(true)]
-    public bool ugReverbCalculation;
-
-    [DefaultValue(true)]
-    public bool surfaceReverbCalculation;
-
-    [DefaultValue(true)]
     public bool advancedReverbCalculation;
 
     [DefaultValue(true)]

@@ -55,20 +55,6 @@ Configs: {
 			Tooltip: Makes sounds have a reverberation factor depending on environment or depth, depending on what settings for reverb you have enabled.
 		}
 
-		ugReverbCalculation: {
-			Label: Enhanced Reverb Calculation (Underground)
-			Tooltip:
-				'''
-				In the cavern layer, the math for calculating reverb is changed a little bit.
-				Having this enabled can be a problem for lower-end CPUs.
-				'''
-		}
-
-		surfaceReverbCalculation: {
-			Label: Enhanced Reverb Calculation (Surface)
-			Tooltip: Toggle surface audio reverb calculations.
-		}
-
 		advancedReverbCalculation: {
 			Label: Advanced Reverb Calculation
 			Tooltip:

@@ -1,19 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using System;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
-using Terraria;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace TerrariaAmbience.Sounds.SFXEffects.FAudioHacks; 
+namespace TerrariaAmbience.Sounds.SoundFilters.FAudioHacks; 
 
-
-// magical shit that does not yet work
 public class FAudioReverbController {
 
-    public static FAudio.FAudioFXReverbParameters DefaultFNAReverb = new() {
+    public static readonly FAudio.FAudioFXReverbParameters DefaultFNAReverb = new() {
         WetDryMix = 100f,
         ReflectionsDelay = 7,
         ReverbDelay = 11,
@@ -62,7 +55,7 @@ public class FAudioReverbController {
 
     static bool _init;
 
-    // something about this code controls the ability for multiple reverb states to be allowed at once
+    // yadda yadda... create more instances somehow. too lazy, too bad.
     public unsafe static void RvInit() {
         if (_init)
             return;
@@ -91,7 +84,7 @@ public class FAudioReverbController {
         reverbDesc->pEffect = reverb;
 
         FAudio.FAudio_CreateSubmixVoice(device.Handle, out device.ReverbVoice, 1,
-            /* Reverb will be omnidirectional */
+            // always omnidirectional reverb
             device.DeviceDetails.OutputFormat.Format.nSamplesPerSec, 0, 0, IntPtr.Zero, chainPtr);
 
         FAudio.FAPOBase_Release(reverb);

@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using Terraria.ModLoader.Core;
 using System.Reflection;
 using TerrariaAmbience.Sounds;
-using TerrariaAmbience.Sounds.SFXEffects;
+using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Content.AddedNPCSounds;
 
@@ -174,7 +174,7 @@ public partial class TerrariaAmbience : Mod {
         DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
         DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
 
-        ReverbAudioSystem.PrecomputeReverbProperties();
+        SoundFilterSystem.PrecomputeReverbProperties();
     }
 
     public override void Unload() {

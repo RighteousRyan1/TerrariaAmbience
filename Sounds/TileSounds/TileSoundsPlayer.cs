@@ -9,7 +9,7 @@ using Terraria.Audio;
 using Microsoft.Xna.Framework;
 using TerrariaAmbience.Content.Players;
 using TerrariaAmbience.Content.AmbientAndMore;
-using TerrariaAmbience.Sounds.SFXEffects;
+using TerrariaAmbience.Sounds.SoundFilters;
 
 namespace TerrariaAmbience.Sounds.TileSounds;
 
@@ -33,17 +33,19 @@ public class TileSoundsPlayer : ModPlayer {
                 int rand = Main.rand.Next(1, 8);
                 Vector2 worldPos = tileCoord.ToVector2().ToWorldCoordinates();
 
-                // var param = ReverbAudioSystem.CreateAudioFX(worldPos, new Vector2(0, -16));
-
-                var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
+                var param = SoundFilterSystem.LatestParams;
 
                 WoodCreak = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/blocks/wood_creak{rand}") {
                     PitchVariance = 0.1f,
                     Volume = 0.04f,
                 };
 
-                var soundInstance = GeneralHelpers.PlaySound(WoodCreak, worldPos).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);
-                if (param.BandPassEnabled) soundInstance.ApplyBandPassFilter(param.BandPassIntensity);
+                var soundInstance = GeneralHelpers.PlaySound(WoodCreak, worldPos);
+                if (soundInstance != null) {
+                    soundInstance.ApplyReverb(param.ReverbGain, param);
+                    if (param.LowPassEnabled) soundInstance.ApplyLowPassFilter(param.LowPassIntensity);
+                    if (param.BandPassEnabled) soundInstance.ApplyBandPassFilter(param.BandPassIntensity);
+                }
             }
         }
     }

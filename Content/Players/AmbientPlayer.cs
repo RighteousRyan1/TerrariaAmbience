@@ -10,7 +10,7 @@ using TerrariaAmbience.Helpers;
 using Terraria.Audio;
 using TerrariaAmbience.Common.Enums;
 using System.Linq;
-using TerrariaAmbience.Sounds.SFXEffects;
+using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbience.Content.AmbientAndMore;
 
 namespace TerrariaAmbience.Content.Players;
@@ -76,7 +76,7 @@ public class AmbientPlayer : ModPlayer
             _showReverbTiles = !_showReverbTiles;
 
         if (_showReverbTiles) {
-            if (genCfg.debugInterface && aaCfg.ugReverbCalculation && aaCfg.advancedReverbCalculation && aaCfg.isReverbEnabled) {
+            if (genCfg.debugInterface && aaCfg.advancedReverbCalculation && aaCfg.isReverbEnabled) {
 
                 bool isUnderground = Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight;
                 bool shouldDrawDust = Main.GameUpdateCount % 10 == 0;
@@ -87,8 +87,8 @@ public class AmbientPlayer : ModPlayer
                 Point gridSize = new(15, 15);
                 Vector2 playerCenter = Player.Center;
 
-                int wallsNear = ReverbAudioSystem.WallsAround(playerCenter, gridSize, out List<Point> wallPoints);
-                int tilesNear = ReverbAudioSystem.TilesAround(playerCenter, gridSize, out List<Point> tilePoints);
+                int wallsNear = SoundFilterSystem.WallsAround(playerCenter, gridSize, out var wallPoints);
+                int tilesNear = SoundFilterSystem.TilesAround(playerCenter, gridSize, out var tilePoints);
 
                 foreach (var tilePos in tilePoints) {
                     Vector2 worldCoords = tilePos.ToVector2() * 16;
@@ -97,7 +97,7 @@ public class AmbientPlayer : ModPlayer
                         new(tilePos.X, tilePos.Y - 1), new(tilePos.X, tilePos.Y + 1)
                     };
 
-                    if (adjacentTiles.Any(adj => ReverbAudioSystem.CanRaycastTo(playerCenter, adj.ToVector2() * 16))) {
+                    if (adjacentTiles.Any(adj => SoundFilterSystem.CanRaycastTo(playerCenter, adj.ToVector2() * 16))) {
                         tileCount++;
                         if (shouldDrawDust) {
                             Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
@@ -107,7 +107,7 @@ public class AmbientPlayer : ModPlayer
 
                 foreach (var wallPos in wallPoints) {
                     Vector2 worldCoords = wallPos.ToVector2() * 16;
-                    if (ReverbAudioSystem.CanRaycastTo(playerCenter, worldCoords)) {
+                    if (SoundFilterSystem.CanRaycastTo(playerCenter, worldCoords)) {
                         wallCount++;
                         if (shouldDrawDust) {
                             Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Red, null);
@@ -176,11 +176,9 @@ public class AmbientPlayer : ModPlayer
         }
     }
     void UpdateReverbParams(uint time) {
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().isReverbEnabled) return;
         if (Main.GameUpdateCount % time != 0) return;
 
-        var param = ReverbAudioSystem.CreateAudioFX(Player.Center);
-        Player.GetModPlayer<ReverbPlayer>().LatestParams = param;
+        SoundFilterSystem.LatestParams = SoundFilterSystem.CreateAudioFX(Player.Center);
     }
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)

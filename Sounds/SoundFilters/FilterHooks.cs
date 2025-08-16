@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using Terraria;
@@ -6,10 +7,11 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaAmbience.Content.Players;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Helpers;
 
-namespace TerrariaAmbience.Sounds.SFXEffects;
+namespace TerrariaAmbience.Sounds.SoundFilters;
 
-public class SoundEffectsModifier : ModSystem
+public class FilterHooks : ModSystem
 {
 	public static List<ActiveSound> dynamicSfxActiveSounds = [];
 	public override void PreSaveAndQuit() {
@@ -26,7 +28,7 @@ public class SoundEffectsModifier : ModSystem
 		foreach (var sfx in dynamicSfxActiveSounds) {
 			if (sfx.Sound is not DynamicSoundEffectInstance self) continue;
 			if (!sfx.Position.HasValue) continue;
-			var param = ReverbAudioSystem.CreateAudioFX(sfx.Position.Value);
+			var param = SoundFilterSystem.CreateAudioFX(sfx.Position.Value);
 
 			if (SoundsThatIgnoreFilters.Contains(sfx.Style)) continue;
 
@@ -41,28 +43,32 @@ public class SoundEffectsModifier : ModSystem
 	private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self) {
 		orig(self);
 
-		// dont apply filters to sounds without positions
-        if (!self.Position.HasValue) return;
-
         var vol = self.Sound.Volume;
-
 		self.Sound.Volume = 0;
+		// self.Sound.Pause();
 		if (self.Sound is DynamicSoundEffectInstance)
 			dynamicSfxActiveSounds.Add(self);
 
-		bool ignoresFilters = SoundsThatIgnoreFilters.Contains(self.Style);
-        // var param = ReverbAudioSystem.CreateAudioFX(self.Position.Value);
-        var param = Main.LocalPlayer.GetModPlayer<ReverbPlayer>().LatestParams;
+        // dont apply filters to sounds without positions
+        if (!self.Position.HasValue) return;
 
-        if (!ignoresFilters) {
-			self.Sound.ApplyReverb(param.ReverbGain / 2, param);
+        bool ignoresFilters = SoundsThatIgnoreFilters.Contains(self.Style);
+
+        if (!ignoresFilters && !Main.gameMenu) {
+            var param = SoundFilterSystem.LatestParams;
+            var playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
+			var bandIntensity = SoundFilterSystem.CalculateBandPass(self.Position.Value, playerUnderwater, out var enableBand);
+
+            self.Sound.ApplyReverb(param.ReverbGain, param);
+
 			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
 				self.Sound.ApplyLowPassFilter(param.LowPassIntensity);
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && param.BandPassEnabled)
-				self.Sound.ApplyBandPassFilter(param.BandPassIntensity);
+			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && enableBand)
+				self.Sound.ApplyBandPassFilter(bandIntensity);
 		}
 
 		// hacky but ok???
+		// self.Sound.Play();
 		self.Sound.Volume = vol;
 	}
 
