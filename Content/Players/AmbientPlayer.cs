@@ -12,6 +12,7 @@ using TerrariaAmbience.Common.Enums;
 using System.Linq;
 using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbience.Content.AmbientAndMore;
+using System.Diagnostics;
 
 namespace TerrariaAmbience.Content.Players;
 
@@ -81,36 +82,43 @@ public class AmbientPlayer : ModPlayer
                 bool isUnderground = Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight;
                 bool shouldDrawDust = Main.GameUpdateCount % 10 == 0;
 
-                if (!isUnderground) return;
+                if (isUnderground) {
 
-                int wallCount = 0, tileCount = 0;
-                Point gridSize = new(15, 15);
-                Vector2 playerCenter = Player.Center;
+                    // int wallCount = 0, tileCount = 0;
+                    Point gridSize = new(15, 15);
+                    Vector2 playerCenter = Player.Center;
 
-                int wallsNear = SoundFilterSystem.WallsAround(playerCenter, gridSize, out var wallPoints);
-                int tilesNear = SoundFilterSystem.TilesAround(playerCenter, gridSize, out var tilePoints);
+                    int wallsNear = SoundFilterSystem.WallsAround(playerCenter, gridSize, out var wallPoints);
+                    int tilesNear = SoundFilterSystem.TilesAround(playerCenter, gridSize, out var tilePoints);
 
-                foreach (var tilePos in tilePoints) {
-                    Vector2 worldCoords = tilePos.ToVector2() * 16;
-                    Point[] adjacentTiles = {
-                        new(tilePos.X - 1, tilePos.Y), new(tilePos.X + 1, tilePos.Y),
+                    TileVisualizationHelpers.TileVisualizations.Add([]);
+
+                    foreach (var tilePos in tilePoints) {
+                        Vector2 worldCoords = tilePos.ToVector2() * 16;
+                        Point[] adjacentTiles = [
+                            new(tilePos.X - 1, tilePos.Y), new(tilePos.X + 1, tilePos.Y),
                         new(tilePos.X, tilePos.Y - 1), new(tilePos.X, tilePos.Y + 1)
-                    };
+                        ];
 
-                    if (adjacentTiles.Any(adj => SoundFilterSystem.CanRaycastTo(playerCenter, adj.ToVector2() * 16))) {
-                        tileCount++;
-                        if (shouldDrawDust) {
-                            Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
+                        if (adjacentTiles.Any(adj => SoundFilterSystem.CanRaycastTo(playerCenter, adj.ToVector2() * 16))) {
+                            TileVisualizationHelpers.TileVisualizations[0].Add(worldCoords, Color.Green);
+                            continue;
+                            // tileCount++;
+                            if (shouldDrawDust) {
+                                Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
+                            }
                         }
                     }
-                }
 
-                foreach (var wallPos in wallPoints) {
-                    Vector2 worldCoords = wallPos.ToVector2() * 16;
-                    if (SoundFilterSystem.CanRaycastTo(playerCenter, worldCoords)) {
-                        wallCount++;
-                        if (shouldDrawDust) {
-                            Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Red, null);
+                    foreach (var wallPos in wallPoints) {
+                        Vector2 worldCoords = wallPos.ToVector2() * 16;
+                        if (SoundFilterSystem.CanRaycastTo(playerCenter, worldCoords)) {
+                            TileVisualizationHelpers.TileVisualizations[0].Add(worldCoords, Color.Red);
+                            continue;
+                            // wallCount++;
+                            if (shouldDrawDust) {
+                                Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Red, null);
+                            }
                         }
                     }
                 }
@@ -125,7 +133,7 @@ public class AmbientPlayer : ModPlayer
             // this essentially just works as a way to not have wet sounds play. no need to do extra magic.
             HasTilesAbove = true;
 
-        UpdateReverbParams(8);
+        UpdateReverbParams(ModContent.GetInstance<AudioAdditionsConfig>().audioFiltersRefreshTime);
 
         // this is left in because my reverb system thinks that the sound originates from within a tile.
         #endregion

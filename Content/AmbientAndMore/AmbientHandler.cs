@@ -86,36 +86,31 @@ public class AmbientHandler {
     public float MaxRain = 0.5f;
 
     public void Initialize() {
-        if (Main.dedServ)
-            return;
+        if (Main.dedServ) return;
 
         var mod = ModContent.GetInstance<TerrariaAmbience>();
 
         BreezeLight = new(mod, AmbientPath + "environment/breeze_light", "BreezeLight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return player.ZoneOverworldHeight && !player.ZoneSkyHeight;
+            return IsStrictlySurface;
         });
         BreezeHeavy = new(mod, AmbientPath + "environment/breeze_heavy", "BreezeHeavy", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return player.ZoneOverworldHeight && !player.ZoneSkyHeight;
+            return IsStrictlySurface;
         });
 
         ForestMorning = new(mod, AmbientPath + $"biome/forest/morning_{Main.rand.Next(1, NUM_MORNING_AMBIENCE)}", "ForestMorning", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x)) || (player.ZoneHallow && !player.ZoneDesert);
+            return InAForest;
         });
         ForestDay = new(mod, AmbientPath + $"biome/forest/day_{Main.rand.Next(1, NUM_DAY_AMBIENCE)}", "ForestDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return (player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x)) || (player.ZoneHallow && !player.ZoneDesert)) &&
-                    Main.dayTime;
+            return InAForest && Main.dayTime;
         });
         ForestEvening = new(mod, AmbientPath + $"biome/forest/evening_{Main.rand.Next(1, NUM_EVENING_AMBIENCE)}", "ForestEvening", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
-            return player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x)) || (player.ZoneHallow && !player.ZoneDesert);
+            return InAForest;
         });
         ForestNight = new(mod, AmbientPath + $"biome/forest/night_{Main.rand.Next(1, NUM_NIGHT_AMBIENCE)}", "ForestNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return (player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(x => player.InModBiome(x))) && !Main.dayTime;
+            return InAForest && !Main.dayTime;
         });
 
         CavernLayer = new(mod, AmbientPath + "biome/cavern/wind", "CavernLayer", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
@@ -124,62 +119,49 @@ public class AmbientHandler {
         });
 
         Desert = new(mod, AmbientPath + "biome/desert/critters", "Desert", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneDesert || ModdedDeserts.Any(x => player.InModBiome(x));
+            return InADesert;
         });
 
         SnowDay = new(mod, AmbientPath + "biome/snow/day", "SnowDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return ((player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(x => player.InModBiome(x))) && Main.dayTime;
+            return InATundra && Main.dayTime;
         });
         SnowNight = new(mod, AmbientPath + "biome/snow/night", "SnowNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return ((player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(x => player.InModBiome(x))) && !Main.dayTime;
+            return InATundra && !Main.dayTime;
         });
         SnowAggro = new(mod, AmbientPath + "biome/snow/windy", "SnowAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return ((player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(x => player.InModBiome(x))) && Main.raining;
+            return InATundra && Main.raining;
         });
         EvilsCrimson = new(mod, AmbientPath + "biome/crimson/rumbles", "EvilsCrimson", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneCrimson || ModdedEvilCrimsons.Any(x => player.InModBiome(x));
+            return InACrimson;
         });
         EvilsCorruption = new(mod, AmbientPath + "biome/corruption/roars", "EvilsCorruption", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneCorrupt || ModdedEvilCorruptions.Any(x => player.InModBiome(x));
+            return InACorruption;
         });
 
         JungleDay = new(mod, AmbientPath + "biome/jungle/day", "JungleDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
+            return InAJungle;
         });
         JungleNight = new(mod, AmbientPath + "biome/jungle/night", "JungleNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
+            return InAJungle;
         });
+        // don't wokr... somehow?
         JungleUndergroundDay = new(mod, AmbientPath + "biome/jungle/underground_day", "JungleUndergroundDay", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
+            return InAJungle;
         });
         JungleUndergroundNight = new(mod, AmbientPath + "biome/jungle/underground_night", "JungleUndergroundNight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return player.ZoneJungle || ModdedJungles.Any(x => player.InModBiome(x));
+            return InAJungle;
         });
 
         BeachCalm = new(mod, AmbientPath + "biome/beach/waves_calm", "BeachCalm", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-
-            return (player.ZoneBeach && !player.ZoneRockLayerHeight) || ModdedBeaches.Any(x => player.InModBiome(x));
+            return InABeach;
         });
         BeachAggro = new(mod, AmbientPath + "biome/beach/waves_aggro", "BeachAggro", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-
-            return (player.ZoneBeach && !player.ZoneRockLayerHeight) || ModdedBeaches.Any(x => player.InModBiome(x));
+            return InABeach;
         });
         Hell = new(mod, AmbientPath + "biome/hell/rumbles", "Hell", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            return true; // we return true because we simply control the volume by the player's level of depth in Update()
+            // save some resources by only controlling this if they're in the underworld
+            return Main.LocalPlayer.position.Y > Main.rockLayer;
         });
-        
         Underwater = new(mod, AmbientPath + "environment/underwater_loop", "Underwater", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
             var player = Main.LocalPlayer;
 
@@ -191,16 +173,13 @@ public class AmbientHandler {
             return player.IsWaterSuffocating();
         });
         RainLight = new(mod, AmbientPath + "rain/light", "RainLight", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return !Main.LocalPlayer.ZoneSnow;
+            return !InATundra;
         });
         RainMed = new(mod, AmbientPath + "rain/med", "RainMedium", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return !Main.LocalPlayer.ZoneSnow;
+            return !InATundra;
         });
         RainHeavy = new(mod, AmbientPath + "rain/heavy", "RainHeavy", maxVolume: 1f, volumeStep: TransitionHarshness, (a) => {
-            var player = Main.LocalPlayer;
-            return !Main.LocalPlayer.ZoneSnow;
+            return !InATundra;
         });
 
         // finally, we add all of them via reflection because manual labor is stupid.
@@ -218,13 +197,23 @@ public class AmbientHandler {
                 ModContent.GetInstance<TerrariaAmbience>().Logger.Error($"Mod Tile '{tile}' not found. Skipping over...");
         }
     }
+
+    public static bool InAForest;
     public List<ModBiome> ModdedForests = [];
+    public static bool InADesert;
     public List<ModBiome> ModdedDeserts = [];
+    public static bool InATundra;
     public List<ModBiome> ModdedTundras = [];
+    public static bool InABeach;
     public List<ModBiome> ModdedBeaches = [];
+    public static bool InAJungle;
     public List<ModBiome> ModdedJungles = [];
+    public static bool InACrimson;
     public List<ModBiome> ModdedEvilCrimsons = [];
+    public static bool InACorruption;
     public List<ModBiome> ModdedEvilCorruptions = [];
+
+    public static bool IsStrictlySurface;
 
     // FROM HERE: I am creating fields that are used to determine ambient noise changes or differences.
     public float WindThreshold = 20f;
@@ -279,7 +268,7 @@ public class AmbientHandler {
         if (Main.dedServ)
             return;
 
-        IsWindTooHarsh = Math.Abs(Main.windSpeedCurrent) >= MaxWind;
+        var player = Main.LocalPlayer;
 
         bool isHarshOk = float.TryParse(ModContent.GetInstance<GeneralConfig>().transitionHarshness, out var harshness);
 
@@ -294,6 +283,18 @@ public class AmbientHandler {
 
         if (Main.gameMenu) return;
 
+        InAForest = player.ZonePurity || player.ZoneMeteor || ModdedForests.Any(player.InModBiome) || (player.ZoneHallow && !player.ZoneDesert);
+        InADesert = player.ZoneDesert || ModdedDeserts.Any(player.InModBiome);
+        InATundra = (player.ZoneSnow && !player.ZoneUnderworldHeight) || ModdedTundras.Any(player.InModBiome);
+        InACrimson = player.ZoneCrimson || ModdedEvilCrimsons.Any(player.InModBiome);
+        InACorruption = player.ZoneCorrupt || ModdedEvilCorruptions.Any(player.InModBiome);
+        InAJungle = player.ZoneJungle || ModdedJungles.Any(player.InModBiome);
+        InABeach = (player.ZoneBeach && !player.ZoneRockLayerHeight) || ModdedBeaches.Any(player.InModBiome);
+
+        IsStrictlySurface = player.ZoneOverworldHeight && !player.ZoneSkyHeight;
+
+        IsWindTooHarsh = Math.Abs(Main.windSpeedCurrent) >= MaxWind;
+
         if (!isHarshOk)
             ModContent.GetInstance<GeneralConfig>().transitionHarshness = "0.01"; // a failsafe in case the player is stupid
 
@@ -305,6 +306,7 @@ public class AmbientHandler {
         // added AllDayPartNight and AllNightPartDay to JungleDay and JungleNight at 11/22/2023 @ 9:33 AM
         JungleDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[0] * 0.75f; // it's a bit loud.
         JungleNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[1] * 0.4f; // it's very loud by default.
+        
         JungleUndergroundDay.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[2];
         JungleUndergroundNight.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[3] * 0.6f; // it's a bit louder than the day variant...
 
@@ -314,7 +316,11 @@ public class AmbientHandler {
         // make quieter / bandpass filter when inside
         Desert.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().desertVolume;
 
-        if (Desert.SoundInstance != null) Desert.SoundInstance.Pitch = Main.dayTime ? 0f : -0.1f;
+        if (Desert.SoundInstance != null) {
+            Desert.SoundInstance.Pitch = 
+                (Main.dayTime ? 0f : -0.1f) - 
+                (InACrimson || InACorruption ? -0.5f : 0f);
+        }
         if (!Underwater.AreConditionsMet) Underwater.VolumeStep = TransitionHarshness * 2.5f;
         else Underwater.VolumeStep = TransitionHarshness;
 
@@ -331,8 +337,6 @@ public class AmbientHandler {
 
         if (Underwater.AreConditionsMet) {
             // do volume lerp between underwater_loop and underwater_loop-deep
-            var player = Main.LocalPlayer;
-
             // check X tiles from the player's head.
             var tileSize = 16;
             var tilesToCheck = 30;

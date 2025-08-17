@@ -99,11 +99,11 @@ public static class GradientGlobals
             FromNoon = (float)Gradient.CreateDouble(Main.time, 0, Main.dayLength) * SkyToUnderground;
             FromMidnight = 0;
 
-            AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -AllDayPartNightOffset, Main.dayLength + AllDayPartNightOffset) * SkyToUnderground;
+            AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -AllDayPartNightOffset, Main.dayLength + AllDayPartNightOffset);
             if (Main.time < Main.dayLength / 2)
-                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -Main.nightLength - AllNightPartDayOffset, AllNightPartDayOffset) * SkyToUnderground;
+                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -Main.nightLength - AllNightPartDayOffset, AllNightPartDayOffset);
             else
-                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, Main.dayLength - AllNightPartDayOffset, Main.dayLength + Main.nightLength + AllNightPartDayOffset) * SkyToUnderground;
+                AllNightPartDay = (float)Gradient.CreateDouble(Main.time, Main.dayLength - AllNightPartDayOffset, Main.dayLength + Main.nightLength + AllNightPartDayOffset);
         }
         else {
             FromEvening = (float)Gradient.CreateDouble(Main.time, -EveningGradOffset, EveningGradOffset) * SkyToUnderground;
@@ -112,10 +112,10 @@ public static class GradientGlobals
             FromMidnight = (float)Gradient.CreateDouble(Main.time, 0, Main.nightLength) * SkyToUnderground;
 
             if (Main.time < Main.nightLength / 2)
-                AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -Main.dayLength - AllDayPartNightOffset, AllDayPartNightOffset) * SkyToUnderground;
+                AllDayPartNight = (float)Gradient.CreateDouble(Main.time, -Main.dayLength - AllDayPartNightOffset, AllDayPartNightOffset);
             else
                 AllDayPartNight = (float)Gradient.CreateDouble(Main.time, Main.nightLength - AllDayPartNightOffset, Main.dayLength + AllDayPartNightOffset) * SkyToUnderground;
-            AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -AllNightPartDayOffset, Main.nightLength + AllNightPartDayOffset) * SkyToUnderground;
+            AllNightPartDay = (float)Gradient.CreateDouble(Main.time, -AllNightPartDayOffset, Main.nightLength + AllNightPartDayOffset);
         }
     }
 }

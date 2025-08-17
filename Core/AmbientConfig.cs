@@ -105,6 +105,9 @@ public class AudioAdditionsConfig : ModConfig {
     [DefaultValue(true)]
     public bool isReverbEnabled;
 
+    [DefaultValue(10)]
+    public uint audioFiltersRefreshTime;
+
     [DefaultValue(true)]
     public bool advancedReverbCalculation;
 

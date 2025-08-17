@@ -1,17 +1,21 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Win32;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using TerrariaAmbience.Content.Players;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
-using static XPT.Core.Audio.MP3Sharp.Decoding.Decoder;
 
 namespace TerrariaAmbience.Sounds.SoundFilters;
 
 public class SoundFilterSystem : ModSystem {
+    public static Vector2 ScreenListeningPosition => Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
     public static FilterParams LatestParams { get; set; }
 
     internal static HashSet<int> lowReverbWalls = [];
@@ -35,26 +39,26 @@ public class SoundFilterSystem : ModSystem {
     // support mods soon too...
     public static void PrecomputeReverbProperties() {
         // compute wall reverb properties
-        for (int i = 0; i < WallID.Search.Count; i++) {
+        for (int i = 0; i < /*WallID.Search.Count*/WallLoader.WallCount; i++) {
             string name = WallID.Search.GetName(i).ToLower();
 
-            if (_noReverbNames.Contains(name))
+            if (_noReverbNames.Any(name.Contains))
                 noReverbWalls.Add(i);
 
             // only runs if it doesn't exist in the no reverb set to go in-hand with the comment left above _noReverbNames
-            else if (_lowReverbNames.Contains(name))
+            else if (_lowReverbNames.Any(name.Contains))
                 lowReverbWalls.Add(i);
         }
 
         // compute tile reverb properties
-        for (int i = 0; i < TileID.Search.Count; i++) {
+        for (int i = 0; i < /*TileID.Search.Count*/TileLoader.TileCount; i++) {
             string name = TileID.Search.GetName(i).ToLower();
 
-            if (_noReverbNames.Contains(name))
+            if (_noReverbNames.Any(name.Contains))
                 noReverbTiles.Add(i);
 
             // same here as well
-            else if (_lowReverbNames.Contains(name))
+            else if (_lowReverbNames.Any(name.Contains))
                 lowReverbTiles.Add(i);
         }
     }
@@ -149,8 +153,8 @@ public class SoundFilterSystem : ModSystem {
         }
 
 
-        HashSet<Point> wallPoints = [];
-        HashSet<Point> tilePoints = [];
+        HashSet<Point> wallPoints;
+        HashSet<Point> tilePoints;
 
         int seenWalls = 0;
         int seenTiles = 0;
@@ -307,22 +311,7 @@ public class SoundFilterSystem : ModSystem {
     }
 
     public static void SetFilterValues(Vector2 position, Vector2 offset, ref FilterParams fParam, bool playerUnderwater) {
-        var goalPos = Main.screenPosition + Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix); // Main.LocalPlayer.Top;
-
-        // Dust.NewDustPerfect(goalPos, DustID.SpelunkerGlowstickSparkle);
-
-        float dist = Vector2.Distance(goalPos, position + offset);
-        var numBlockingTiles = CountTilesTouched(goalPos.ToTileCoordinates(), (position + offset).ToTileCoordinates(), t => t.HasTile && Main.tileSolid[t.TileType]);
-
-        /*float normalized = Math.Clamp(dist / 1500f, 0f, 1f);
-        // p < 1 means approach slows down near 0
-        float p = 0.975f; // sqrt curve — fast drop at first, slower and slower near 0
-        float curve = 1f - MathF.Pow(normalized, p);*/
-
-        // no curve for now...?
-        fParam.LowPassIntensity = Math.Max(1f - numBlockingTiles / 50f /* / curve*/, 0f);
-        fParam.LowPassEnabled = true;
-
+        fParam.LowPassIntensity = CalculateLowPass(position, offset, out fParam.LowPassEnabled);
         fParam.BandPassIntensity = CalculateBandPass(position, playerUnderwater, out fParam.BandPassEnabled);
     }
 
@@ -331,6 +320,80 @@ public class SoundFilterSystem : ModSystem {
         enableBand = underWater || playerUnderwater;
         return (playerUnderwater && !underWater) ? 0.0175f : (underWater && playerUnderwater) ? 0.01f : 0.04f;
     }
+    public static float CalculateLowPass(Vector2 position, Vector2 offset, out bool enabled) {
+        var goalPos = Main.screenPosition + ScreenListeningPosition; // Main.LocalPlayer.Top;
+
+        // Dust.NewDustPerfect(goalPos, DustID.SpelunkerGlowstickSparkle);
+
+        // mult by 2 since 2 feet per block
+        var numBlockingTiles = CountTilesTouched(goalPos.ToTileCoordinates(), 
+            (position + offset).ToTileCoordinates(), 
+            t => t.HasTile && Main.tileSolid[t.TileType]);
+
+        float curve = 1f;
+
+        if (numBlockingTiles > 0) {
+            float dist = Vector2.Distance(goalPos, position + offset);
+            float normalized = Math.Clamp(dist / 2000f, 0f, 1f);
+            // p < 1 means approach slows down near 0
+            float p = 0.25f; // fast drop at first, slower and slower near 0 (cuz filter semantics)
+            curve = 1f - MathF.Pow(normalized, p);
+        }
+
+        enabled = true;
+        var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
+        // Debug.WriteLine($"{numBlockingTiles} - {occlusion}, {curve}");
+
+        return occlusion * curve;
+    }
+
+    public static float PitchFromPerFrame(
+            Vector2 srcPosPx, Vector2 srcVelPxPerFrame,
+            Vector2 lisPosPx, Vector2 lisVelPxPerFrame,
+            float speedOfSoundTilesPerSec = 100f,              // tweak by ear: 60..125 tiles/s
+            float minRatio = 0.5f, float maxRatio = 2.0f)      // safety
+        {
+        // convert velocities to pixels/second (Terraria runs at 60 updates/sec)
+        const float Tps = 60f;
+        Vector2 srcVelPxPerSec = srcVelPxPerFrame * Tps;
+        Vector2 lisVelPxPerSec = lisVelPxPerFrame * Tps;
+
+        float cPxPerSec = speedOfSoundTilesPerSec * 16f;   // tiles/s -> px/s
+        return PitchFromPerSecond(srcPosPx, srcVelPxPerSec, lisPosPx, lisVelPxPerSec, cPxPerSec, minRatio, maxRatio);
+    }
+
+    // ---- helper when your velocities are already in pixels/second ----
+    public static float PitchFromPerSecond(
+        Vector2 srcPosPx, Vector2 srcVelPxPerSec,
+        Vector2 lisPosPx, Vector2 lisVelPxPerSec,
+        float speedOfSoundPxPerSec,
+        float minRatio = 0.5f, float maxRatio = 2.0f) {
+        Vector2 d = srcPosPx - lisPosPx;
+        float len = d.Length();
+        if (len < 1e-4f) return 0f;                // same spot → no shift
+
+        Vector2 n = d / len;                       // listener→source unit vector
+
+        // Radial components (+ toward each other)
+        float vSourceToward = -Vector2.Dot(srcVelPxPerSec, n);
+        float vListenerToward = Vector2.Dot(lisVelPxPerSec, n);
+
+        float c = MathF.Max(1e-3f, speedOfSoundPxPerSec);
+
+        // Classic Doppler frequency ratio
+        float ratio = (c + vListenerToward) / (c - vSourceToward);
+
+        // Keep it sane
+        ratio = MathHelper.Clamp(ratio, minRatio, maxRatio);
+
+        // MonoGame SoundEffectInstance.Pitch uses octaves (log2 of ratio)
+        float pitchOct = MathF.Log(ratio, 2f);
+        return MathHelper.Clamp(pitchOct, -1f, 1f);
+    }
+
+    // simple exponential smoothing (call each tick)
+    public static float SmoothPitch(float currentPitch, float targetPitch, float lerpFactor = 0.2f)
+        => MathHelper.Lerp(currentPitch, targetPitch, lerpFactor);
 
     public static int CountTilesTouched(Point start, Point end, Func<Tile, bool> predicate = null) {
         int count = 0;
@@ -372,5 +435,90 @@ public class SoundFilterSystem : ModSystem {
 
         return count;
     }
+    /*public static bool IsPlayerInEnclosedSpace(Player player, RoomDetails roomDetails = null, bool requireWalls = true) {
+        int originX = (int)(player.Center.X / 16);
+        int originY = (int)(player.Center.Y / 16);
 
+        if (!WorldGen.InWorld(originX, originY))
+            return false;
+
+        // visited is a window around the player
+        bool[,] visited = new bool[MAX_ROOM_WIDTH * 2, MAX_ROOM_HEIGHT * 2];
+        Queue<Point> queue = new();
+
+        // seed
+        queue.Enqueue(new Point(originX, originY));
+        visited[MAX_ROOM_WIDTH, MAX_ROOM_HEIGHT] = true;
+
+        int minX = originX, maxX = originX;
+        int minY = originY, maxY = originY;
+        int areaCount = 0;
+        bool reachedEdge = false;
+        bool foundMissingWall = false;
+
+        while (queue.Count > 0) {
+            var dq = queue.Dequeue();
+            int x = dq.X, y = dq.Y;
+            areaCount++;
+
+            // update bounds
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+
+            if (!WorldGen.InWorld(x, y)) {
+                reachedEdge = true;
+                break;
+            }
+
+            // current tile & properties
+            Tile cur = Main.tile[x, y];
+            bool curSolid = IsTileSolid(cur);
+            bool curHasWall = cur.WallType > 0;
+
+            // If we require walls, then any *non-solid* interior tile that lacks a wall invalidates the room.
+            // (We ignore solid tiles for wall requirement; doors/walls handled in IsTileSolid.)
+            if (requireWalls && !curSolid && !curHasWall) {
+                foundMissingWall = true;
+                // we can bail early to save time; no need to keep filling
+                break;
+            }
+
+            // bounds/area limits
+            if (areaCount > MAX_ROOM_AREA ||
+                (maxX - minX) > MAX_ROOM_WIDTH ||
+                (maxY - minY) > MAX_ROOM_HEIGHT) {
+                reachedEdge = true;
+                break;
+            }
+
+            // proximity to world edge
+            if (x <= 5 || x >= Main.maxTilesX - 5 || y <= 5 || y >= Main.maxTilesY - 5) {
+                reachedEdge = true;
+                break;
+            }
+
+            // enqueue neighbors (we pass origin to compute visited indices correctly)
+            CheckAndEnqueue(x + 1, y, originX, originY, queue, visited);
+            CheckAndEnqueue(x - 1, y, originX, originY, queue, visited);
+            CheckAndEnqueue(x, y + 1, originX, originY, queue, visited);
+            CheckAndEnqueue(x, y - 1, originX, originY, queue, visited);
+        }
+
+        bool isEnclosed = !reachedEdge && (!requireWalls || !foundMissingWall);
+
+        if (roomDetails != null && isEnclosed) {
+            roomDetails.Width = maxX - minX + 1;
+            roomDetails.Height = maxY - minY + 1;
+            roomDetails.Area = areaCount;
+            roomDetails.MinX = minX;
+            roomDetails.MinY = minY;
+            roomDetails.MaxX = maxX;
+            roomDetails.MaxY = maxY;
+            roomDetails.WallsSatisfied = !foundMissingWall;
+        }
+
+        return isEnclosed;
+    }*/
 }

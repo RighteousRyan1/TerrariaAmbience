@@ -64,41 +64,24 @@ internal class MethodDetours {
     static Vector2 drawPos;
     static string column1;
     static string column2;
+    internal static byte viewMode;
 
     private static void Main_DrawInterface_30_Hotbar(On_Main.orig_DrawInterface_30_Hotbar orig, Main self) {
         orig(self);
         column1 = string.Empty;
         column2 = string.Empty;
 
-        if (ModContent.GetInstance<GeneralConfig>().debugInterface) {
-            #region DrawVolume
+        if (!ModContent.GetInstance<GeneralConfig>().debugInterface) return;
 
-            var ambPlayer = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
-
-            bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
-
+        #region DrawVolume
+        string txt = string.Empty;
+        var fontToUse = FontAssets.DeathText.Value;
+        var ambPlayer = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
+        if (viewMode >= 0) {
             column1 += $"Ambience Name/Volume:";
             foreach (var amb in TerrariaAmbience.DefaultAmbientHandler.Ambiences) {
                 column1 += $"\n{amb.Name}: {amb.Volume:0.###}";
             }
-            column2 += $"Tile Registry (Is player on?):\n";
-            foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
-                var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
-                column2 += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
-                    && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
-                // it doesnt update unless player is on ground... hmmm fix?
-            }
-            var latest = SoundFilterSystem.LatestParams;
-            column2 += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
-                + $"\nPlayer Filters: "+ 
-                $"\n    ReverbGain: {latest.ReverbGain}" +
-                $"\n    DecayTime: {latest.Reverb.DecayTime}" +
-                $"\n    RoomSize: {latest.Reverb.RoomSize}" +
-                $"\n    RefDelay: {latest.Reverb.ReflectionsDelay}" +
-                $"\n    EarlyDiff: {latest.Reverb.EarlyDiffusion}" +
-                $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
-
-            var fontToUse = FontAssets.DeathText.Value;
 
             if (Main.playerInventory && (Main.mapStyle == 0 || Main.mapStyle == 2))
                 drawPos = new Vector2(Main.screenWidth - Main.screenWidth / 7, 80);
@@ -117,21 +100,36 @@ internal class MethodDetours {
                     (int)(fontToUse.MeasureString(column1).X * 0.24f),
                     (int)(fontToUse.MeasureString(column1).Y * 0.23f)),
                 Color.SkyBlue * 0.6f);
-
             ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
                 fontToUse,
                 column1,
                 position: drawPos,
-                Color.LightGray,
-                0f,
+                Color.LightGray, 0f,
                 origin: Vector2.Zero,
-                baseScale: new Vector2(0.225f),
-                -1,
-                1);
+                baseScale: new Vector2(0.225f), -1, 1);
+        }
+        if (viewMode >= 1) {
+            bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
+            column2 += $"Tile Registry (Is player on?):\n";
+            foreach (var step in TerrariaAmbience.DefaultFootstepHandler.AllSounds) {
+                var meetsConditions = (step.FootstepConditions is not null && step.FootstepConditions.Invoke(Main.LocalPlayer)) || step.FootstepConditions is null;
+                column2 += $"{step.Name}: {(step.IsPlayerOnAnyTile && meetsConditions
+                    && Main.LocalPlayer.velocity.Y == 0 ? "Yes" : "No")}\n";
+                // it doesnt update unless player is on ground... hmmm fix?
+            }
+            var latest = SoundFilterSystem.LatestParams;
+            column2 += $"CurTile: " + (PlayerTileChecker.TileId >= 0 ? (isVanillaTile ? name + $" | ID: {PlayerTileChecker.TileId}" : TileLoader.GetTile(PlayerTileChecker.TileId).Name + $" ({TileLoader.GetTile(PlayerTileChecker.TileId).Mod.Name})") : "None")
+                + $"\nPlayer Filters: " +
+                $"\n    ReverbGain: {latest.ReverbGain}" +
+                $"\n    DecayTime: {latest.Reverb.DecayTime}" +
+                $"\n    RoomSize: {latest.Reverb.RoomSize}" +
+                $"\n    RefDelay: {latest.Reverb.ReflectionsDelay}" +
+                $"\n    EarlyDiff: {latest.Reverb.EarlyDiffusion}" +
+                $"\nIsUnderground: {Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneDirtLayerHeight}";
 
             #region DrawColumn2
 
-            drawPos.X -= 200;
+            drawPos.X -= 300;
 
             Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle(
@@ -153,30 +151,31 @@ internal class MethodDetours {
                 1);
 
             #endregion
+        }
 
-            var stepsDetected = TerrariaAmbience.DefaultFootstepHandler.AllSounds.Where(x => x.IsPlayerOnAnyTile).Select(x => x.Name);
-            var text = string.Join(", ", stepsDetected);
-            float scale = 0.25f;
-            var measure = fontToUse.MeasureString(text) * scale;
-            var infoPos = new Vector2(Main.screenWidth / 2, 8);
+        // draws the little debug text at the top
+        var stepsDetected = TerrariaAmbience.DefaultFootstepHandler.AllSounds.Where(x => x.IsPlayerOnAnyTile).Select(x => x.Name);
+        var text = string.Join(", ", stepsDetected);
+        text += $"\nPress RightShift to change debug view mode. (current={viewMode})";
+        float scale = 0.25f;
+        var measure = fontToUse.MeasureString(text) * scale;
+        var infoPos = new Vector2(Main.screenWidth / 2, 8);
 
-            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
-                fontToUse,
-                text,
-                position: infoPos,
-                Color.LightGray,
-                0f,
-                origin: new Vector2(measure.X / 2, 0),
-                baseScale: new Vector2(scale),
-                -1,
-                1);
-            #endregion
+        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch,
+            fontToUse,
+            text,
+            position: infoPos,
+            Color.LightGray, 0f,
+            origin: new Vector2(measure.X / 2, 0),
+            baseScale: new Vector2(scale), -1, 1);
+        #endregion
 
-            #region DrawDebuggingKeybinds
+        #region DrawDebuggingKeybinds
 
+        if (viewMode >= 2) {
             var b = TerrariaAmbience.dbg_modBiomes.Where(Main.LocalPlayer.InModBiome).ToList();
 
-            string txt = $"Press RightAlt to toggle reverb info" +
+            txt = $"Press RightAlt to toggle reverb info" +
                 $"\n\nMouseWorld: ({(int)Main.MouseWorld.X}, {(int)Main.MouseWorld.Y})" +
                 $"\nL: Play sound at mouse" +
                 "\nK: Spawn Positional Audio Sound at mouse" +
@@ -223,26 +222,65 @@ internal class MethodDetours {
                     }
                 }
             }
-            #endregion
+        }
+        #endregion
 
+        if (viewMode >= 3) {
+            int numPerRow = 5;
             // draw reverb material registry
-            txt = "Wall Insulators:";
-            drawPos.X -= 300;
+            txt = "Tile absorption" + (viewMode == 3 ? " (Vanilla)" : " (Vanilla + Modded)") +
+                "\n\nWall Insulators (low sound deflection):";
+            drawPos.X -= 500;
 
             for (int i = 0; i < SoundFilterSystem.lowReverbWalls.Count; i++) {
                 var lowR = SoundFilterSystem.lowReverbWalls.ElementAt(i);
                 var wallName = WallID.Search.GetName(lowR);
 
-                if (i % 3 == 0) txt += Environment.NewLine;
-                txt += $"{wallName}";
+                if (viewMode < 4) if (lowR >= WallID.Count) break;
 
+                if (i % numPerRow == 0) txt += Environment.NewLine;
+                txt += $"{wallName}, ";
+            }
+            txt += "\n\n";
+            txt += "Tile insulators (low sound deflection):";
+            for (int i = 0; i < SoundFilterSystem.lowReverbTiles.Count; i++) {
+                var lowR = SoundFilterSystem.lowReverbTiles.ElementAt(i);
+
+                if (viewMode < 4) if (lowR >= TileID.Count) break;
+
+                var tileName = TileID.Search.GetName(lowR);
+
+                if (i % numPerRow == 0) txt += Environment.NewLine;
+                txt += $"{tileName}, ";
+            }
+            txt += "\n\n";
+            txt += "Wall inhibitors (no sound deflection):";
+            for (int i = 0; i < SoundFilterSystem.noReverbWalls.Count; i++) {
+                var lowR = SoundFilterSystem.noReverbWalls.ElementAt(i);
+                var wallName = WallID.Search.GetName(lowR);
+
+                if (viewMode < 4) if (lowR >= WallID.Count) break;
+
+                if (i % numPerRow == 0) txt += Environment.NewLine;
+                txt += $"{wallName}, ";
+            }
+            txt += "\n\n";
+            txt += "Tile inhibitors (no sound deflection):";
+            for (int i = 0; i < SoundFilterSystem.noReverbTiles.Count; i++) {
+                var lowR = SoundFilterSystem.noReverbTiles.ElementAt(i);
+                var tileName = TileID.Search.GetName(lowR);
+
+                if (viewMode < 4) if (lowR >= TileID.Count) break;
+
+                if (i % numPerRow == 0) txt += Environment.NewLine;
+                txt += $"{tileName}, ";
             }
 
             Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle((int)(drawPos.X - 6),
                 (int)(drawPos.Y - 6),
-                (int)(fontToUse.MeasureString(txt).X * 0.24f),
-                (int)(fontToUse.MeasureString(txt).Y * 0.23f)),
+                (int)(fontToUse.MeasureString(txt).X * 0.175f),
+                (int)(fontToUse.MeasureString(txt).Y * 0.175f)),
                 Color.DarkMagenta * 0.6f
             );
 
@@ -253,7 +291,7 @@ internal class MethodDetours {
                 Color.White,
                 0f,
                 Vector2.Zero,
-                new Vector2(0.225f), -1, 1
+                new Vector2(0.175f), -1, 1
             );
         }
     }

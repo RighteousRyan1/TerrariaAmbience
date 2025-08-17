@@ -14,9 +14,9 @@ namespace TerrariaAmbience.Content.Players;
 
 public class RoomDetectionPlayer : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
-    private const int MAX_ROOM_WIDTH = 100;
-    private const int MAX_ROOM_HEIGHT = 100;
-    private const int MAX_ROOM_AREA = 2000;
+    static int MAX_ROOM_WIDTH = 100;
+    static int MAX_ROOM_HEIGHT = 100;
+    static int MAX_ROOM_AREA = 2000;
 
     public static bool IsTileSolid(Tile tile) {
         // tile is solid and unactuated
@@ -130,9 +130,7 @@ public class RoomDetectionPlayer : ModSystem {
         return isEnclosed;
     }
 
-    // Note: now independent of requireWalls; we only handle flood frontier here.
-    // We also use originX/originY to compute the "visited window" indices.
-    private static void CheckAndEnqueue(int x, int y, int originX, int originY, Queue<Point> queue, bool[,] visited) {
+    static void CheckAndEnqueue(int x, int y, int originX, int originY, Queue<Point> queue, bool[,] visited) {
 
         if (!WorldGen.InWorld(x, y))
             return;
@@ -141,9 +139,10 @@ public class RoomDetectionPlayer : ModSystem {
 
         var isSolid = IsTileSolid(tile);
 
-        //if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.U))
-        //    if (Main.GameUpdateCount % 60 == 0)
-        //        Dust.QuickBox(new Vector2(x * 16, y * 16), new Vector2(x * 16 + 16, y * 16 + 16), 1, isSolid ? Color.Red : Color.Lime, null);
+        if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.U))
+            if (Main.GameUpdateCount % 60 == 0)
+                Dust.QuickDust(new Vector2(x, y) * 16 + new Vector2(8), isSolid ? Color.Magenta : Color.Lime);
+                // Dust.QuickBox(new Vector2(x * 16, y * 16), new Vector2(x * 16 + 16, y * 16 + 16), 1, isSolid ? Color.Red : Color.Lime, null);
 
         // stop flood at solid tiles
         if (isSolid)
@@ -173,6 +172,8 @@ public class RoomDetectionPlayer : ModSystem {
 
         if (!ModContent.GetInstance<AudioAdditionsConfig>().floodFillAmbientOcclusion) return;
 
+        //MAX_ROOM_WIDTH = 50;
+        //MAX_ROOM_HEIGHT = 50;
         IsInRoom = IsPlayerInEnclosedSpace(Main.LocalPlayer, _currentRoom);
 
         /*if (IsInRoom && !_wasInRoom) {

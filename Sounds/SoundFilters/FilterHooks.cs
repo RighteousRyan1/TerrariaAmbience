@@ -1,6 +1,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -14,6 +16,9 @@ namespace TerrariaAmbience.Sounds.SoundFilters;
 public class FilterHooks : ModSystem
 {
 	public static List<ActiveSound> dynamicSfxActiveSounds = [];
+	// public static List<Vector2> dynamicSfxPrevPos = [];
+
+	static List<float> _oldLowPasses = [];
 	public override void PreSaveAndQuit() {
 		TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Stop();
 	}
@@ -25,20 +30,50 @@ public class FilterHooks : ModSystem
 	// in a different room, or the speaker is in a room and the listening player is not, muffle the voice.
 	// this same logic could be applied to sounds, but that could be costly... idk if more costly than the reverb calculation but who knows
 	public override void PostUpdateEverything() {
-		foreach (var sfx in dynamicSfxActiveSounds) {
+        //var lisPos = SoundFilterSystem.ScreenListeningPosition;
+		//var lisVel = lisPos - _oldScreenPos;
+        for (int i = 0; i < dynamicSfxActiveSounds.Count; i++) {
+			var sfx = dynamicSfxActiveSounds[i];
 			if (sfx.Sound is not DynamicSoundEffectInstance self) continue;
 			if (!sfx.Position.HasValue) continue;
-			var param = SoundFilterSystem.CreateAudioFX(sfx.Position.Value);
+			var sndPos = sfx.Position.Value;
+			//var sndVel = sndPos - dynamicSfxPrevPos[i];
 
-			if (SoundsThatIgnoreFilters.Contains(sfx.Style)) continue;
+            var param = SoundFilterSystem.CreateAudioFX(sndPos);
 
+            // const float C_TILES_PER_SEC = 100f;
+
+            /*float targetPitch = SoundFilterSystem.PitchFromPerFrame(
+                sndPos, sndVel,
+                lisPos, lisVel,
+                speedOfSoundTilesPerSec: C_TILES_PER_SEC);*/
+
+            // var test = Main.MouseScreen.X / Main.screenWidth * 25;
+			// FAudio.FAudioSourceVoice_SetFrequencyRatio(self.handle, 1f - MathF.Abs(targetPitch), 0);
+			// self.Pitch = targetPitch;
+			// Main.NewText(MathF.Abs(targetPitch) + 1);
 			self.ApplyReverb(param.ReverbGain / 2);
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
-				self.ApplyLowPassFilter(param.LowPassIntensity);
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && param.BandPassEnabled)
-				self.ApplyBandPassFilter(param.BandPassIntensity);
-		}
-	}
+            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled) {
+                // _currentLowPasses[i] holds the *applied* value, initialized to 1.0f or whatever default
+                float target = param.LowPassIntensity;
+
+                // smooth approach: t is a small factor (e.g. 0.05)
+                float t = 0.4f * TerrariaAmbience.WorkaroundDeltaTime;
+                float smoothed = MathHelper.Lerp(_oldLowPasses[i], target, t);
+
+                self.ApplyLowPassFilter(smoothed);
+
+                // save the applied value, not the target
+                _oldLowPasses[i] = smoothed;
+            }
+			// overrides lowpass??
+            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && param.BandPassEnabled)
+                self.ApplyBandPassFilter(param.BandPassIntensity);
+
+            // dynamicSfxPrevPos[i] = sfx.Position.Value;
+        }
+		// _oldScreenPos = SoundFilterSystem.ScreenListeningPosition;
+    }
 
 	private void ActiveSound_Play(On_ActiveSound.orig_Play orig, ActiveSound self) {
 		orig(self);
@@ -46,8 +81,10 @@ public class FilterHooks : ModSystem
         var vol = self.Sound.Volume;
 		self.Sound.Volume = 0;
 		// self.Sound.Pause();
-		if (self.Sound is DynamicSoundEffectInstance)
+		if (self.Sound is DynamicSoundEffectInstance) {
 			dynamicSfxActiveSounds.Add(self);
+			_oldLowPasses.Add(0f);
+		}
 
         // dont apply filters to sounds without positions
         if (!self.Position.HasValue) return;
@@ -58,11 +95,11 @@ public class FilterHooks : ModSystem
             var param = SoundFilterSystem.LatestParams;
             var playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
 			var bandIntensity = SoundFilterSystem.CalculateBandPass(self.Position.Value, playerUnderwater, out var enableBand);
-
+			var lowPassIntensity = SoundFilterSystem.CalculateLowPass(self.Position.Value, Vector2.Zero, out var enabledLP);
             self.Sound.ApplyReverb(param.ReverbGain, param);
 
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
-				self.Sound.ApplyLowPassFilter(param.LowPassIntensity);
+			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled && enabledLP)
+				self.Sound.ApplyLowPassFilter(lowPassIntensity);
 			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && enableBand)
 				self.Sound.ApplyBandPassFilter(bandIntensity);
 		}

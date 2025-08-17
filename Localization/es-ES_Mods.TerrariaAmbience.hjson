@@ -82,6 +82,15 @@ Configs: {
 				Disabling this setting can improve performance.
 				''' */
 		}
+
+		audioFiltersRefreshTime: {
+			// Label: Audio Filters Refresh Time
+			/* Tooltip:
+				'''
+				The time (in ticks) between updating calculating properties of all sound filters.
+				Lower values are more intensive on the CPU, and higher values have the opposite effect.
+				''' */
+		}
 	}
 
 	GeneralConfig: {
