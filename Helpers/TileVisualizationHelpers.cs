@@ -10,9 +10,7 @@ using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience.Helpers; 
 public class TileVisualizationHelpers : ModSystem {
-    public static List<Dictionary<Vector2, Color>> TileVisualizations { get; private set; } = [];
-
-    public static int CurVisualizationIndex = 0;
+    public static Dictionary<Vector2, Color> TileVisualizations { get; private set; } = [];
 
     public static Texture2D DebugPixel;
     public override void PostDrawTiles() {
@@ -21,13 +19,9 @@ public class TileVisualizationHelpers : ModSystem {
             DebugPixel.SetData([Color.White]);
         }
 
-        if (CurVisualizationIndex >= TileVisualizations.Count) return;
-
-        var curVisualization = TileVisualizations[CurVisualizationIndex];
-
         Main.spriteBatch.Begin(default, default, default, default, default, default, Main.GameViewMatrix.TransformationMatrix);
 
-        foreach (var elem in curVisualization) {
+        foreach (var elem in TileVisualizations) {
             var pos = elem.Key - Main.screenPosition;
             var color = elem.Value;
             // Draw a rectangle at the tile position with the specified color
@@ -47,8 +41,8 @@ public class TileVisualizationHelpers : ModSystem {
         }
     }
 
-    public static void TryAdd(int index) {
-
+    public static void TryAdd(Vector2 pos, Color color) {
+        TileVisualizations.TryAdd(pos, color);
     }
 
     static void DrawBox(SpriteBatch sb, Vector2 start, Vector2 end, Color boxColor, Vector2 origin = default) {

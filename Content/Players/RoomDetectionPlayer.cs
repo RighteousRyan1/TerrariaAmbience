@@ -19,8 +19,9 @@ public class RoomDetectionPlayer : ModSystem {
     static int MAX_ROOM_AREA = 2000;
 
     public static bool IsTileSolid(Tile tile) {
+        // note to self: Main.tileBlockLight to false!
         // tile is solid and unactuated
-        if (tile.HasTile && Main.tileSolid[tile.TileType] && !tile.IsActuated)
+        if (tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType] && !tile.IsActuated)
             return true;
 
         // platforms are invalid
@@ -40,10 +41,11 @@ public class RoomDetectionPlayer : ModSystem {
     /// Checks if a player is in an enclosed space with proper walls.
     /// </summary>
     /// <param name="player">The player to check</param>
-    /// <param name="roomDetails">If not null, will be filled with room size and other details</param>
+    /// <param name="room">If not null, will be filled with room size and other details</param>
     /// <param name="requireWalls">Whether to require player-placed walls in the enclosed space</param>
     /// <returns>True if in enclosed space with walls, false otherwise</returns>
-    public static bool IsPlayerInEnclosedSpace(Player player, RoomDetails roomDetails = null, bool requireWalls = true) {
+    public static bool IsPlayerInRoom(Player player, Room room, bool requireWalls = true) {
+        room.Tiles.Clear();
         int originX = (int)(player.Center.X / 16);
         int originY = (int)(player.Center.Y / 16);
 
@@ -85,12 +87,10 @@ public class RoomDetectionPlayer : ModSystem {
             bool curSolid = IsTileSolid(cur);
             bool curHasWall = cur.WallType > 0;
 
-            // If we require walls, then any *non-solid* interior tile that lacks a wall invalidates the room.
-            // (We ignore solid tiles for wall requirement; doors/walls handled in IsTileSolid.)
             if (requireWalls && !curSolid && !curHasWall) {
                 foundMissingWall = true;
-                // we can bail early to save time; no need to keep filling
-                break;
+                // break to save processing time if i want to lol
+                
             }
 
             // bounds/area limits
@@ -108,41 +108,39 @@ public class RoomDetectionPlayer : ModSystem {
             }
 
             // enqueue neighbors (we pass origin to compute visited indices correctly)
-            CheckAndEnqueue(x + 1, y, originX, originY, queue, visited);
-            CheckAndEnqueue(x - 1, y, originX, originY, queue, visited);
-            CheckAndEnqueue(x, y + 1, originX, originY, queue, visited);
-            CheckAndEnqueue(x, y - 1, originX, originY, queue, visited);
+            CheckAndEnqueue(x + 1, y, originX, originY, queue, room, visited);
+            CheckAndEnqueue(x - 1, y, originX, originY, queue, room, visited);
+            CheckAndEnqueue(x, y + 1, originX, originY, queue, room, visited);
+            CheckAndEnqueue(x, y - 1, originX, originY, queue, room, visited);
         }
 
         bool isEnclosed = !reachedEdge && (!requireWalls || !foundMissingWall);
 
-        if (roomDetails != null && isEnclosed) {
-            roomDetails.Width = maxX - minX + 1;
-            roomDetails.Height = maxY - minY + 1;
-            roomDetails.Area = areaCount;
-            roomDetails.MinX = minX;
-            roomDetails.MinY = minY;
-            roomDetails.MaxX = maxX;
-            roomDetails.MaxY = maxY;
-            roomDetails.WallsSatisfied = !foundMissingWall;
+        if (isEnclosed) {
+            room.Width = maxX - minX + 1;
+            room.Height = maxY - minY + 1;
+            room.Area = areaCount;
+            room.MinX = minX;
+            room.MinY = minY;
+            room.MaxX = maxX;
+            room.MaxY = maxY;
+            room.WallsSatisfied = !foundMissingWall;
         }
 
         return isEnclosed;
     }
 
-    static void CheckAndEnqueue(int x, int y, int originX, int originY, Queue<Point> queue, bool[,] visited) {
-
+    static void CheckAndEnqueue(int x, int y, int originX, int originY, Queue<Point> queue, Room room, bool[,] visited) {
         if (!WorldGen.InWorld(x, y))
             return;
 
         Tile tile = Main.tile[x, y];
 
-        var isSolid = IsTileSolid(tile);
+        var pt = new Point(x, y);
+        if (!room.Tiles.Contains(pt))
+            room.Tiles.Add(pt);
 
-        if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.U))
-            if (Main.GameUpdateCount % 60 == 0)
-                Dust.QuickDust(new Vector2(x, y) * 16 + new Vector2(8), isSolid ? Color.Magenta : Color.Lime);
-                // Dust.QuickBox(new Vector2(x * 16, y * 16), new Vector2(x * 16 + 16, y * 16 + 16), 1, isSolid ? Color.Red : Color.Lime, null);
+        var isSolid = IsTileSolid(tile);
 
         // stop flood at solid tiles
         if (isSolid)
@@ -158,23 +156,21 @@ public class RoomDetectionPlayer : ModSystem {
             return;
 
         visited[relX, relY] = true;
-        queue.Enqueue(new Point(x, y));
+        queue.Enqueue(pt);
     }
 
     // bool _wasInRoom = false;
-    readonly RoomDetails _currentRoom = new();
 
+    public static Room PlayerRoom = new();
     public static bool IsInRoom { get; private set; }
 
     public override void PostUpdateEverything() {
-        // 4 times a second might be excessive...? idk.
-        // now every frame. but make it configurable, methinks
+        if (Main.GameUpdateCount % ModContent.GetInstance<AudioAdditionsConfig>().audioFiltersRefreshTime != 0) return;
 
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().floodFillAmbientOcclusion) return;
+        MAX_ROOM_WIDTH = 50;
+        MAX_ROOM_HEIGHT = 50;
 
-        //MAX_ROOM_WIDTH = 50;
-        //MAX_ROOM_HEIGHT = 50;
-        IsInRoom = IsPlayerInEnclosedSpace(Main.LocalPlayer, _currentRoom);
+        IsInRoom = IsPlayerInRoom(Main.LocalPlayer, PlayerRoom);
 
         /*if (IsInRoom && !_wasInRoom) {
             Main.NewText($"Entered room! Size: {_currentRoom.Width}x{_currentRoom.Height}, Area: {_currentRoom.Area}");
@@ -186,7 +182,7 @@ public class RoomDetectionPlayer : ModSystem {
         // _wasInRoom = IsInRoom;
     }
 }
-public class RoomDetails {
+public class Room {
     public int Width { get; set; }
     public int Height { get; set; }
     public int Area { get; set; }
@@ -195,4 +191,6 @@ public class RoomDetails {
     public int MaxX { get; set; }
     public int MaxY { get; set; }
     public bool WallsSatisfied { get; set; } // = true..?
+
+    public List<Point> Tiles = [];
 }

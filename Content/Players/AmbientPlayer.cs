@@ -78,46 +78,56 @@ public class AmbientPlayer : ModPlayer
 
         if (_showReverbTiles) {
             if (genCfg.debugInterface && aaCfg.advancedReverbCalculation && aaCfg.isReverbEnabled) {
+                var tilePosList = RoomDetectionPlayer.PlayerRoom.Tiles;
 
-                bool isUnderground = Main.LocalPlayer.ZoneRockLayerHeight || Main.LocalPlayer.ZoneUnderworldHeight || Main.LocalPlayer.ZoneDirtLayerHeight;
-                bool shouldDrawDust = Main.GameUpdateCount % 10 == 0;
+                bool playerSurfaceOrHell = Main.LocalPlayer.Center.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
+                bool playerUnderground = !playerSurfaceOrHell;
+                var colorNoReverb = Color.Red;
+                var colorLowReverb = Color.Lerp(Color.Lime, Color.Red, 0.5f);
+                var colorHighReverb = Color.Lime;
 
-                if (isUnderground) {
+                foreach (var tilePos in tilePosList) {
+                    var tile = Framing.GetTileSafely(tilePos);
+                    Vector2 worldCoords = tilePos.ToVector2() * 16;
 
-                    // int wallCount = 0, tileCount = 0;
-                    Point gridSize = new(15, 15);
-                    Vector2 playerCenter = Player.Center;
-
-                    int wallsNear = SoundFilterSystem.WallsAround(playerCenter, gridSize, out var wallPoints);
-                    int tilesNear = SoundFilterSystem.TilesAround(playerCenter, gridSize, out var tilePoints);
-
-                    TileVisualizationHelpers.TileVisualizations.Add([]);
-
-                    foreach (var tilePos in tilePoints) {
-                        Vector2 worldCoords = tilePos.ToVector2() * 16;
-                        Point[] adjacentTiles = [
-                            new(tilePos.X - 1, tilePos.Y), new(tilePos.X + 1, tilePos.Y),
-                        new(tilePos.X, tilePos.Y - 1), new(tilePos.X, tilePos.Y + 1)
-                        ];
-
-                        if (adjacentTiles.Any(adj => SoundFilterSystem.CanRaycastTo(playerCenter, adj.ToVector2() * 16))) {
-                            TileVisualizationHelpers.TileVisualizations[0].Add(worldCoords, Color.Green);
-                            continue;
-                            // tileCount++;
-                            if (shouldDrawDust) {
-                                Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Green, null);
-                            }
+                    var wall = tile.WallType;
+                    var ttype = tile.TileType;
+                    if (ttype > 0) {
+                        var isHighReverb = !SoundFilterSystem.lowReverbTiles.Contains(ttype) && !SoundFilterSystem.noReverbTiles.Contains(ttype);
+                        if (isHighReverb) {
+                            TileVisualizationHelpers.TryAdd(worldCoords, colorHighReverb);
+                        }
+                        else if (SoundFilterSystem.lowReverbTiles.Contains(ttype)) {
+                            TileVisualizationHelpers.TryAdd(worldCoords, colorLowReverb);
+                        }
+                        else {
+                            TileVisualizationHelpers.TryAdd(worldCoords, colorNoReverb);
                         }
                     }
-
-                    foreach (var wallPos in wallPoints) {
-                        Vector2 worldCoords = wallPos.ToVector2() * 16;
-                        if (SoundFilterSystem.CanRaycastTo(playerCenter, worldCoords)) {
-                            TileVisualizationHelpers.TileVisualizations[0].Add(worldCoords, Color.Red);
-                            continue;
-                            // wallCount++;
-                            if (shouldDrawDust) {
-                                Dust.QuickBox(worldCoords, worldCoords + new Vector2(16), 0, Color.Red, null);
+                    else if (wall > 0) {
+                        var isHighReverb = !SoundFilterSystem.lowReverbWalls.Contains(wall) && !SoundFilterSystem.noReverbWalls.Contains(wall);
+                        if (isHighReverb) {
+                            TileVisualizationHelpers.TryAdd(worldCoords, colorHighReverb);
+                        }
+                        else if (SoundFilterSystem.lowReverbTiles.Contains(ttype)) {
+                            TileVisualizationHelpers.TryAdd(worldCoords, colorLowReverb);
+                        }
+                        else {
+                            TileVisualizationHelpers.TryAdd(worldCoords, colorNoReverb);
+                        }
+                    }
+                    // if we're underground the background is present and it can "count" as a surface
+                    else if (wall == 0 && ttype == 0) {
+                        if (playerUnderground) {
+                            // dirt "underground" layer
+                            // low reverb since it's partially rock and mostly dirt
+                            if (tilePos.Y > Main.worldSurface && tilePos.Y < Main.rockLayer) {
+                                TileVisualizationHelpers.TryAdd(worldCoords, colorLowReverb);
+                            }
+                            // cavern to top of underworld
+                            // this is because it's primarily rock in the background
+                            else if (tilePos.Y > Main.rockLayer && tilePos.Y < Main.maxTilesY - 200) {
+                                TileVisualizationHelpers.TryAdd(worldCoords, colorHighReverb);
                             }
                         }
                     }
@@ -186,7 +196,7 @@ public class AmbientPlayer : ModPlayer
     void UpdateReverbParams(uint time) {
         if (Main.GameUpdateCount % time != 0) return;
 
-        SoundFilterSystem.LatestParams = SoundFilterSystem.CreateAudioFX(Player.Center);
+        SoundFilterSystem.LatestParams = SoundFilterSystem.CreateAudioFX(RoomDetectionPlayer.PlayerRoom); // SoundFilterSystem.CreateAudioFX(Player.Center);
     }
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)

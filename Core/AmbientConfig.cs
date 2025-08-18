@@ -116,9 +116,6 @@ public class AudioAdditionsConfig : ModConfig {
 
     [DefaultValue(true)]
     public bool isSoundOcclusionEnabled;
-
-    [DefaultValue(true)]
-    public bool floodFillAmbientOcclusion;
 }
 public class AmbientConfigServer : ModConfig {
     public override ConfigScope Mode => ConfigScope.ServerSide;
