@@ -9,7 +9,7 @@ using TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
 namespace TerrariaAmbience.Sounds.SoundFilters;
 
 public static class FilterHelpers {
-    static bool showWarnings => ModContent.GetInstance<GeneralConfig>().showInfoAndWarnings;
+    static bool showWarnings => ModContent.GetInstance<AmbientConfig>().showInfoAndWarnings;
     public const string FILTER_ISSUE_WARNING = "Error applying sound filter for {0}. Check the pins in the [c/FFFF00:#bug-reports] channel in the [c/5865F2:Discord] server in the top left of the main menu.";
     public const string FILTER_SAVED_GAME = "Recovered from fatal error in {0}. If you are seeing this message, please report this in our [c/5865F2:Discord] server in the top left of the main menu.";
     public static SoundEffectInstance ApplyReverb(this SoundEffectInstance instance, float gain, FilterParams param = default) {

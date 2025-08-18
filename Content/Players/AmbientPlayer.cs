@@ -65,10 +65,10 @@ public class AmbientPlayer : ModPlayer
     public override void PreUpdate() {
         if (Main.soundVolume == 0) return; 
 
-        var genCfg = ModContent.GetInstance<GeneralConfig>();
-        var servCfg = ModContent.GetInstance<AmbientConfigServer>();
+        var genCfg = ModContent.GetInstance<FootstepsConfig>();
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
 
-        if (servCfg.newSplashSounds)
+        if (audioCfg.newSplashSounds)
             ManagePlayerSplashes();
         #region Step/Sound handling
 
@@ -78,7 +78,7 @@ public class AmbientPlayer : ModPlayer
             // this essentially just works as a way to not have wet sounds play. no need to do extra magic.
             HasTilesAbove = true;
 
-        UpdateReverbParams(ModContent.GetInstance<AudioAdditionsConfig>().audioFiltersRefreshTime);
+        UpdateReverbParams(ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime);
 
         // this is left in because my reverb system thinks that the sound originates from within a tile.
         #endregion
@@ -89,7 +89,8 @@ public class AmbientPlayer : ModPlayer
         Player.runSoundDelay = 100;
     }
     void ManageChestSounds() {
-        if (!ModContent.GetInstance<AmbientConfigServer>().chestSounds) return;
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
+        if (!audioCfg.chestSounds) return;
 
         timerUntilValidChestStateChange++;
         if (timerUntilValidChestStateChange < 60) return;
@@ -151,12 +152,15 @@ public class AmbientPlayer : ModPlayer
             TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
         float maxDist = 780f;
         float campfireVolumeScalar = 0.75f;
-        if (ModContent.GetInstance<GeneralConfig>().campfireSounds && CampfireDetection.IsNearCampfire) {
-            cracklePan = (CampfireDetection.CampfireDistance / maxDist) * (CampfireDetection.IsCampfireOnTheRight ? -1 : 1) / 2;
+
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
+
+        crackleVolume = 0f;
+
+        if (audioCfg.campfireSounds && CampfireDetection.IsNearCampfire) {
+            cracklePan = CampfireDetection.CampfireDistance / maxDist * (CampfireDetection.IsCampfireOnTheRight ? -1 : 1) / 2;
             crackleVolume = 1f - CampfireDetection.CampfireDistance / maxDist * campfireVolumeScalar;
         }
-        else
-            crackleVolume = 0f;
 
         crackleVolume = MathHelper.Clamp(crackleVolume, 0f, 1f);
         cracklePan = MathHelper.Clamp(cracklePan, -1f, 1f);

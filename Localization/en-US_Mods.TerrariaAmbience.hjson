@@ -1,30 +1,48 @@
 Configs: {
-	AmbientConfigServer: {
-		DisplayName: Ambient Config (Server)
+	InventorySoundsConfig: {
+		DisplayName: Inventory Sounds Config
 
-		chestSounds: {
-			Label: Chest Open/Close Sounds
-			Tooltip:
-				'''
-				Toggle on to turn chest sounds on. Toggle off to turn them off.
-				Turned on by default.
-				This config is shared with everyone in the server.
-				'''
+		useItemSwapSounds: {
+			Label: Use Sounds on Item Change
+			Tooltip: Have this set to 'On' if you want to hear sounds while changing held items.
 		}
 
-		newSplashSounds: {
-			Label: Toggle New Water Sounds
+		volumeMultiplier: {
+			Label: Sound Multiplier
+			Tooltip: Change the master volume of inventory sounds.
+		}
+
+		enabledDynamicSoundsSystem: {
+			Label: Dynamic Inventory Sounds
 			Tooltip:
 				'''
-				Toggle on to turn this mod's new water interaction sounds on. Toggle off to turn them off.
-				Turned on by default.
-				This config is shared with everyone in the server.
+				Whether or not the dynamic inventory sounds system is enabled or not.
+				If disabled, regular 'grab' sounds will be used.
 				'''
 		}
 	}
 
-	AudioAdditionsConfig: {
-		DisplayName: Audio Additions Config
+	AudioConfig: {
+		DisplayName: Audio Config
+
+		Headers: {
+			SoundEffects: Sound Effects Header
+			SoundFilters: Sound Filters Header
+		}
+
+		campfireSounds: {
+			Label: Toggle Campfire Volumetric Sound
+			Tooltip:
+				'''
+				Toggle on to turn campfire sounds on. Toggle off to turn them off.
+				Turned on by default.
+				'''
+		}
+
+		craftingSoundsVolume: {
+			Label: Crafting Sounds Volume
+			Tooltip: Changes the volume multiplier of the sounds made when a player crafts an item. Set to 0 to disable.
+		}
 
 		slimySounds: {
 			Label: Slimy Sounds
@@ -45,14 +63,47 @@ Configs: {
 			Tooltip: Toggle the (somewhat loud) sounds that play and have dynamic sound updating based on location-to-player panning.
 		}
 
-		Headers: {
-			SoundFilters: Sound Filters
-			NewSounds: New Sounds Header
+		chestSounds: {
+			Label: Container sounds
+			Tooltip:
+				'''
+				If enabled, certain containers will play sounds when opened/closed.
+				This config is shared with everyone in the server.
+				'''
+		}
+
+		newSplashSounds: {
+			Label: New Splash Sounds
+			Tooltip:
+				'''
+				Toggle on to turn this mod's new water interaction sounds on. Toggle off to turn them off.
+				Turned on by default.
+				This config is shared with everyone in the server.
+				'''
 		}
 
 		isReverbEnabled: {
 			Label: Reverb
 			Tooltip: Makes sounds have a reverberation factor depending on environment or depth, depending on what settings for reverb you have enabled.
+		}
+
+		reverbUsingRaycasting: {
+			Label: Reverb Raycasting
+			Tooltip:
+				'''
+				If enabled, reverb will use an immensely more accurate approach to calculating reverb.
+				If Reverb is disabled, this setting changes nothing.
+				Be aware that enabling this comes at a sizable performance cost.
+				'''
+		}
+
+		audioFiltersRefreshTime: {
+			Label: Audio Filters Refresh Time
+			Tooltip:
+				'''
+				The time (in ticks) between updating calculating properties of all sound filters.
+				Lower values are more intensive on the CPU, and higher values have the opposite effect.
+				'''
 		}
 
 		advancedReverbCalculation: {
@@ -67,76 +118,30 @@ Configs: {
 
 		isSoundDampeningEnabled: {
 			Label: Sound Dampening
-			Tooltip: Makes sounds sound dampened when appropriate (i.e: underwater)ff.
+			Tooltip: Makes sounds sound dampened when appropriate (i.e: underwater).
 		}
 
 		isSoundOcclusionEnabled: {
 			Label: Sound Occlusion
 			Tooltip: Makes sounds muffled when the Line-of-Sight to the player is blocked, depending on distance and density of the blockage.
 		}
-
-		floodFillAmbientOcclusion: {
-			Label: Flood Fill Audio Adaption
-			Tooltip:
-				'''
-				Ambience will lower in volume if you are in a room with this setting enabled.
-				Disabling this setting can improve performance.
-				'''
-		}
-
-		audioFiltersRefreshTime: {
-			Label: Audio Filters Refresh Time
-			Tooltip:
-				'''
-				The time (in ticks) between updating calculating properties of all sound filters.
-				Lower values are more intensive on the CPU, and higher values have the opposite effect.
-				'''
-		}
 	}
 
-	GeneralConfig: {
-		DisplayName: General Config
+	FootstepsConfig: {
+		DisplayName: Footsteps Config
 
-		Headers: {
-			AmbienceAndSounds: Ambience And Sounds
-			Debugging: Debugging
-			AmbienceTrackVolumes: Ambience Fine-Tuning
-		}
-
-		campfireSounds: {
-			Label: Toggle Campfire Volumetric Sound
+		entityFootstepsVolume: {
+			Label: Entity Footsteps Volume
 			Tooltip:
 				'''
-				Toggle on to turn campfire sounds on. Toggle off to turn them off.
-				Turned on by default.
+				Sets the volume of footstep audio for numerous NPCs, including Town NPCs, Zombies, and more.
+				Set to 0 to disable.
 				'''
 		}
 
-		transitionHarshness: {
-			Label: Ambient Transition Harshness
-			Tooltip:
-				'''
-				Changes the harshness between ambient track transitions. Keep it low for a nice, soothing transition.
-				Put it closer to 1 and make it near-instant.
-				Anywhere under 0.075 is a good value.
-				Making it go too low can cause issues or make things a bit unwanted. Choose the value at your own risk!
-				DISCLAIMER: Making this input a non-floating-point numeric type will cause the value to default to 0.01.
-				'''
-		}
-
-		areArmorAndVanitySoundsEnabled: {
-			Label: Armor/Vanity Sounds
-			Tooltip: Determines whether or not the extra sounds that having armor / vanity equipped play when walking around.
-		}
-
-		debugInterface: {
-			Label: Toggle Debug Values (Vanilla Ambiences)
-			Tooltip: Toggle volume debugging values, such as snow, crickets, and more.
-		}
-
-		overallVolume: {
-			Label: Overall Volume
-			Tooltip: The overall volume of ambience from this mod.
+		masterFootstepsVolume: {
+			Label: Footsteps Volume
+			Tooltip: Controls master volume of footsteps. Set to zero to disable them.
 		}
 
 		wetStepsEnabled: {
@@ -145,6 +150,47 @@ Configs: {
 				'''
 				Whether or not to have wet footstep sounds when it is raining and the player is not under a roof.
 				Do know that there is a *little* bit of performance gain from disabling this.
+				'''
+		}
+
+		areArmorAndVanitySoundsEnabled: {
+			Label: Armor/Vanity Sounds
+			Tooltip: Determines whether or not the extra sounds that having armor/vanity equipped play when walking around.
+		}
+	}
+
+	AmbientConfig: {
+		DisplayName: Ambience Config
+
+		Headers: {
+			Debugging: Debugging
+			AmbienceTrackVolumes: Fine-Tuning
+		}
+
+		debugInterface: {
+			Label: Toggle Debug
+			Tooltip: Toggle volume debugging values, such as snow, crickets, and more.
+		}
+
+		showInfoAndWarnings: {
+			Label: show Info And Warnings
+			Tooltip: ""
+		}
+
+		overallVolume: {
+			Label: Master Volume
+			Tooltip: The master volume of ambience from this mod.
+		}
+
+		transitionHarshness: {
+			Label: Ambient Transition Speed
+			Tooltip:
+				'''
+				Changes the harshness between ambient track transitions. Keep it low for a nice, soothing transition.
+				Put it closer to 1 and make it near-instant.
+				Anywhere under 0.075 is a good value.
+				Making it go too low can cause issues or make things a bit unwanted. Choose the value at your own risk!
+				DISCLAIMER: Making this input a non-floating-point numeric type will cause the value to default to 0.01.
 				'''
 		}
 
@@ -163,7 +209,7 @@ Configs: {
 
 		snowVolume: {
 			Tooltip: ""
-			Label: Snow
+			Label: Tundra
 		}
 
 		jungleVolumes: {
@@ -219,63 +265,6 @@ Configs: {
 			Label: Submerged
 			Tooltip: ""
 		}
-
-		craftingSoundsVolume: {
-			Label: Crafting Sounds Volume
-			Tooltip: Changes the volume multiplier of the sounds made when a player crafts an item. Set to 0 to disable.
-		}
-
-		footstepsVolMult: {
-			Label: Footsteps Volume
-			Tooltip: Controls volume multiplier of footsteps. Set to zero to not hear any.
-		}
-
-		entityFootstepsVolume: {
-			Label: Entity Footsteps Volume
-			Tooltip:
-				'''
-				Sets the volume of footstep audio for numerous NPCs, including Town NPCs, Zombies, and more.
-				Set to 0 to disable.
-				'''
-		}
-
-		showAmbientForecastUi: {
-			Label: Show Ambient Forecast UI
-			Tooltip: Enables/disables the ambient forecast UI next to the hotbar
-		}
-
-		showInfoAndWarnings: {
-			Label: Show Info And Warnings
-			Tooltip:
-				'''
-				Whether or not this mod will report important informationt to the chat when information is needed or things go wrong.
-				Do note that, if by any chance things go wrong and continually go wrong, your FPS will drop significantly.
-				In the case that this happens, be sure to enable this setting to see what is going on, and report any issues to the Discord server.
-				'''
-		}
-	}
-
-	InventorySoundsConfig: {
-		DisplayName: Inventory Sounds Config
-
-		useItemSwapSounds: {
-			Label: Use Sounds on Item Change
-			Tooltip: Have this set to 'On' if you want to hear sounds while changing held items.
-		}
-
-		volumeMultiplier: {
-			Label: Sound Multiplier
-			Tooltip: Change the overall volume of inventory sounds.
-		}
-
-		enabledDynamicSoundsSystem: {
-			Label: Dynamic Inventory Sounds
-			Tooltip:
-				'''
-				Whether or not the dynamic inventory sounds system is enabled or not.
-				If disabled, regular 'grab' sounds will be used.
-				'''
-		}
 	}
 
 	UIConfig: {
@@ -293,7 +282,7 @@ Configs: {
 
 		showAmbientForecastUi: {
 			Label: Show Ambient Forecast UI
-			Tooltip: Whether or not to display the ambient forecast UI near the hotbar
+			Tooltip: Whether or not to display the ambient forecast UI near the hotbar.
 		}
 	}
 }

@@ -56,7 +56,7 @@ public class FilterHooks : ModSystem
             // self.Pitch = targetPitch;
             // Main.NewText(MathF.Abs(targetPitch) + 1);
             self.ApplyReverb(SoundFilterSystem.LatestParams.ReverbGain);
-            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled && enabledLP) {
+            if (ModContent.GetInstance<AudioConfig>().isSoundOcclusionEnabled && enabledLP) {
 				// _currentLowPasses[i] holds the *applied* value, initialized to 1.0f or whatever default
 				float target = lowPassIntensity;
 
@@ -70,7 +70,7 @@ public class FilterHooks : ModSystem
                 _oldLowPasses[i] = smoothed;
             }
 			// overrides lowpass??
-            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && enableBand)
+            if (ModContent.GetInstance<AudioConfig>().isSoundDampeningEnabled && enableBand)
                 self.ApplyBandPassFilter(bandIntensity);
 
             // dynamicSfxPrevPos[i] = sfx.Position.Value;
@@ -101,9 +101,9 @@ public class FilterHooks : ModSystem
 			var lowPassIntensity = SoundFilterSystem.CalculateLowPass(self.Position.Value, Vector2.Zero, out var enabledLP);
             self.Sound.ApplyReverb(param.ReverbGain, param);
 
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled && enabledLP)
+			if (ModContent.GetInstance<AudioConfig>().isSoundOcclusionEnabled && enabledLP)
 				self.Sound.ApplyLowPassFilter(lowPassIntensity);
-			if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && enableBand)
+			if (ModContent.GetInstance<AudioConfig>().isSoundDampeningEnabled && enableBand)
 				self.Sound.ApplyBandPassFilter(bandIntensity);
 		}
 

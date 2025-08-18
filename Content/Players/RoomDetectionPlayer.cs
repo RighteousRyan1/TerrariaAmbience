@@ -24,10 +24,6 @@ public class RoomDetectionPlayer : ModSystem {
         if (tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType] && !tile.IsActuated)
             return true;
 
-        // platforms are invalid
-        /*if (tile.HasTile && Main.tileSolidTop[tile.TileType])
-            return true;*/
-
         // closed doors are solid
         if (tile.HasTile && (tile.TileType == TileID.OpenDoor || tile.TileType == TileID.ClosedDoor) && tile.TileFrameY == 0)
             return true;
@@ -165,8 +161,13 @@ public class RoomDetectionPlayer : ModSystem {
     public static bool IsInRoom { get; private set; }
 
     public override void PostUpdateEverything() {
-        if (Main.GameUpdateCount % ModContent.GetInstance<AudioAdditionsConfig>().audioFiltersRefreshTime != 0) return;
+        if (Main.GameUpdateCount % ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime != 0) return;
 
+        /*var t = (int)(Main.MouseScreen.X / Main.screenWidth * 100);
+        MAX_ROOM_WIDTH = t;
+        MAX_ROOM_HEIGHT = t;
+
+        MAX_ROOM_AREA = 5000;*/
         IsInRoom = IsPlayerInRoom(Main.LocalPlayer, PlayerRoom);
 
         /*if (IsInRoom && !_wasInRoom) {

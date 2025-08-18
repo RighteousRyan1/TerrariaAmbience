@@ -59,8 +59,8 @@ public class TileVisualizationHelpers : ModSystem {
                 _visVis = 0;
         }
 
-        var genCfg = ModContent.GetInstance<GeneralConfig>();
-        var aaCfg = ModContent.GetInstance<AudioAdditionsConfig>();
+        var genCfg = ModContent.GetInstance<AmbientConfig>();
+        var aaCfg = ModContent.GetInstance<AudioConfig>();
 
         if (!genCfg.debugInterface || !aaCfg.advancedReverbCalculation || !aaCfg.isReverbEnabled) return;
 
@@ -69,11 +69,30 @@ public class TileVisualizationHelpers : ModSystem {
         bool playerSurfaceOrHell = Main.LocalPlayer.Center.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
         bool playerUnderground = !playerSurfaceOrHell;
 
+        bool isRaycastEnabled = aaCfg.reverbUsingRaycasting;
+
         foreach (var tilePos in tilePosList) {
             var tile = Framing.GetTileSafely(tilePos);
             Vector2 worldCoords = tilePos.ToVector2() * 16;
 
-            var reflectivity = SoundFilterSystem.CalculateAcousticReflectivity(tilePos, out _, out _);
+            var reflectivity = SoundFilterSystem.CalculateAcousticReflectivity(tilePos, out bool wt, out bool ww, out var wl);
+
+            if (isRaycastEnabled) {
+                var numTiles = 0;
+
+                var lpc = Main.LocalPlayer.Center.ToTileCoordinates();
+
+                SoundFilterSystem.TileLine(tilePos, lpc,
+                    (x, y, t) => {
+                        var ts = Main.tileSolid[t.TileType];
+                        var tst = Main.tileSolidTop[t.TileType];
+                        if (t.HasTile && ts && !tst)
+                            if (x != tilePos.X || y != tilePos.Y)
+                                numTiles++;
+                    });
+                if (numTiles > 0)
+                    continue;
+            }
 
             switch (reflectivity) {
                 case Reflectivity.Low:
@@ -83,6 +102,8 @@ public class TileVisualizationHelpers : ModSystem {
                     TryAdd(worldCoords, _colorHighReverb);
                     break;
                 case Reflectivity.None:
+                    // don't display empty tiles on parts of the world without a cavern background
+                    if ((ww || wt) && (wl != WorldLayer.Cavern || wl != WorldLayer.Dirt))
                     TryAdd(worldCoords, _colorNoReverb);
                     break;
             }

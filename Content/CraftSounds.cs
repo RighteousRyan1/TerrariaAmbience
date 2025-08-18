@@ -131,7 +131,8 @@ public class CraftSounds : GlobalItem {
         // why tf is "TimeSinceLastCraft" shitting its pants? we will never know. ryan out
         if (LastCraftedConsumable != item.type || TimeSinceLastCraft > 60) {
             if (wasValidStation) {
-                var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
+                var audioCfg = ModContent.GetInstance<AudioConfig>();
+                var volScale = audioCfg.craftingSoundsVolume;
                 var dir = string.Empty;
 
                 var pair = CategoryToDir.FirstOrDefault(x => x.Key.Intersect(recipe.requiredTile).Any());

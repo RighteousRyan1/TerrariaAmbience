@@ -14,46 +14,37 @@ public class UIConfig : ModConfig {
     [DefaultValue(true)]
     public bool showAmbientForecastUi;
 }
-public class GeneralConfig : ModConfig {
+public class FootstepsConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
-    #region Ambience and Sounds
-    [Header("AmbienceAndSounds")]
-
     [DefaultValue(true)]
     public float entityFootstepsVolume;
 
     [DefaultValue(1f)]
-    public float footstepsVolMult;
-
-    [DefaultValue(true)]
-    public bool campfireSounds;
-
-    [DefaultValue("0.01")]
-    public string transitionHarshness;
-
-    [DefaultValue(true)]
-    public bool areArmorAndVanitySoundsEnabled;
+    public float masterFootstepsVolume;
 
     [DefaultValue(true)]
     public bool wetStepsEnabled;
 
-    [DefaultValue(1f)]
-    public float craftingSoundsVolume;
-    #endregion
-
-    #region Debug
+    [DefaultValue(true)]
+    public bool areArmorAndVanitySoundsEnabled;
+}
+public class AmbientConfig : ModConfig {
+    public override ConfigScope Mode => ConfigScope.ClientSide;
     [Header("Debugging")]
+
     [DefaultValue(false)]
     public bool debugInterface;
+
     [DefaultValue(true)]
     public bool showInfoAndWarnings;
-    #endregion
 
-    #region ToggleSounds
     [Header("AmbienceTrackVolumes")]
 
     [DefaultValue(1f)]
     public float overallVolume;
+
+    [DefaultValue("0.01")]
+    public string transitionHarshness;
 
     [DefaultValue(new float[] { 1f, 1f, 1f, 1f })]
     public float[] forestVolumes = new float[4];
@@ -84,12 +75,18 @@ public class GeneralConfig : ModConfig {
 
     [DefaultValue(1f)]
     public float underwaterVolume;
-    #endregion
 }
-public class AudioAdditionsConfig : ModConfig {
+public class AudioConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
-    [Header("NewSounds")]
+    [Header("SoundEffects")]
+
+    [DefaultValue(true)]
+    public bool campfireSounds;
+
+    [DefaultValue(1f)]
+    public float craftingSoundsVolume;
+
     [DefaultValue(true)]
     public bool slimySounds;
 
@@ -99,11 +96,19 @@ public class AudioAdditionsConfig : ModConfig {
     [DefaultValue(true)]
     public bool dynamicAnimalSounds;
 
+    [DefaultValue(true)]
+    public bool chestSounds;
+
+    [ReloadRequired]
+    [DefaultValue(true)]
+    public bool newSplashSounds;
+
     [Header("SoundFilters")]
 
     [DefaultValue(true)]
     public bool isReverbEnabled;
-
+    [DefaultValue(true)]
+    public bool reverbUsingRaycasting;
     [DefaultValue(10)]
     [Range(1, 60)]
     public uint audioFiltersRefreshTime;
@@ -116,17 +121,4 @@ public class AudioAdditionsConfig : ModConfig {
 
     [DefaultValue(true)]
     public bool isSoundOcclusionEnabled;
-}
-public class AmbientConfigServer : ModConfig {
-    public override ConfigScope Mode => ConfigScope.ServerSide;
-    #region Sound Configs
-
-    [DefaultValue(true)]
-    public bool chestSounds;
-
-    [ReloadRequired]
-    [DefaultValue(true)]
-    public bool newSplashSounds;
-
-    #endregion
 }

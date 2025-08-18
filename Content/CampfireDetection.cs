@@ -17,7 +17,9 @@ public class CampfireDetection : GlobalTile
     public static bool IsNearCampfire;
     public override void NearbyEffects(int i, int j, int type, bool closer) {
         if (Main.dedServ) return;
-        if (!ModContent.GetInstance<GeneralConfig>().campfireSounds) return;
+
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
+        if (!audioCfg.campfireSounds) return;
 
         CampfirePos.X = i * 16;
         CampfirePos.Y = j * 16;

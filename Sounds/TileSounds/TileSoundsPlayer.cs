@@ -17,7 +17,7 @@ public class TileSoundsPlayer : ModPlayer {
     public SoundStyle WoodCreak;
 
     public override void PostUpdate() {
-        var config = ModContent.GetInstance<AudioAdditionsConfig>();
+        var config = ModContent.GetInstance<AudioConfig>();
         if (!config.woodCreaks) return;
 
         Point playerTilePos = new((int)Player.Center.X / 16, (int)Player.Center.Y / 16);

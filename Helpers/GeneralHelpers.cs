@@ -20,467 +20,466 @@ using Terraria.GameContent;
 using ReLogic.Content;
 using MonoMod.RuntimeDetour;
 
-namespace TerrariaAmbience.Helpers
+namespace TerrariaAmbience.Helpers;
+
+public static class MenuDetours
 {
-    public static class MenuDetours
-    {
-        public delegate void Orig_AddMenuButtons(Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
+    public delegate void Orig_AddMenuButtons(Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
 
-        public delegate void Hook_AddMenuButtons(Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
+    public delegate void Hook_AddMenuButtons(Orig_AddMenuButtons orig, Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons);
 
-        public static Hook AddMenuButtonsHook;
+    public static Hook AddMenuButtonsHook;
 
-        public static void Init() {
-            // this is useful to have for future notes.
-            AddMenuButtonsHook = new(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic),
-                MethodDetours.MenuDetours_On_AddMenuButtons);
-        }
+    public static void Init() {
+        // this is useful to have for future notes.
+        AddMenuButtonsHook = new(typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("AddMenuButtons", BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic),
+            MethodDetours.MenuDetours_On_AddMenuButtons);
     }
-    public class GeneralHelpers
-    {
-        public static float GetPanFromPosition(Vector2 position) {
-            bool onScreen = false;
-            float panFromVector = 0f;
-            if (position.X == -1f || position.Y == -1f) {
+}
+public class GeneralHelpers
+{
+    public static float GetPanFromPosition(Vector2 position) {
+        bool onScreen = false;
+        float panFromVector = 0f;
+        if (position.X == -1f || position.Y == -1f) {
+            onScreen = true;
+        }
+        else {
+            Rectangle screenBounds = new((int)(Main.screenPosition.X - Main.screenWidth * 2), (int)(Main.screenPosition.Y - Main.screenHeight * 2), Main.screenWidth * 5, Main.screenHeight * 5);
+            Rectangle rectFromVect = new((int)position.X, (int)position.Y, 1, 1);
+            Vector2 midScreen = new(Main.screenPosition.X + Main.screenWidth / 2, Main.screenPosition.Y + Main.screenHeight / 2);
+            if (rectFromVect.Intersects(screenBounds)) {
                 onScreen = true;
             }
-            else {
-                Rectangle screenBounds = new((int)(Main.screenPosition.X - Main.screenWidth * 2), (int)(Main.screenPosition.Y - Main.screenHeight * 2), Main.screenWidth * 5, Main.screenHeight * 5);
-                Rectangle rectFromVect = new((int)position.X, (int)position.Y, 1, 1);
-                Vector2 midScreen = new(Main.screenPosition.X + Main.screenWidth / 2, Main.screenPosition.Y + Main.screenHeight / 2);
-                if (rectFromVect.Intersects(screenBounds)) {
-                    onScreen = true;
-                }
-                if (onScreen) {
-                    panFromVector = (position.X - midScreen.X) / ((float)Main.screenWidth * 0.5f);
-                    float num = Math.Abs(position.X - midScreen.X);
-                    float absPanY = Math.Abs(position.Y - midScreen.Y);
-                    Math.Sqrt((double)(num * num + absPanY * absPanY));
-                }
+            if (onScreen) {
+                panFromVector = (position.X - midScreen.X) / ((float)Main.screenWidth * 0.5f);
+                float num = Math.Abs(position.X - midScreen.X);
+                float absPanY = Math.Abs(position.Y - midScreen.Y);
+                Math.Sqrt((double)(num * num + absPanY * absPanY));
             }
-            if (panFromVector < -1f) {
-                panFromVector = -1f;
-            }
-            if (panFromVector > 1f) {
-                panFromVector = 1f;
-            }
-            return panFromVector;
         }
+        if (panFromVector < -1f) {
+            panFromVector = -1f;
+        }
+        if (panFromVector > 1f) {
+            panFromVector = 1f;
+        }
+        return panFromVector;
+    }
 
-        public static float GetVolumeFromPosition(Vector2 position) {
-            bool onScreen = false;
-            float volumeFromVector = 1f;
-            if (position.X == -1f || position.Y == -1f) {
+    public static float GetVolumeFromPosition(Vector2 position) {
+        bool onScreen = false;
+        float volumeFromVector = 1f;
+        if (position.X == -1f || position.Y == -1f) {
+            onScreen = true;
+        }
+        else {
+            Rectangle screenBounds = new((int)(Main.screenPosition.X - Main.screenWidth * 2), (int)(Main.screenPosition.Y - Main.screenHeight * 2), Main.screenWidth * 5, Main.screenHeight * 5);
+            Rectangle rectFromVect = new((int)position.X, (int)position.Y, 1, 1);
+            Vector2 midScreen = new(Main.screenPosition.X + Main.screenWidth / 2, Main.screenPosition.Y + Main.screenHeight / 2);
+            if (rectFromVect.Intersects(screenBounds)) {
                 onScreen = true;
             }
-            else {
-                Rectangle screenBounds = new((int)(Main.screenPosition.X - Main.screenWidth * 2), (int)(Main.screenPosition.Y - Main.screenHeight * 2), Main.screenWidth * 5, Main.screenHeight * 5);
-                Rectangle rectFromVect = new((int)position.X, (int)position.Y, 1, 1);
-                Vector2 midScreen = new(Main.screenPosition.X + Main.screenWidth / 2, Main.screenPosition.Y + Main.screenHeight / 2);
-                if (rectFromVect.Intersects(screenBounds)) {
-                    onScreen = true;
-                }
-                if (onScreen) {
-                    float num7 = Math.Abs(position.X - midScreen.X);
-                    float num5 = Math.Abs(position.Y - midScreen.Y);
-                    float num6 = (float)Math.Sqrt((double)(num7 * num7 + num5 * num5));
-                    volumeFromVector = 1f - num6 / ((float)Main.screenWidth * 1.5f);
-                }
+            if (onScreen) {
+                float num7 = Math.Abs(position.X - midScreen.X);
+                float num5 = Math.Abs(position.Y - midScreen.Y);
+                float num6 = (float)Math.Sqrt((double)(num7 * num7 + num5 * num5));
+                volumeFromVector = 1f - num6 / ((float)Main.screenWidth * 1.5f);
             }
-            if (volumeFromVector > 1f) {
-                volumeFromVector = 1f;
-            }
-            if (volumeFromVector < 0f) {
-                volumeFromVector = 0f;
-            }
-            if (Vector2.Distance(Main.screenPosition, position) > 3850f) {
-                volumeFromVector = 0f;
-            }
-            return volumeFromVector;
         }
-        public static SoundStyle SimpleSoundStyle(string path, int variants, SoundType type = SoundType.Sound, float volume = 1f, float pitch = 0f) {
-            return new(path, variants, type) {
-                Volume = volume,
-                Pitch = pitch,
-            };
+        if (volumeFromVector > 1f) {
+            volumeFromVector = 1f;
         }
-        public static SoundEffectInstance PlaySound(in SoundStyle style, Vector2? position = null) {
-            var id = SoundEngine.PlaySound(style, position);
-            if (SoundEngine.TryGetActiveSound(id, out var sound))
-                return sound.Sound;
-            else
-                return null;
+        if (volumeFromVector < 0f) {
+            volumeFromVector = 0f;
         }
-        public static Rectangle GetRectOf(Vector2 position) => new((int)position.X, (int)position.Y, 1, 1);
-        public static Rectangle GetRectOf(Point position) => new(position.X, position.Y, 1, 1);
-        public static T GetAssetValue<T>(Mod mod, string path) where T : class {
-            return mod.Assets.Request<T>(path, AssetRequestMode.ImmediateLoad).Value;
+        if (Vector2.Distance(Main.screenPosition, position) > 3850f) {
+            volumeFromVector = 0f;
         }
-        public static void SavePlayer() {
-            Player.SavePlayer(Main.ActivePlayerFileData);
-            Main.NewText("[c/00FF00:Console] >> Player saved. You are free to exit.");
-        }
-        public static T Pick<T>(params T[] values) {
-            return Main.rand.Next(values);
-        }
-        public static void ReloadMods() {
-            typeof(ModLoader).Assembly.GetType("Terraria.ModLoader.ModLoader").GetMethod("Reload", BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
-        }
-        public static bool KeyPress(Keys key) {
-            return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
-        }
-        public static GeneralHelpers Instance => ModContent.GetInstance<GeneralHelpers>();
-        public enum AudioFileExtension {
-            MP3,
-            WAV,
-            OGG,
-            M4A,
-            FLAC,
-            VOX
-        }
-        public static void AddMainMenuButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons) {
-            buttonNames[buttonIndex] = text;
+        return volumeFromVector;
+    }
+    public static SoundStyle SimpleSoundStyle(string path, int variants, SoundType type = SoundType.Sound, float volume = 1f, float pitch = 0f) {
+        return new(path, variants, type) {
+            Volume = volume,
+            Pitch = pitch,
+        };
+    }
+    public static SoundEffectInstance PlaySound(in SoundStyle style, Vector2? position = null) {
+        var id = SoundEngine.PlaySound(style, position);
+        if (SoundEngine.TryGetActiveSound(id, out var sound))
+            return sound.Sound;
+        else
+            return null;
+    }
+    public static Rectangle GetRectOf(Vector2 position) => new((int)position.X, (int)position.Y, 1, 1);
+    public static Rectangle GetRectOf(Point position) => new(position.X, position.Y, 1, 1);
+    public static T GetAssetValue<T>(Mod mod, string path) where T : class {
+        return mod.Assets.Request<T>(path, AssetRequestMode.ImmediateLoad).Value;
+    }
+    public static void SavePlayer() {
+        Player.SavePlayer(Main.ActivePlayerFileData);
+        Main.NewText("[c/00FF00:Console] >> Player saved. You are free to exit.");
+    }
+    public static T Pick<T>(params T[] values) {
+        return Main.rand.Next(values);
+    }
+    public static void ReloadMods() {
+        typeof(ModLoader).Assembly.GetType("Terraria.ModLoader.ModLoader").GetMethod("Reload", BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
+    }
+    public static bool KeyPress(Keys key) {
+        return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
+    }
+    public static GeneralHelpers Instance => ModContent.GetInstance<GeneralHelpers>();
+    public enum AudioFileExtension {
+        MP3,
+        WAV,
+        OGG,
+        M4A,
+        FLAC,
+        VOX
+    }
+    public static void AddMainMenuButton(string text, Action act, int selectedMenu, string[] buttonNames, ref int buttonIndex, ref int numButtons) {
+        buttonNames[buttonIndex] = text;
 
-            if (selectedMenu == buttonIndex) {
-                SoundEngine.PlaySound(SoundID.MenuOpen);
-                act();
-            }
-
-            buttonIndex++;
-            numButtons++;
-        }
-        public static MouseState MSNew {
-            get;
-            internal set;
-        }
-        public static MouseState MSOld {
-            get;
-            internal set;
-        }
-        public static void ClickHandling() {
-            MSNew = Mouse.GetState();
-
-        }
-        public static void UpdateButtons() {
-            if (Main.dayTime) {
-                if (def < 150)
-                    def++;
-            }
-            else {
-                if (def > 86)
-                    def--;
-            }
-        }
-        public static bool ClickEnded(bool leftClick) {
-            if (leftClick) {
-                return MSOld.LeftButton == ButtonState.Pressed && MSNew.LeftButton == ButtonState.Released;
-            }
-            else {
-                return MSOld.RightButton == ButtonState.Pressed && MSNew.RightButton == ButtonState.Released;
-            }
-        }
-        private static byte def;
-        public bool hovering;
-        public Rectangle CreateSimpleUIButton(
-            Vector2 position,
-            string text,
-            Action whatToDo,
-            ref float useScale,
-            Color colorWhenHovered = default,
-            float scaleMultiplier = 0.015f,
-            Action hoveringToDo = null,
-            Color nonHoverColor = default,
-            float alpha = 1f,
-            bool waitUntilClickEnd = false,
-            Action rightClickAction = null) {
-            if (colorWhenHovered == default) {
-                colorWhenHovered = Main.highVersionColor;
-            }
-            if (nonHoverColor == default) {
-                nonHoverColor = new Color(def, def, def);
-            }
-            useScale = MathHelper.Clamp(useScale, 0.65f, 0.85f);
-
-            var bounds = FontAssets.DeathText.Value.MeasureString(text);
-            var rectHoverable = new Rectangle((int)position.X - (int)(bounds.X / 2 * useScale), (int)(position.Y - bounds.Y / 2 + 10), (int)(bounds.X * useScale), (int)bounds.Y - 30);
-
-            hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
-
-            ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.DeathText.Value, text, position, hovering ? colorWhenHovered * alpha : nonHoverColor * alpha, 0f, bounds / 2, new Vector2(useScale), -1, 2);
-            if (!waitUntilClickEnd) {
-                if (Main.mouseLeft && Main.mouseLeftRelease && hovering && whatToDo != null) {
-                    whatToDo();
-                }
-                if (Main.mouseRight && Main.mouseRightRelease && hovering && rightClickAction != null) {
-                    rightClickAction();
-                }
-            }
-            else {
-                if (ClickEnded(true) && hovering && whatToDo != null) {
-                    whatToDo();
-                }
-            }
-            if (hoveringToDo != null) {
-                if (hovering) {
-                    hoveringToDo();
-                }
-            }
-            useScale += hovering ? scaleMultiplier : -scaleMultiplier;
-            return rectHoverable;
-        }
-        public static bool CheckPlayerArmorSlot(Player player, int slot, out Item item) {
-            item = new Item();
-            if (!player.armor[slot].IsAir)
-                item = player.armor[slot];
-
-            return !player.armor[slot].IsAir;
+        if (selectedMenu == buttonIndex) {
+            SoundEngine.PlaySound(SoundID.MenuOpen);
+            act();
         }
 
-        public static int GetAllUsedAccSlots(Player player) {
-            int x = 0;
-            foreach (Item item in player.armor) {
-                if (!item.IsAir) {
-                    x++;
-                }
-            }
-            return x;
-        }
-        public static string DisplayAllUsedAccSlots(Player player) {
-            int i = 0;
-            string s = "";
-            foreach (Item item in player.armor) {
-                if (!item.IsAir) {
-                    i++;
-                    s += $" | player.armor[{i - 1}]:{item.Name}";
-                }
-            }
-            return s == "" ? "No valid slots" : s;
-        }
-        public static float TrueTime => (float)(Main.time + (Main.dayTime ? 0d : Main.dayLength));
-        public const float FullDayLength = (float)(Main.nightLength + Main.dayLength);
-        public class IDs {
-            public struct ArmorSlotID {
-                public static ReLogic.Reflection.IdDictionary Search = ReLogic.Reflection.IdDictionary.Create<short, short>();
-                public const short HeadSlot = 0;
-                public const short ChestSlot = 1;
-                public const short LegSlot = 2;
-                public const short AccSlot1 = 3;
-                public const short AccSlot2 = 4;
-                public const short AccSlot3 = 4;
-                public const short AccSlot4 = 5;
-                public const short AccSlot5 = 6;
+        buttonIndex++;
+        numButtons++;
+    }
+    public static MouseState MSNew {
+        get;
+        internal set;
+    }
+    public static MouseState MSOld {
+        get;
+        internal set;
+    }
+    public static void ClickHandling() {
+        MSNew = Mouse.GetState();
 
-                public const short VanityHeadSlot = 10;
-                public const short VanityChestSlot = 11;
-                public const short VanityLegSlot = 12;
-
-                public const short VanityAccSlot1 = 3;
-                public const short VanityAccSlot2 = 4;
-                public const short VanityAccSlot3 = 4;
-                public const short VanityAccSlot4 = 5;
-                public const short VanityAccSlot5 = 6;
-            }
+    }
+    public static void UpdateButtons() {
+        if (Main.dayTime) {
+            if (def < 150)
+                def++;
         }
-        public static List<Tile> GetTileSquare(int i, int j, int width, int height) {
-            var tilesInSquare = new List<Tile>();
-            for (int n = i - width / 2; n < i + width / 2; n++) {
-                for (int m = j - height / 2; m < j + height / 2; m++) {
-                    Tile tile = Framing.GetTileSafely(n, m);
-                    tilesInSquare.Add(tile);
-                }
-            }
-            return tilesInSquare;
-        }
-        public static List<Point> GetTileSquareCoordinates(int i, int j, int width, int height) {
-            var coordsPerTile = new List<Point>();
-            for (int n = i - width / 2; n < i + width / 2; n++) {
-                for (int m = j - height / 2; m < j + height / 2; m++) {
-                    coordsPerTile.Add(new Point(n, m));
-                }
-            }
-
-            return coordsPerTile;
-        }
-
-        public static Tile GetTileAt(Vector2 coordinates) {
-            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? Framing.GetTileSafely(coordinates.ToPoint()) : new Tile();
-        }
-        public static string GetTileNameAt(Vector2 coordinates) {
-            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? TileID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).TileType) : "Empty";
-        }
-        public static string GetWallNameAt(Vector2 coordinates) {
-            return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? WallID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).WallType) : "Empty";
+        else {
+            if (def > 86)
+                def--;
         }
     }
-    public static class MathUtils
-    {
-        public static float InverseLerp(float begin, float end, float value, bool clamped = false) {
-            if (clamped) {
-                if (begin < end) {
-                    if (value < begin)
-                        return 0f;
-                    if (value > end)
-                        return 1f;
-                }
-                else {
-                    if (value < end)
-                        return 1f;
-                    if (value > begin)
-                        return 0f;
-                }
-            }
-            return (value - begin) / (end - begin);
+    public static bool ClickEnded(bool leftClick) {
+        if (leftClick) {
+            return MSOld.LeftButton == ButtonState.Pressed && MSNew.LeftButton == ButtonState.Released;
+        }
+        else {
+            return MSOld.RightButton == ButtonState.Pressed && MSNew.RightButton == ButtonState.Released;
         }
     }
-    public static class ExtensionMethods
-    {
-        public static Mod mod => ModContent.GetInstance<TerrariaAmbience>();
-        public static bool Underwater(this Vector2 drowningPosition) => Collision.DrownCollision(drowningPosition, 1, 1);
-        public static bool IsWaterSuffocating(this Player player) => Collision.DrownCollision(player.position, player.width, player.height, player.gravDir); // how did i not know this existed before
-        public static string AppendFileExtension(this string str, GeneralHelpers.AudioFileExtension extension) {
-            return $"{str}.{extension.ToString().ToLower()}";
+    private static byte def;
+    public bool hovering;
+    public Rectangle CreateSimpleUIButton(
+        Vector2 position,
+        string text,
+        Action whatToDo,
+        ref float useScale,
+        Color colorWhenHovered = default,
+        float scaleMultiplier = 0.015f,
+        Action hoveringToDo = null,
+        Color nonHoverColor = default,
+        float alpha = 1f,
+        bool waitUntilClickEnd = false,
+        Action rightClickAction = null) {
+        if (colorWhenHovered == default) {
+            colorWhenHovered = Main.highVersionColor;
         }
-        public static void ModifyRGB(this Color color, byte amount, bool subract = false) {
-            void Solve() {
-                if (!subract) {
-                    color.R += amount;
-                    color.G += amount;
-                    color.B += amount;
-                }
-                else {
-                    color.R -= amount;
-                    color.G -= amount;
-                    color.B -= amount;
-                }
+        if (nonHoverColor == default) {
+            nonHoverColor = new Color(def, def, def);
+        }
+        useScale = MathHelper.Clamp(useScale, 0.65f, 0.85f);
+
+        var bounds = FontAssets.DeathText.Value.MeasureString(text);
+        var rectHoverable = new Rectangle((int)position.X - (int)(bounds.X / 2 * useScale), (int)(position.Y - bounds.Y / 2 + 10), (int)(bounds.X * useScale), (int)bounds.Y - 30);
+
+        hovering = rectHoverable.Contains(Main.MouseScreen.ToPoint());
+
+        ChatManager.DrawColorCodedStringWithShadow(Main.spriteBatch, FontAssets.DeathText.Value, text, position, hovering ? colorWhenHovered * alpha : nonHoverColor * alpha, 0f, bounds / 2, new Vector2(useScale), -1, 2);
+        if (!waitUntilClickEnd) {
+            if (Main.mouseLeft && Main.mouseLeftRelease && hovering && whatToDo != null) {
+                whatToDo();
             }
-            Solve();
-        }
-        public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth) {
-            if (tex != null && !tex.IsDisposed) {
-                spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, layerDepth);
+            if (Main.mouseRight && Main.mouseRightRelease && hovering && rightClickAction != null) {
+                rightClickAction();
             }
         }
-        /// <summary>
-        /// Checks if this SoundEffectInstance is Playing.
-        /// </summary>
-        /// <returns>A boolean determining if this sound is Paused.</returns>
-        public static bool IsPlaying(this SoundEffectInstance sfx) {
-            bool isNull = sfx == null;
-
-            if (!isNull)
-                return sfx.State == SoundState.Playing;
-
-            return false;
+        else {
+            if (ClickEnded(true) && hovering && whatToDo != null) {
+                whatToDo();
+            }
         }
-        /// <summary>
-        /// Checks if this SoundEffectInstance is Stopped.
-        /// </summary>
-        /// <returns>A boolean determining if this sound is Stopped.</returns>
-        public static bool IsStopped(this SoundEffectInstance sfx) {
-            bool isNull = sfx == null;
-
-            if (!isNull)
-                return sfx.State == SoundState.Stopped;
-
-            return false;
+        if (hoveringToDo != null) {
+            if (hovering) {
+                hoveringToDo();
+            }
         }
-        /// <summary>
-        /// Checks if this SoundEffectInstance is Paused.
-        /// </summary>
-        /// <returns>A boolean determining if this sound is Paused.</returns>
-        public static bool IsPaused(this SoundEffectInstance sfx) {
-            bool isNull = sfx == null;
+        useScale += hovering ? scaleMultiplier : -scaleMultiplier;
+        return rectHoverable;
+    }
+    public static bool CheckPlayerArmorSlot(Player player, int slot, out Item item) {
+        item = new Item();
+        if (!player.armor[slot].IsAir)
+            item = player.armor[slot];
 
-            if (!isNull)
-                return sfx.State == SoundState.Paused;
+        return !player.armor[slot].IsAir;
+    }
 
-            return false;
+    public static int GetAllUsedAccSlots(Player player) {
+        int x = 0;
+        foreach (Item item in player.armor) {
+            if (!item.IsAir) {
+                x++;
+            }
         }
-        public static bool HeadWet(this Player player) {
-            Vector2 v = new Vector2(player.Top.X, player.Top.Y - 1.4f).RotatedBy(player.fullRotation, player.Center);
-            return Main.tile[(int)v.X / 16, (int)v.Y / 16].LiquidAmount > 0;
+        return x;
+    }
+    public static string DisplayAllUsedAccSlots(Player player) {
+        int i = 0;
+        string s = "";
+        foreach (Item item in player.armor) {
+            if (!item.IsAir) {
+                i++;
+                s += $" | player.armor[{i - 1}]:{item.Name}";
+            }
         }
-        /// <summary>
-        /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
-        /// </summary>
-        /// <param name="position">The position to check around.</param>
-        /// <param name="dist">The distance from the player</param>
-        /// <returns>The amount of tiles in dist around the player.</returns>
-        public static int TilesAround(this Vector2 position, int dist, bool condition) {
-            int index = 0;
-            if (condition) {
-                for (int i = (int)position.X / 16 - dist; i < (int)position.X / 16 + dist; i++) {
-                    for (int j = (int)position.Y / 16 - dist; j < (int)position.Y / 16 + dist; j++) {
-                        Tile tile = Main.tile[i, j];
+        return s == "" ? "No valid slots" : s;
+    }
+    public static float TrueTime => (float)(Main.time + (Main.dayTime ? 0d : Main.dayLength));
+    public const float FullDayLength = (float)(Main.nightLength + Main.dayLength);
+    public class IDs {
+        public struct ArmorSlotID {
+            public static ReLogic.Reflection.IdDictionary Search = ReLogic.Reflection.IdDictionary.Create<short, short>();
+            public const short HeadSlot = 0;
+            public const short ChestSlot = 1;
+            public const short LegSlot = 2;
+            public const short AccSlot1 = 3;
+            public const short AccSlot2 = 4;
+            public const short AccSlot3 = 4;
+            public const short AccSlot4 = 5;
+            public const short AccSlot5 = 6;
 
-                        if (tile.HasTile && tile.CollisionType() == 1) {
-                            index++;
-                        }
+            public const short VanityHeadSlot = 10;
+            public const short VanityChestSlot = 11;
+            public const short VanityLegSlot = 12;
+
+            public const short VanityAccSlot1 = 3;
+            public const short VanityAccSlot2 = 4;
+            public const short VanityAccSlot3 = 4;
+            public const short VanityAccSlot4 = 5;
+            public const short VanityAccSlot5 = 6;
+        }
+    }
+    public static List<Tile> GetTileSquare(int i, int j, int width, int height) {
+        var tilesInSquare = new List<Tile>();
+        for (int n = i - width / 2; n < i + width / 2; n++) {
+            for (int m = j - height / 2; m < j + height / 2; m++) {
+                Tile tile = Framing.GetTileSafely(n, m);
+                tilesInSquare.Add(tile);
+            }
+        }
+        return tilesInSquare;
+    }
+    public static List<Point> GetTileSquareCoordinates(int i, int j, int width, int height) {
+        var coordsPerTile = new List<Point>();
+        for (int n = i - width / 2; n < i + width / 2; n++) {
+            for (int m = j - height / 2; m < j + height / 2; m++) {
+                coordsPerTile.Add(new Point(n, m));
+            }
+        }
+
+        return coordsPerTile;
+    }
+
+    public static Tile GetTileAt(Vector2 coordinates) {
+        return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? Framing.GetTileSafely(coordinates.ToPoint()) : new Tile();
+    }
+    public static string GetTileNameAt(Vector2 coordinates) {
+        return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? TileID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).TileType) : "Empty";
+    }
+    public static string GetWallNameAt(Vector2 coordinates) {
+        return WorldGen.InWorld((int)coordinates.X, (int)coordinates.Y) ? WallID.Search.GetName(Framing.GetTileSafely(coordinates.ToPoint()).WallType) : "Empty";
+    }
+}
+public static class MathUtils
+{
+    public static float InverseLerp(float begin, float end, float value, bool clamped = false) {
+        if (clamped) {
+            if (begin < end) {
+                if (value < begin)
+                    return 0f;
+                if (value > end)
+                    return 1f;
+            }
+            else {
+                if (value < end)
+                    return 1f;
+                if (value > begin)
+                    return 0f;
+            }
+        }
+        return (value - begin) / (end - begin);
+    }
+}
+public static class ExtensionMethods
+{
+    public static Mod mod => ModContent.GetInstance<TerrariaAmbience>();
+    public static bool Underwater(this Vector2 drowningPosition) => Collision.DrownCollision(drowningPosition, 1, 1);
+    public static bool IsWaterSuffocating(this Player player) => Collision.DrownCollision(player.position, player.width, player.height, player.gravDir); // how did i not know this existed before
+    public static string AppendFileExtension(this string str, GeneralHelpers.AudioFileExtension extension) {
+        return $"{str}.{extension.ToString().ToLower()}";
+    }
+    public static void ModifyRGB(this Color color, byte amount, bool subract = false) {
+        void Solve() {
+            if (!subract) {
+                color.R += amount;
+                color.G += amount;
+                color.B += amount;
+            }
+            else {
+                color.R -= amount;
+                color.G -= amount;
+                color.B -= amount;
+            }
+        }
+        Solve();
+    }
+    public static void SafeDraw(this SpriteBatch spriteBatch, Texture2D tex, Vector2 pos, Rectangle? sourceRect, Color color, float rot, Vector2 orig, float scale, SpriteEffects effects, float layerDepth) {
+        if (tex != null && !tex.IsDisposed) {
+            spriteBatch.Draw(tex, pos, sourceRect, color, rot, orig, scale, effects, layerDepth);
+        }
+    }
+    /// <summary>
+    /// Checks if this SoundEffectInstance is Playing.
+    /// </summary>
+    /// <returns>A boolean determining if this sound is Paused.</returns>
+    public static bool IsPlaying(this SoundEffectInstance sfx) {
+        bool isNull = sfx == null;
+
+        if (!isNull)
+            return sfx.State == SoundState.Playing;
+
+        return false;
+    }
+    /// <summary>
+    /// Checks if this SoundEffectInstance is Stopped.
+    /// </summary>
+    /// <returns>A boolean determining if this sound is Stopped.</returns>
+    public static bool IsStopped(this SoundEffectInstance sfx) {
+        bool isNull = sfx == null;
+
+        if (!isNull)
+            return sfx.State == SoundState.Stopped;
+
+        return false;
+    }
+    /// <summary>
+    /// Checks if this SoundEffectInstance is Paused.
+    /// </summary>
+    /// <returns>A boolean determining if this sound is Paused.</returns>
+    public static bool IsPaused(this SoundEffectInstance sfx) {
+        bool isNull = sfx == null;
+
+        if (!isNull)
+            return sfx.State == SoundState.Paused;
+
+        return false;
+    }
+    public static bool HeadWet(this Player player) {
+        Vector2 v = new Vector2(player.Top.X, player.Top.Y - 1.4f).RotatedBy(player.fullRotation, player.Center);
+        return Main.tile[(int)v.X / 16, (int)v.Y / 16].LiquidAmount > 0;
+    }
+    /// <summary>
+    /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
+    /// </summary>
+    /// <param name="position">The position to check around.</param>
+    /// <param name="dist">The distance from the player</param>
+    /// <returns>The amount of tiles in dist around the player.</returns>
+    public static int TilesAround(this Vector2 position, int dist, bool condition) {
+        int index = 0;
+        if (condition) {
+            for (int i = (int)position.X / 16 - dist; i < (int)position.X / 16 + dist; i++) {
+                for (int j = (int)position.Y / 16 - dist; j < (int)position.Y / 16 + dist; j++) {
+                    Tile tile = Main.tile[i, j];
+
+                    if (tile.HasTile && tile.CollisionType() == 1) {
+                        index++;
                     }
                 }
             }
-            return index;
         }
+        return index;
+    }
 
-        /// <summary>
-        /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
-        /// </summary>
-        /// <param name="player">The player</param>
-        /// <param name="dist">The distance from the player</param>
-        /// <param name="tile">An tile to do something with the tiles inside <paramref name="dist"/>.</param>
-        /// <returns></returns>
-        public static int TilesAround(this Player player, int dist, out Tile tile, bool condition) {
-            Tile leTile = Main.tile[1, 1];
-            int index = 0;
-            if (condition) {
-                for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++) {
-                    for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++) {
-                        leTile = Main.tile[i, j];
+    /// <summary>
+    /// Finds the tiles around the player in a square. Do not put the value too high otherwise FPS will tank.
+    /// </summary>
+    /// <param name="player">The player</param>
+    /// <param name="dist">The distance from the player</param>
+    /// <param name="tile">An tile to do something with the tiles inside <paramref name="dist"/>.</param>
+    /// <returns></returns>
+    public static int TilesAround(this Player player, int dist, out Tile tile, bool condition) {
+        Tile leTile = Main.tile[1, 1];
+        int index = 0;
+        if (condition) {
+            for (int i = (int)player.Bottom.X / 16 - dist; i < (int)player.Bottom.X / 16 + dist; i++) {
+                for (int j = (int)player.Bottom.Y / 16 - dist; j < (int)player.Bottom.Y / 16 + dist; j++) {
+                    leTile = Main.tile[i, j];
 
-                        if (leTile.HasTile && leTile.CollisionType() == 1) {
-                            index++;
-                        }
+                    if (leTile.HasTile && leTile.CollisionType() == 1) {
+                        index++;
                     }
                 }
             }
-            tile = leTile;
-            return index;
         }
+        tile = leTile;
+        return index;
     }
-    public static class TileUtils
-    {
-        public static float GetWaterPressureFloat(int heightCheck, Vector2 checkPos) {
+}
+public static class TileUtils
+{
+    public static float GetWaterPressureFloat(int heightCheck, Vector2 checkPos) {
 
-            if (!Collision.DrownCollision(checkPos, 1, 1, -1)) {
-                return 0f;
-            }
-
-            float yDist = 0;
-
-            int iterations = 0;
-
-            for (int i = (int)checkPos.Y; i > (int)checkPos.Y - heightCheck; i--) {
-                iterations++;
-
-                bool isWaterExistent = Collision.DrownCollision(checkPos - new Vector2(0, iterations), 1, 1, -1);
-                if (!isWaterExistent || iterations == heightCheck) {
-                    yDist = iterations;
-                    break;
-                }
-            }
-
-            return yDist;
+        if (!Collision.DrownCollision(checkPos, 1, 1, -1)) {
+            return 0f;
         }
-        public static int CollisionType(this Tile tile) {
-            if (!tile.HasTile)
-                return 0;
-            if (tile.BlockType == BlockType.HalfBlock)
-                return 2;
-            if (tile.Slope != SlopeType.Solid)
-                return 2 * (int)tile.Slope;
-            if (Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType])
-                return 1;
-            return -1;
+
+        float yDist = 0;
+
+        int iterations = 0;
+
+        for (int i = (int)checkPos.Y; i > (int)checkPos.Y - heightCheck; i--) {
+            iterations++;
+
+            bool isWaterExistent = Collision.DrownCollision(checkPos - new Vector2(0, iterations), 1, 1, -1);
+            if (!isWaterExistent || iterations == heightCheck) {
+                yDist = iterations;
+                break;
+            }
         }
+
+        return yDist;
+    }
+    public static int CollisionType(this Tile tile) {
+        if (!tile.HasTile)
+            return 0;
+        if (tile.BlockType == BlockType.HalfBlock)
+            return 2;
+        if (tile.Slope != SlopeType.Solid)
+            return 2 * (int)tile.Slope;
+        if (Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType])
+            return 1;
+        return -1;
     }
 }

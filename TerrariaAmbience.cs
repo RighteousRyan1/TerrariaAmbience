@@ -213,7 +213,8 @@ public partial class TerrariaAmbience : Mod {
                 else {
                     var path = reader.ReadString();
                     var pos = reader.ReadVector2();
-                    var volScale = ModContent.GetInstance<GeneralConfig>().craftingSoundsVolume;
+                    var audioCfg = ModContent.GetInstance<AudioConfig>();
+                    var volScale = audioCfg.craftingSoundsVolume;
                     SoundEngine.PlaySound(new SoundStyle(path).WithVolumeScale(CraftSounds.UniversalSoundScale * volScale), pos);
                 }
                 break;

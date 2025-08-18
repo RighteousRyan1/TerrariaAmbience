@@ -71,7 +71,7 @@ internal class MethodDetours {
         column1 = string.Empty;
         column2 = string.Empty;
 
-        if (!ModContent.GetInstance<GeneralConfig>().debugInterface) return;
+        if (!ModContent.GetInstance<AmbientConfig>().debugInterface) return;
 
         #region DrawVolume
         string txt = string.Empty;

@@ -96,13 +96,13 @@ public class FootstepHandler {
         Armor = new(mod, "Sounds/Custom/steps/armor/heavy", 9, "Armor") {
             UseAnyTile = true,
             FootstepConditions = (p) => {
-                return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
+                return ModContent.GetInstance<FootstepsConfig>().areArmorAndVanitySoundsEnabled;
             }
         };
         Vanity = new(mod, "Sounds/Custom/steps/armor/light", 6, "Vanity") {
             UseAnyTile = true,
             FootstepConditions = (p) => {
-                return ModContent.GetInstance<GeneralConfig>().areArmorAndVanitySoundsEnabled;
+                return ModContent.GetInstance<FootstepsConfig>().areArmorAndVanitySoundsEnabled;
             }
         };
 
@@ -135,11 +135,12 @@ public class FootstepHandler {
 
     public void Update() {
         if (Main.gameMenu) return;
+        var fstepCfg = ModContent.GetInstance<FootstepsConfig>();
 
         for (int i = 0; i < AllSounds.Count; i++) {
             if (AllSounds[i] is null)
                 continue;
-            AllSounds[i].VolumeMultiplier = ModContent.GetInstance<GeneralConfig>().footstepsVolMult;
+            AllSounds[i].VolumeMultiplier = fstepCfg.masterFootstepsVolume;
         }
         var vol = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().GetArmorStepVolume();
         Armor.LandVolume = vol;
@@ -152,7 +153,7 @@ public class FootstepHandler {
         // TODO: make landing step volumes scale based on fall speed?
         AllSounds.ForEach(x => {
             if (x is null) return;
-            x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footstepsVolMult != 0;
+            x.HandleByDefault = fstepCfg.masterFootstepsVolume != 0;
         });
     }
 

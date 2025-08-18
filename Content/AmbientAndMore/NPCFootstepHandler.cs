@@ -49,13 +49,7 @@ public class NPCFootstepHandler : GlobalNPC {
     public static void AddZombie(int type, float vol) => NPCIDToStepFrame.Add(type, ([0], vol));
     public static void AddZombies(int[] types, float vol) => Array.ForEach(types, x => AddZombie(x, vol));
     public override void PostAI(NPC npc) {
-        /*if (npc.Hitbox.Contains(Main.MouseWorld.ToPoint())) {
-            if (Main.mouseRight && Main.mouseRightRelease) {
-                npc.StrikeInstantKill();
-                InitializeNPCStepping();
-            }
-        }*/
-        var cfg = ModContent.GetInstance<GeneralConfig>();
+        var cfg = ModContent.GetInstance<FootstepsConfig>();
         if (cfg.entityFootstepsVolume == 0f) return; 
         // implement landing sounds i presume?
         if (NPCIDToStepFrame.TryGetValue(npc.type, out (int[] Frames, float VolMult) value)) {

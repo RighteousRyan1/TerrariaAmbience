@@ -270,7 +270,7 @@ public class AmbientHandler {
 
         var player = Main.LocalPlayer;
 
-        bool isHarshOk = float.TryParse(ModContent.GetInstance<GeneralConfig>().transitionHarshness, out var harshness);
+        bool isHarshOk = float.TryParse(ModContent.GetInstance<AmbientConfig>().transitionHarshness, out var harshness);
 
         foreach (var amb in Ambiences) {
             if (Main.gameMenu)
@@ -296,25 +296,25 @@ public class AmbientHandler {
         IsWindTooHarsh = Math.Abs(Main.windSpeedCurrent) >= MaxWind;
 
         if (!isHarshOk)
-            ModContent.GetInstance<GeneralConfig>().transitionHarshness = "0.01"; // a failsafe in case the player is stupid
+            ModContent.GetInstance<AmbientConfig>().transitionHarshness = "0.01"; // a failsafe in case the player is stupid
 
-        ForestMorning.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMorning * ModContent.GetInstance<GeneralConfig>().forestVolumes[0];
-        ForestDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromNoon * ModContent.GetInstance<GeneralConfig>().forestVolumes[1];
-        ForestEvening.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromEvening * ModContent.GetInstance<GeneralConfig>().forestVolumes[2];
-        ForestNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMidnight * ModContent.GetInstance<GeneralConfig>().forestVolumes[3];
+        ForestMorning.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMorning * ModContent.GetInstance<AmbientConfig>().forestVolumes[0];
+        ForestDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromNoon * ModContent.GetInstance<AmbientConfig>().forestVolumes[1];
+        ForestEvening.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromEvening * ModContent.GetInstance<AmbientConfig>().forestVolumes[2];
+        ForestNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.FromMidnight * ModContent.GetInstance<AmbientConfig>().forestVolumes[3];
 
         // added AllDayPartNight and AllNightPartDay to JungleDay and JungleNight at 11/22/2023 @ 9:33 AM
-        JungleDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[0] * 0.75f; // it's a bit loud.
-        JungleNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[1] * 0.4f; // it's very loud by default.
+        JungleDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<AmbientConfig>().jungleVolumes[0] * 0.75f; // it's a bit loud.
+        JungleNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<AmbientConfig>().jungleVolumes[1] * 0.4f; // it's very loud by default.
         
-        JungleUndergroundDay.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<GeneralConfig>().jungleVolumes[2];
-        JungleUndergroundNight.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<GeneralConfig>().jungleVolumes[3] * 0.6f; // it's a bit louder than the day variant...
+        JungleUndergroundDay.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllDayPartNight * ModContent.GetInstance<AmbientConfig>().jungleVolumes[2];
+        JungleUndergroundNight.MaxVolume = GradientGlobals.Underground * GradientGlobals.AllNightPartDay * ModContent.GetInstance<AmbientConfig>().jungleVolumes[3] * 0.6f; // it's a bit louder than the day variant...
 
-        SnowDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().snowVolume;
-        SnowNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().snowVolume;
-        SnowAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.RainIntensityForSnow * GradientGlobals.WindSpeedsHigh *  ModContent.GetInstance<GeneralConfig>().snowVolume;
+        SnowDay.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<AmbientConfig>().snowVolume;
+        SnowNight.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<AmbientConfig>().snowVolume;
+        SnowAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.RainIntensityForSnow * GradientGlobals.WindSpeedsHigh *  ModContent.GetInstance<AmbientConfig>().snowVolume;
         // make quieter / bandpass filter when inside
-        Desert.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().desertVolume;
+        Desert.MaxVolume = GradientGlobals.SkyToUnderground * ModContent.GetInstance<AmbientConfig>().desertVolume;
 
         if (Desert.SoundInstance != null) {
             Desert.SoundInstance.Pitch = 
@@ -357,14 +357,14 @@ public class AmbientHandler {
             UnderwaterDeep.MaxVolume = underwaterDeepGradient;
         }
 
-        BeachCalm.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<GeneralConfig>().oceanVolume;
-        BeachAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsHigh * ModContent.GetInstance<GeneralConfig>().oceanVolume;
+        BeachCalm.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsLow * ModContent.GetInstance<AmbientConfig>().oceanVolume;
+        BeachAggro.MaxVolume = GradientGlobals.SkyToUnderground * GradientGlobals.WindSpeedsHigh * ModContent.GetInstance<AmbientConfig>().oceanVolume;
         
-        BreezeLight.MaxVolume = GradientGlobals.WindLight * GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume;
-        BreezeHeavy.MaxVolume = GradientGlobals.WindCapped * GradientGlobals.SkyToUnderground * ModContent.GetInstance<GeneralConfig>().breezeVolume * 0.5f;
-        CavernLayer.MaxVolume = GradientGlobals.Underground * ModContent.GetInstance<GeneralConfig>().cavernsVolume * 0.4f;
+        BreezeLight.MaxVolume = GradientGlobals.WindLight * GradientGlobals.SkyToUnderground * ModContent.GetInstance<AmbientConfig>().breezeVolume;
+        BreezeHeavy.MaxVolume = GradientGlobals.WindCapped * GradientGlobals.SkyToUnderground * ModContent.GetInstance<AmbientConfig>().breezeVolume * 0.5f;
+        CavernLayer.MaxVolume = GradientGlobals.Underground * ModContent.GetInstance<AmbientConfig>().cavernsVolume * 0.4f;
         
-        Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<GeneralConfig>().hellVolume;
+        Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<AmbientConfig>().hellVolume;
 
         // idk how to avoid looping again
         var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();

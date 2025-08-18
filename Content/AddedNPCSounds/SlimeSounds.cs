@@ -35,7 +35,7 @@ public class SlimeSounds : GlobalNPC {
     }
     public override void PostAI(NPC npc) {
         if (Main.dedServ) return;
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().slimySounds) return;
+        if (!ModContent.GetInstance<AudioConfig>().slimySounds) return;
 
         if (!Slimes.Contains(npc.type)) return;
 
@@ -96,7 +96,7 @@ public class SplashingSounds : GlobalNPC {
     public override bool InstancePerEntity => true;
     bool _wet;
     public override void PostAI(NPC npc) {
-        var cfg3 = ModContent.GetInstance<AmbientConfigServer>();
+        var cfg3 = ModContent.GetInstance<AudioConfig>();
 
         if (cfg3.newSplashSounds)
             HandleSplashing(npc);

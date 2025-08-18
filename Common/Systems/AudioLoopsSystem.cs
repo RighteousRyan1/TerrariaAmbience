@@ -76,7 +76,7 @@ public class AudioLoopsSystem : ModSystem
     {
         //Main.NewText("Tile: " + GeneralHelpers.GetTileNameAt(Main.MouseWorld / 16).ToLower());
         //Main.NewText("Wall: " + GeneralHelpers.GetWallNameAt(Main.MouseWorld / 16).ToLower());
-        if (ModContent.GetInstance<AudioAdditionsConfig>().dynamicAnimalSounds)
+        if (ModContent.GetInstance<AudioConfig>().dynamicAnimalSounds)
         {
             if (Main.LocalPlayer.ZoneOverworldHeight)
             {

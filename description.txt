@@ -8,6 +8,12 @@ Developers:
 
 Most Recent Update:
 
+- Tons of bug fixes on top of the previous updates
+- Tons of optimizations to improve performance all around the board
+- Re-organized the entirety of the mod's config
+	- Localization much needed! Only english is supported on the new config.
+	- Contact me on Discord and I can send the old localizations for Spanish, Polish, and Russian
+
 - Improved reverb tenfold! 
 	- There are now room sizes, bounce delays, and more! Check out differently sized rooms and see how it reacts!
 - Changed/improved the crimson ambient track (prone to change?)
@@ -18,8 +24,8 @@ Most Recent Update:
 
 ---------------------------
 
-[Support me on Ko-fi!](https://ko-fi.com/righteousryan)
-[Join the Discord!](https://discord.gg/pT2BzSG)
+Support me on Ko-fi: https://ko-fi.com/righteousryan
+Join the Discord: https://discord.gg/pT2BzSG
 
 ---------------------------
 

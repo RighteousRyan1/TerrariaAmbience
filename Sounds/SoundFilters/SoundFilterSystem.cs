@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.Build.Tasks;
+using Microsoft.Win32;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ public enum WorldLayer {
     Underworld
 }
 public class SoundFilterSystem : ModSystem {
-    public static Vector2 ScreenListeningPosition => Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
+    public static Vector2 ScreenListeningPosition => Main.screenPosition + Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
     public static FilterParams LatestParams { get; set; }
 
     internal static HashSet<int> lowReverbWalls = [];
@@ -45,10 +46,14 @@ public class SoundFilterSystem : ModSystem {
         "dirt", "sand", "slush", "glass", "plank", "mud",
 
         "sand", "silt", "dirt", "plank", "bamboo", "glass",
-        "ice", "tin", "wood", "door"
+        "ice", "tin", "wood", "door", "shingles"
     ];
     // support mods soon too...
     public static void PrecomputeReverbProperties() {
+        noReverbTiles.Clear();
+        noReverbWalls.Clear();
+        lowReverbTiles.Clear();
+        lowReverbWalls.Clear();
         // compute wall reverb properties
         for (int i = 0; i < WallLoader.WallCount; i++) {
             string name = WallID.Search.GetName(i).ToLower();
@@ -79,208 +84,8 @@ public class SoundFilterSystem : ModSystem {
                 lowReverbTiles.Add(i);
         }
     }
-
-    public static bool CanRaycastTo(Vector2 begin, Vector2 destination) => Collision.CanHitLine(begin, 1, 1, destination, 1, 1);
-
-    public static int TileObjectsAround(Vector2 position, Point grid, out HashSet<Point> blocks, out HashSet<Point> walls, out HashSet<Point> emptyTiles) {
-        blocks = [];
-        walls = [];
-        emptyTiles = [];
-        Point tilePos = position.ToTileCoordinates();
-        int count = 0;
-
-        for (int i = tilePos.X - grid.X; i <= tilePos.X + grid.X; i++) {
-            for (int j = tilePos.Y - grid.Y; j <= tilePos.Y + grid.Y; j++) {
-                Tile tile = Framing.GetTileSafely(i, j);
-                if (tile.HasTile) {
-                    blocks.Add(new(i, j));
-                    count++;
-                }
-                else if (tile.WallType > 0) {
-                    walls.Add(new(i, j));
-                    count++;
-                }
-                else if (!tile.HasTile && tile.WallType <= 0) {
-                    emptyTiles.Add(new(i, j));
-                }
-            }
-        }
-        return count;
-    }
-
-    public static int WallsAround(Vector2 position, Point grid, out HashSet<Point> tileCoords) {
-        tileCoords = [];
-        Point tilePos = position.ToTileCoordinates();
-        int count = 0;
-
-        for (int i = tilePos.X - grid.X; i <= tilePos.X + grid.X; i++) {
-            for (int j = tilePos.Y - grid.Y; j <= tilePos.Y + grid.Y; j++) {
-                Tile tile = Framing.GetTileSafely(i, j);
-                if (tile.WallType > 0 && !tile.HasTile) {
-                    tileCoords.Add(new(i, j));
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-    public static FilterParams CreateAudioFX(Vector2 fromV2, Vector2 offset = default) {
-        var cfg = ModContent.GetInstance<AudioAdditionsConfig>();
-        var fParam = new FilterParams();
-        float reverbActual = 0f;
-
-        if (Main.gameMenu)
-            return fParam;
-
-        bool playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
-        bool playerSurfaceOrHell = Main.LocalPlayer.Center.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
-        bool playerUnderground = !playerSurfaceOrHell;
-
-
-        if (!cfg.isReverbEnabled) {
-            fParam.ReverbGain = 0f;
-            SetFilterValues(fromV2, offset, ref fParam, playerUnderwater);
-            return fParam;
-        }
-
-        // base values
-        fParam.Reverb = FAudioReverbController.DefaultFNAReverb;
-        if (!cfg.advancedReverbCalculation) {
-            fParam.ReverbGain = MathUtils.InverseLerp((float)Main.worldSurface * 16, Main.maxTilesY * 16, Main.LocalPlayer.Center.Y, true);
-            SetFilterValues(fromV2, offset, ref fParam, playerUnderwater);
-            return fParam;
-        }
-
-
-        HashSet<Point> wallPoints;
-        HashSet<Point> tilePoints;
-
-        int seenWalls = 0;
-        int seenTiles = 0;
-
-        int highReverbSurfaces = 0, lowReverbSurfaces = 0;
-
-        // we only get here if advanced reverb calculation is enabled
-        if (playerSurfaceOrHell) {
-            WallsAround(fromV2, new Point(15, 15), out wallPoints);
-            //TileObjectsAround(fromV2, new Point(15, 15), out tilePoints, out wallPoints);
-            foreach (var pt in wallPoints) {
-                var wall = Framing.GetTileSafely(pt).WallType;
-
-                var isHighReverb = !lowReverbWalls.Contains(wall) && !noReverbWalls.Contains(wall);
-                if (isHighReverb && CanRaycastTo(fromV2, pt.ToVector2() * 16 + offset)) {
-                    highReverbSurfaces++;
-                    seenWalls++;
-                }
-                else if (lowReverbWalls.Contains(wall) && CanRaycastTo(fromV2, pt.ToVector2() * 16 + offset)) {
-                    lowReverbSurfaces++;
-                    seenWalls++;
-                }
-            }
-        }
-        if (playerUnderground) {
-            TileObjectsAround(fromV2, new Point(15, 15), out tilePoints, out wallPoints, out var emptyTiles);
-
-            foreach (var tilePos in tilePoints) {
-                var tileType = Framing.GetTileSafely(tilePos).TileType;
-                Vector2 worldCoords = tilePos.ToVector2() * 16;
-
-                // Determine main cardinal direction towards fromV2
-                Vector2 direction = fromV2 - worldCoords;
-                bool isHorizontal = Math.Abs(direction.X) > Math.Abs(direction.Y);
-
-                // Get adjacent points in two directions facing fromV2
-                Point primaryDir = isHorizontal ? new Point(tilePos.X + Math.Sign(direction.X), tilePos.Y)
-                                                : new Point(tilePos.X, tilePos.Y + Math.Sign(direction.Y));
-
-                Point secondaryDir = isHorizontal ? new Point(tilePos.X, tilePos.Y + Math.Sign(direction.Y))
-                                                  : new Point(tilePos.X + Math.Sign(direction.X), tilePos.Y);
-
-                // Perform two raycasts
-                bool raycast1 = CanRaycastTo(fromV2, primaryDir.ToVector2() * 16);
-                bool raycast2 = CanRaycastTo(fromV2, secondaryDir.ToVector2() * 16);
-
-                if (!raycast1 && !raycast2)
-                    continue;
-
-                seenTiles++;
-                // for now, we assume that tiles and walls are "high reverb" if they aren't in the low reverb set or the no reverb set
-                if (!lowReverbTiles.Contains(tileType) && !noReverbTiles.Contains(tileType)) {
-                    highReverbSurfaces++;
-                }
-                else if (lowReverbWalls.Contains(tileType)) {
-                    lowReverbSurfaces++;
-                }
-            }
-
-            foreach (var wallPos in wallPoints) {
-                var wallType = Framing.GetTileSafely(wallPos).WallType;
-                Vector2 worldCoords = wallPos.ToVector2() * 16;
-
-                Vector2 direction = fromV2 - worldCoords;
-                bool isHorizontal = Math.Abs(direction.X) > Math.Abs(direction.Y);
-
-                Point primaryDir = isHorizontal ? new Point(wallPos.X + Math.Sign(direction.X), wallPos.Y)
-                                                : new Point(wallPos.X, wallPos.Y + Math.Sign(direction.Y));
-
-                Point secondaryDir = isHorizontal ? new Point(wallPos.X, wallPos.Y + Math.Sign(direction.Y))
-                                                  : new Point(wallPos.X + Math.Sign(direction.X), wallPos.Y);
-
-                bool raycast1 = CanRaycastTo(fromV2, primaryDir.ToVector2() * 16);
-                bool raycast2 = CanRaycastTo(fromV2, secondaryDir.ToVector2() * 16);
-
-                if (!raycast1 && !raycast2)
-                    continue;
-
-                seenWalls++;
-
-                if (!lowReverbWalls.Contains(wallType) && !noReverbWalls.Contains(wallType)) {
-                    highReverbSurfaces++;
-                }
-                else if (lowReverbWalls.Contains(wallType)) {
-                    lowReverbSurfaces++;
-                }
-            }
-
-            foreach (var emptyPos in emptyTiles) {
-                Vector2 worldCoords = emptyPos.ToVector2() * 16;
-
-                bool primaryCast = CanRaycastTo(fromV2, worldCoords);
-
-                if (!primaryCast) continue;
-
-                highReverbSurfaces++;
-                seenWalls++;
-            }
-        }
-
-        // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
-
-        reverbActual += highReverbSurfaces * 0.0025f;
-        reverbActual += lowReverbSurfaces * 0.00125f;
-
-        fParam.Reverb.DecayTime = (seenWalls + seenTiles) * 0.004f;
-        fParam.Reverb.ReflectionsDelay = (uint)(seenWalls + seenTiles) / 8;
-        fParam.Reverb.EarlyDiffusion = (byte)MathHelper.Lerp(0, 15, (float)(seenTiles + seenWalls) / 1000);
-        // a tile equals 2 "feet".. but maybe not.
-        fParam.Reverb.RoomSize = seenWalls + seenTiles;
-        // RoomFilterMain seems to create a "distant" echo?
-        // fParam.Reverb.RoomFilterHF = 0f;
-
-        SetFilterValues(fromV2, offset, ref fParam, playerUnderwater);
-        fParam.ReverbGain = MathF.Min(reverbActual, 1f);
-
-        // doesn't really save on the computation of said things...
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
-            fParam.LowPassEnabled = false;
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled)
-            fParam.BandPassEnabled = false;
-
-        return fParam;
-    }
-
     public static FilterParams CreateAudioFX(Room room) {
-        var cfg = ModContent.GetInstance<AudioAdditionsConfig>();
+        var aaCfg = ModContent.GetInstance<AudioConfig>();
         var fParam = new FilterParams();
         float reverbActual = 0f;
 
@@ -293,7 +98,7 @@ public class SoundFilterSystem : ModSystem {
 
         var pos = Main.LocalPlayer.Center;
 
-        if (!cfg.isReverbEnabled) {
+        if (!aaCfg.isReverbEnabled) {
             fParam.ReverbGain = 0f;
             SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
             return fParam;
@@ -301,7 +106,7 @@ public class SoundFilterSystem : ModSystem {
 
         // base values
         fParam.Reverb = FAudioReverbController.DefaultFNAReverb;
-        if (!cfg.advancedReverbCalculation) {
+        if (!aaCfg.advancedReverbCalculation) {
             fParam.ReverbGain = MathUtils.InverseLerp((float)Main.worldSurface * 16, Main.maxTilesY * 16, Main.LocalPlayer.Center.Y, true);
             SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
             return fParam;
@@ -319,12 +124,31 @@ public class SoundFilterSystem : ModSystem {
 
         int highReverbSurfaces = 0, lowReverbSurfaces = 0;
 
+        var isRaycastEnabled = aaCfg.reverbUsingRaycasting;
+
         // we only get here if advanced reverb calculation is enabled
         foreach (var tilePos in tilePosList) {
-            var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall);
+            var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
             if (wasTile) numTilesCounts++;
             else if (wasWall) numWallsCounts++;
-            else if (!wasTile && !wasWall) numWallsCounts += 0.5f;
+            else if (!wasTile && !wasWall && wl == WorldLayer.Cavern || wl == WorldLayer.Dirt) numWallsCounts += 0.5f;
+
+            if (isRaycastEnabled) {
+                var numTiles = 0;
+
+                var lpc = Main.LocalPlayer.Center.ToTileCoordinates();
+
+                TileLine(tilePos, lpc,
+                    (x, y, t) => {
+                        var ts = Main.tileSolid[t.TileType];
+                        var tst = Main.tileSolidTop[t.TileType];
+                        if (t.HasTile && ts && !tst)
+                            if (x != tilePos.X || y != tilePos.Y)
+                                numTiles++;
+                    });
+                if (numTiles > 0)
+                    continue;
+            }
 
             switch (reflectivity) {
                 case Reflectivity.Low:
@@ -335,6 +159,8 @@ public class SoundFilterSystem : ModSystem {
                     break;
             }
         }
+
+
 
         // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
 
@@ -353,9 +179,9 @@ public class SoundFilterSystem : ModSystem {
         fParam.ReverbGain = MathF.Min(reverbActual, 1f);
 
         // doesn't really save on the computation of said things...
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled)
+        if (!ModContent.GetInstance<AudioConfig>().isSoundOcclusionEnabled)
             fParam.LowPassEnabled = false;
-        if (!ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled)
+        if (!ModContent.GetInstance<AudioConfig>().isSoundDampeningEnabled)
             fParam.BandPassEnabled = false;
 
         return fParam;
@@ -372,14 +198,19 @@ public class SoundFilterSystem : ModSystem {
         return (playerUnderwater && !underWater) ? 0.0175f : (underWater && playerUnderwater) ? 0.01f : 0.04f;
     }
     public static float CalculateLowPass(Vector2 position, Vector2 offset, out bool enabled) {
-        var goalPos = Main.screenPosition + ScreenListeningPosition;
+        var goalPos = ScreenListeningPosition;
 
         // Dust.NewDustPerfect(goalPos, DustID.SpelunkerGlowstickSparkle);
 
         // mult by 2 since 2 feet per block
-        var numBlockingTiles = CountTilesTouched(goalPos.ToTileCoordinates(), 
-            (position + offset).ToTileCoordinates(), 
-            t => t.HasTile && Main.tileSolid[t.TileType]);
+        int numBlockingTiles = 0;
+        TileLine(goalPos.ToTileCoordinates(),
+            (position + offset).ToTileCoordinates(),
+            (x, y, t) => {
+                if (t.HasTile && Main.tileSolid[t.TileType])
+                    numBlockingTiles++;
+            });
+            // t => t.HasTile && Main.tileSolid[t.TileType]);
 
         float curve = 1f;
 
@@ -398,10 +229,12 @@ public class SoundFilterSystem : ModSystem {
         return occlusion * curve;
     }
 
-    public static Reflectivity CalculateAcousticReflectivity(Point tilePos, out bool wasTile, out bool wasWall) {
+    public static Reflectivity CalculateAcousticReflectivity(Point tilePos, out bool wasTile, out bool wasWall, out WorldLayer wl) {
         var thisTile = Framing.GetTileSafely(tilePos);
         int wall = thisTile.WallType, tile = thisTile.TileType;
         wasTile = wasWall = false;
+
+        var wlRef = CalculateReverbForWorldLayer(tilePos, out wl);
 
         if (tile > 0) {
             var isHighReverb = !lowReverbTiles.Contains(tile) && !noReverbTiles.Contains(tile);
@@ -415,7 +248,7 @@ public class SoundFilterSystem : ModSystem {
             wasTile = true;
 
             if (isInvalidTile) {
-                return CalculateReverbForWorldLayer(tilePos, out _);
+                return wlRef;
             }
             if (isHighReverb)
                 return Reflectivity.High;
@@ -430,7 +263,7 @@ public class SoundFilterSystem : ModSystem {
         }
         // if we're underground the background is present and it can "count" as a surface
         else if (wall == 0 && tile == 0) {
-            return CalculateReverbForWorldLayer(tilePos, out _);
+            return wlRef;
         }
         return Reflectivity.None;
     }
@@ -464,8 +297,8 @@ public class SoundFilterSystem : ModSystem {
             return Reflectivity.None;
     }
 
-    public static int CountTilesTouched(Point start, Point end, Func<Tile, bool> predicate = null) {
-        int count = 0;
+    public static void TileLine(Point start, Point end, TileTouchCallback touchCallback = null) {
+        // int count = 0;
 
         int x0 = start.X;
         int y0 = start.Y;
@@ -481,12 +314,7 @@ public class SoundFilterSystem : ModSystem {
         int err = dx - dy;
 
         while (true) {
-            if (WorldGen.InWorld(x0, y0)) {
-                Tile tile = Main.tile[x0, y0];
-
-                if (predicate?.Invoke(tile) == true)
-                    count++;
-            }
+            if (!WorldGen.InWorld(x0, y0)) continue;
 
             if (x0 == x1 && y0 == y1)
                 break;
@@ -500,8 +328,14 @@ public class SoundFilterSystem : ModSystem {
                 err += dx;
                 y0 += sy;
             }
+
+            Tile tile = Main.tile[x0, y0];
+
+            touchCallback?.Invoke(x0, y0, tile);
         }
 
-        return count;
+        // return count;
     }
+
+    public delegate void TileTouchCallback(int tilePosX, int tilePosY, Tile tile);
 }
