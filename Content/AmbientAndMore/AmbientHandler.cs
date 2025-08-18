@@ -368,7 +368,10 @@ public class AmbientHandler {
 
         // idk how to avoid looping again
         var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
-        Ambiences.ForEach(x => x.MaxVolume *= pl.InRoomAmbientMultiplier);
+        Ambiences.ForEach(x => {
+            x.MaxVolume *= pl.InRoomAmbientMultiplier;
+            x.MaxVolume *= ModContent.GetInstance<AmbientConfig>().overallVolume;
+        });
     }
 }
 public static class AmbienceID {

@@ -173,8 +173,13 @@ Configs: {
 		}
 
 		showInfoAndWarnings: {
-			Label: show Info And Warnings
-			Tooltip: ""
+			Label: Show Info/Warnings
+			Tooltip: 
+				'''
+				Whether or not to display important information and warnings to the chat when problematic errors occur.
+				Having this disabled can remove small annoyances, but can make it hard to identify what is destroying your game's performance.
+				Enable this option if you are having severe framerate drops to see if any errors are being spammed into the chat.
+				'''
 		}
 
 		overallVolume: {
