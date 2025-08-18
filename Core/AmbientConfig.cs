@@ -22,9 +22,6 @@ public class GeneralConfig : ModConfig {
     [DefaultValue(true)]
     public float entityFootstepsVolume;
 
-    [DefaultValue(true)]
-    public bool footsteps;
-
     [DefaultValue(1f)]
     public float footstepsVolMult;
 
@@ -48,6 +45,8 @@ public class GeneralConfig : ModConfig {
     [Header("Debugging")]
     [DefaultValue(false)]
     public bool debugInterface;
+    [DefaultValue(true)]
+    public bool showInfoAndWarnings;
     #endregion
 
     #region ToggleSounds
@@ -106,6 +105,7 @@ public class AudioAdditionsConfig : ModConfig {
     public bool isReverbEnabled;
 
     [DefaultValue(10)]
+    [Range(1, 60)]
     public uint audioFiltersRefreshTime;
 
     [DefaultValue(true)]

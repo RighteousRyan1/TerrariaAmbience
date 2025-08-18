@@ -14,7 +14,7 @@ public class SpookyModSupport : ModSystem {
             TileDetection.AddTilesToList(mod, FootstepHandler.GrassBlocks,
                 "SpookyGrass", "SpookyGrassGreen", "CemeteryGrass", "MushroomMoss");
             TileDetection.AddTilesToList(mod, FootstepHandler.StoneBlocks,
-                "CemeteryStone");
+                "CemeteryStone", "SpookyStone");
             TileDetection.AddTilesToList(mod, FootstepHandler.DirtBlocks,
                 "SpookyDirt");
             // "SpookyWood" is "Old Wood"

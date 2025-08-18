@@ -14,9 +14,9 @@ namespace TerrariaAmbience.Content.Players;
 
 public class RoomDetectionPlayer : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
-    static int MAX_ROOM_WIDTH = 100;
-    static int MAX_ROOM_HEIGHT = 100;
-    static int MAX_ROOM_AREA = 2000;
+    static int MAX_ROOM_WIDTH = 50;
+    static int MAX_ROOM_HEIGHT = 50;
+    static int MAX_ROOM_AREA = 1250;
 
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!
@@ -166,9 +166,6 @@ public class RoomDetectionPlayer : ModSystem {
 
     public override void PostUpdateEverything() {
         if (Main.GameUpdateCount % ModContent.GetInstance<AudioAdditionsConfig>().audioFiltersRefreshTime != 0) return;
-
-        MAX_ROOM_WIDTH = 50;
-        MAX_ROOM_HEIGHT = 50;
 
         IsInRoom = IsPlayerInRoom(Main.LocalPlayer, PlayerRoom);
 

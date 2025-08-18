@@ -99,17 +99,7 @@ Configs: {
 		Headers: {
 			AmbienceAndSounds: Ambience And Sounds
 			Debugging: Debugging
-			AmbienceTrackVolume: Ambient Track Volume
-			// AmbienceTrackVolumes: Ambience Track Volumes Header
-		}
-
-		footsteps: {
-			Label: Toggle Footsteps
-			Tooltip:
-				'''
-				Toggle on to turn on footsteps. Toggle off to turn them off.
-				Enabled by default.
-				'''
+			// AmbienceTrackVolumes: Ambience Fine-Tuning
 		}
 
 		campfireSounds: {
@@ -251,6 +241,16 @@ Configs: {
 		showAmbientForecastUi: {
 			// Label: Show Ambient Forecast UI
 			// Tooltip: Enables/disables the ambient forecast UI next to the hotbar
+		}
+
+		showInfoAndWarnings: {
+			// Label: Show Info And Warnings
+			/* Tooltip:
+				'''
+				Whether or not this mod will report important informationt to the chat when information is needed or things go wrong.
+				Do note that, if by any chance things go wrong and continually go wrong, your FPS will drop significantly.
+				In the case that this happens, be sure to enable this setting to see what is going on, and report any issues to the Discord server.
+				''' */
 		}
 	}
 

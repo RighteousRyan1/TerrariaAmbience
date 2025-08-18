@@ -239,7 +239,11 @@ internal class MethodDetours {
                 if (viewMode < 4) if (lowR >= WallID.Count) break;
 
                 if (i % numPerRow == 0) txt += Environment.NewLine;
-                txt += $"{wallName}, ";
+
+                var str = $"{wallName}, ";
+
+                if (viewMode == 5) str = str.Split('/')[1];
+                txt += str;
             }
             txt += "\n\n";
             txt += "Tile insulators (low sound deflection):";
@@ -251,7 +255,11 @@ internal class MethodDetours {
                 var tileName = TileID.Search.GetName(lowR);
 
                 if (i % numPerRow == 0) txt += Environment.NewLine;
-                txt += $"{tileName}, ";
+                
+                var str = $"{tileName}, ";
+
+                if (viewMode == 5) str = str.Split('/')[1];
+                txt += str;
             }
             txt += "\n\n";
             txt += "Wall inhibitors (no sound deflection):";
@@ -262,7 +270,11 @@ internal class MethodDetours {
                 if (viewMode < 4) if (lowR >= WallID.Count) break;
 
                 if (i % numPerRow == 0) txt += Environment.NewLine;
-                txt += $"{wallName}, ";
+
+                var str = $"{wallName}, ";
+
+                if (viewMode == 5) str = str.Split('/')[1];
+                txt += str;
             }
             txt += "\n\n";
             txt += "Tile inhibitors (no sound deflection):";
@@ -273,7 +285,11 @@ internal class MethodDetours {
                 if (viewMode < 4) if (lowR >= TileID.Count) break;
 
                 if (i % numPerRow == 0) txt += Environment.NewLine;
-                txt += $"{tileName}, ";
+
+                var str = $"{tileName}, ";
+
+                if (viewMode == 5) str = str.Split('/')[1];
+                txt += str;
             }
 
             Main.spriteBatch.Draw(TextureAssets.MagicPixel.Value,

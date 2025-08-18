@@ -152,7 +152,7 @@ public class FootstepHandler {
         // TODO: make landing step volumes scale based on fall speed?
         AllSounds.ForEach(x => {
             if (x is null) return;
-            x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footsteps;
+            x.HandleByDefault = ModContent.GetInstance<GeneralConfig>().footstepsVolMult != 0;
         });
     }
 

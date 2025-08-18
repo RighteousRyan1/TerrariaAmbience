@@ -39,7 +39,10 @@ public class FilterHooks : ModSystem
 			var sndPos = sfx.Position.Value;
 			//var sndVel = sndPos - dynamicSfxPrevPos[i];
 
-            var param = SoundFilterSystem.CreateAudioFX(sndPos);
+            // var param = SoundFilterSystem.CreateAudioFX(sndPos);
+
+            var bandIntensity = SoundFilterSystem.CalculateBandPass(sndPos, Main.LocalPlayer.IsWaterSuffocating(), out var enableBand);
+            var lowPassIntensity = SoundFilterSystem.CalculateLowPass(sndPos, Vector2.Zero, out var enabledLP);
 
             // const float C_TILES_PER_SEC = 100f;
 
@@ -49,13 +52,13 @@ public class FilterHooks : ModSystem
                 speedOfSoundTilesPerSec: C_TILES_PER_SEC);*/
 
             // var test = Main.MouseScreen.X / Main.screenWidth * 25;
-			// FAudio.FAudioSourceVoice_SetFrequencyRatio(self.handle, 1f - MathF.Abs(targetPitch), 0);
-			// self.Pitch = targetPitch;
-			// Main.NewText(MathF.Abs(targetPitch) + 1);
-			self.ApplyReverb(param.ReverbGain / 2);
-            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled) {
-                // _currentLowPasses[i] holds the *applied* value, initialized to 1.0f or whatever default
-                float target = param.LowPassIntensity;
+            // FAudio.FAudioSourceVoice_SetFrequencyRatio(self.handle, 1f - MathF.Abs(targetPitch), 0);
+            // self.Pitch = targetPitch;
+            // Main.NewText(MathF.Abs(targetPitch) + 1);
+            self.ApplyReverb(SoundFilterSystem.LatestParams.ReverbGain);
+            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundOcclusionEnabled && enabledLP) {
+				// _currentLowPasses[i] holds the *applied* value, initialized to 1.0f or whatever default
+				float target = lowPassIntensity;
 
                 // smooth approach: t is a small factor (e.g. 0.05)
                 float t = 0.4f * TerrariaAmbience.WorkaroundDeltaTime;
@@ -67,8 +70,8 @@ public class FilterHooks : ModSystem
                 _oldLowPasses[i] = smoothed;
             }
 			// overrides lowpass??
-            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && param.BandPassEnabled)
-                self.ApplyBandPassFilter(param.BandPassIntensity);
+            if (ModContent.GetInstance<AudioAdditionsConfig>().isSoundDampeningEnabled && enableBand)
+                self.ApplyBandPassFilter(bandIntensity);
 
             // dynamicSfxPrevPos[i] = sfx.Position.Value;
         }

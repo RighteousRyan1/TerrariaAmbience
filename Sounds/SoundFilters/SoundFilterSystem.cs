@@ -14,6 +14,17 @@ using TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
 
 namespace TerrariaAmbience.Sounds.SoundFilters;
 
+public enum Reflectivity {
+    None,
+    Low,
+    High
+}
+public enum WorldLayer {
+    Surface,
+    Dirt,
+    Cavern,
+    Underworld
+}
 public class SoundFilterSystem : ModSystem {
     public static Vector2 ScreenListeningPosition => Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
     public static FilterParams LatestParams { get; set; }
@@ -39,7 +50,7 @@ public class SoundFilterSystem : ModSystem {
     // support mods soon too...
     public static void PrecomputeReverbProperties() {
         // compute wall reverb properties
-        for (int i = 0; i < /*WallID.Search.Count*/WallLoader.WallCount; i++) {
+        for (int i = 0; i < WallLoader.WallCount; i++) {
             string name = WallID.Search.GetName(i).ToLower();
 
             if (_noReverbNames.Any(name.Contains))
@@ -51,13 +62,14 @@ public class SoundFilterSystem : ModSystem {
         }
 
         // compute tile reverb properties
-        for (int i = 0; i < /*TileID.Search.Count*/TileLoader.TileCount; i++) {
+        for (int i = 0; i < TileLoader.TileCount; i++) {
             string name = TileID.Search.GetName(i).ToLower();
 
-            if (!Main.tileSolid[i] || Main.tileSolidTop[i]) {
+            // better to check during runtime
+            /*if (!Main.tileSolid[i] || Main.tileSolidTop[i]) {
                 noReverbTiles.Add(i);
                 continue;
-            }
+            }*/
 
             if (_noReverbNames.Any(name.Contains))
                 noReverbTiles.Add(i);
@@ -68,25 +80,7 @@ public class SoundFilterSystem : ModSystem {
         }
     }
 
-    public static bool CanRaycastTo(Vector2 begin, Vector2 destination) =>
-        Collision.CanHitLine(begin, 1, 1, destination, 1, 1);
-
-    public static int TilesAround(Vector2 position, Point grid, out HashSet<Point> tileCoords) {
-        tileCoords = [];
-        Point tilePos = position.ToTileCoordinates();
-        int count = 0;
-
-        for (int i = tilePos.X - grid.X; i <= tilePos.X + grid.X; i++) {
-            for (int j = tilePos.Y - grid.Y; j <= tilePos.Y + grid.Y; j++) {
-                Tile tile = Framing.GetTileSafely(i, j);
-                if (tile.HasTile && tile.CollisionType() == 1) {
-                    tileCoords.Add(new(i, j));
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
+    public static bool CanRaycastTo(Vector2 begin, Vector2 destination) => Collision.CanHitLine(begin, 1, 1, destination, 1, 1);
 
     public static int TileObjectsAround(Vector2 position, Point grid, out HashSet<Point> blocks, out HashSet<Point> walls, out HashSet<Point> emptyTiles) {
         blocks = [];
@@ -327,52 +321,25 @@ public class SoundFilterSystem : ModSystem {
 
         // we only get here if advanced reverb calculation is enabled
         foreach (var tilePos in tilePosList) {
-            var tile = Framing.GetTileSafely(tilePos);
+            var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall);
+            if (wasTile) numTilesCounts++;
+            else if (wasWall) numWallsCounts++;
+            else if (!wasTile && !wasWall) numWallsCounts += 0.5f;
 
-            var wall = tile.WallType;
-            var ttype = tile.TileType;
-            if (ttype > 0) {
-                numTilesCounts++;
-                var isHighReverb = !lowReverbTiles.Contains(ttype) && !noReverbTiles.Contains(ttype);
-                if (isHighReverb) {
-                    highReverbSurfaces++;
-                }
-                else if (lowReverbTiles.Contains(ttype)) {
+            switch (reflectivity) {
+                case Reflectivity.Low:
                     lowReverbSurfaces++;
-                }
-            }
-            else if (wall > 0) {
-                numWallsCounts++;
-                var isHighReverb = !lowReverbWalls.Contains(wall) && !noReverbWalls.Contains(wall);
-                if (isHighReverb) {
+                    break;
+                case Reflectivity.High:
                     highReverbSurfaces++;
-                }
-                else if (lowReverbWalls.Contains(wall)) {
-                    lowReverbSurfaces++;
-                }
-            }
-            // if we're underground the background is present and it can "count" as a surface
-            else if (wall == 0 && ttype == 0) {
-                if (playerUnderground) {
-                    // dirt "underground" layer
-                    // low reverb since it's partially rock and mostly dirt
-                    numWallsCounts += 0.5f;
-                    if (tilePos.Y > Main.worldSurface && tilePos.Y < Main.rockLayer) {
-                        lowReverbSurfaces++;
-                    }
-                    // cavern to top of underworld
-                    // this is because it's primarily rock in the background
-                    else if (tilePos.Y > Main.rockLayer && tilePos.Y < Main.maxTilesY - 200) {
-                        highReverbSurfaces++;
-                    }
-                }
+                    break;
             }
         }
 
         // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
 
         reverbActual += highReverbSurfaces * 0.0025f;
-        reverbActual += lowReverbSurfaces * 0.00125f;
+        reverbActual += lowReverbSurfaces * 0.00075f;
 
         fParam.Reverb.DecayTime = (numWallsCounts + numTilesCounts) * 0.004f;
         fParam.Reverb.ReflectionsDelay = (uint)(numWallsCounts + numTilesCounts) / 8;
@@ -431,53 +398,71 @@ public class SoundFilterSystem : ModSystem {
         return occlusion * curve;
     }
 
-    public static float PitchFromPerFrame(
-            Vector2 srcPosPx, Vector2 srcVelPxPerFrame,
-            Vector2 lisPosPx, Vector2 lisVelPxPerFrame,
-            float speedOfSoundTilesPerSec = 100f,              // tweak by ear: 60..125 tiles/s
-            float minRatio = 0.5f, float maxRatio = 2.0f)      // safety
-        {
-        // convert velocities to pixels/second (Terraria runs at 60 updates/sec)
-        const float Tps = 60f;
-        Vector2 srcVelPxPerSec = srcVelPxPerFrame * Tps;
-        Vector2 lisVelPxPerSec = lisVelPxPerFrame * Tps;
+    public static Reflectivity CalculateAcousticReflectivity(Point tilePos, out bool wasTile, out bool wasWall) {
+        var thisTile = Framing.GetTileSafely(tilePos);
+        int wall = thisTile.WallType, tile = thisTile.TileType;
+        wasTile = wasWall = false;
 
-        float cPxPerSec = speedOfSoundTilesPerSec * 16f;   // tiles/s -> px/s
-        return PitchFromPerSecond(srcPosPx, srcVelPxPerSec, lisPosPx, lisVelPxPerSec, cPxPerSec, minRatio, maxRatio);
+        if (tile > 0) {
+            var isHighReverb = !lowReverbTiles.Contains(tile) && !noReverbTiles.Contains(tile);
+            var isInvalidTile = !Main.tileSolid[tile] || Main.tileSolidTop[tile];
+
+            if (isInvalidTile && wall > 0) {
+                wasWall = true;
+                return CalculateWall(wall);
+            }
+
+            wasTile = true;
+
+            if (isInvalidTile) {
+                return CalculateReverbForWorldLayer(tilePos, out _);
+            }
+            if (isHighReverb)
+                return Reflectivity.High;
+            else if (lowReverbTiles.Contains(tile))
+                return Reflectivity.Low;
+            else
+                return Reflectivity.None;
+        }
+        else if (wall > 0) {
+            wasWall = true;
+            return CalculateWall(wall);
+        }
+        // if we're underground the background is present and it can "count" as a surface
+        else if (wall == 0 && tile == 0) {
+            return CalculateReverbForWorldLayer(tilePos, out _);
+        }
+        return Reflectivity.None;
     }
 
-    // ---- helper when your velocities are already in pixels/second ----
-    public static float PitchFromPerSecond(
-        Vector2 srcPosPx, Vector2 srcVelPxPerSec,
-        Vector2 lisPosPx, Vector2 lisVelPxPerSec,
-        float speedOfSoundPxPerSec,
-        float minRatio = 0.5f, float maxRatio = 2.0f) {
-        Vector2 d = srcPosPx - lisPosPx;
-        float len = d.Length();
-        if (len < 1e-4f) return 0f;                // same spot → no shift
+    public static Reflectivity CalculateReverbForWorldLayer(Point tilePos, out WorldLayer wl) {
+        // dirt "underground" layer
+        // low reverb since it's partially rock and mostly dirt
+        if (tilePos.Y >= Main.worldSurface && tilePos.Y < Main.rockLayer) {
+            wl = WorldLayer.Dirt;
+            return Reflectivity.Low;
+        }
+        // cavern to top of underworld
+        // this is because it's primarily rock in the background
+        else if (tilePos.Y >= Main.rockLayer && tilePos.Y < Main.maxTilesY - 200) {
+            wl = WorldLayer.Cavern;
+            return Reflectivity.High;
+        }
 
-        Vector2 n = d / len;                       // listener→source unit vector
-
-        // Radial components (+ toward each other)
-        float vSourceToward = -Vector2.Dot(srcVelPxPerSec, n);
-        float vListenerToward = Vector2.Dot(lisVelPxPerSec, n);
-
-        float c = MathF.Max(1e-3f, speedOfSoundPxPerSec);
-
-        // Classic Doppler frequency ratio
-        float ratio = (c + vListenerToward) / (c - vSourceToward);
-
-        // Keep it sane
-        ratio = MathHelper.Clamp(ratio, minRatio, maxRatio);
-
-        // MonoGame SoundEffectInstance.Pitch uses octaves (log2 of ratio)
-        float pitchOct = MathF.Log(ratio, 2f);
-        return MathHelper.Clamp(pitchOct, -1f, 1f);
+        wl = tilePos.Y < Main.worldSurface ? WorldLayer.Surface : WorldLayer.Underworld;
+        return Reflectivity.None;
     }
+    public static Reflectivity CalculateWall(int wall) {
+        var isLowReverb = lowReverbWalls.Contains(wall);
+        var isHighReverb = !isLowReverb && !noReverbWalls.Contains(wall);
 
-    // simple exponential smoothing (call each tick)
-    public static float SmoothPitch(float currentPitch, float targetPitch, float lerpFactor = 0.2f)
-        => MathHelper.Lerp(currentPitch, targetPitch, lerpFactor);
+        if (isHighReverb)
+            return Reflectivity.High;
+        else if (isLowReverb)
+            return Reflectivity.Low;
+        else
+            return Reflectivity.None;
+    }
 
     public static int CountTilesTouched(Point start, Point end, Func<Tile, bool> predicate = null) {
         int count = 0;

@@ -51,11 +51,12 @@ public class AmbientPlayer : ModPlayer
     /// </summary>
     public bool HasTilesAbove { get; private set; }
 
-    private bool _wet; // old state of player wet
-
-    private bool _showReverbTiles;
+    bool _wet; // old state of player wet
     public override void OnEnterWorld() {
         TerrariaAmbience.DefaultAmbientHandler.HandleEnterWorld();
+
+        Main.NewTextMultiline("If your game is experiencing severe framerate issues upon world startup (i.e: right now), do not worry, the" +
+            "\ngame is caching things to make your game run much smoother during gameplay.", c: Color.Orange);
 
         if (Main.netMode == NetmodeID.SinglePlayer) return;
 
@@ -65,76 +66,10 @@ public class AmbientPlayer : ModPlayer
         if (Main.soundVolume == 0) return; 
 
         var genCfg = ModContent.GetInstance<GeneralConfig>();
-        var aaCfg = ModContent.GetInstance<AudioAdditionsConfig>();
         var servCfg = ModContent.GetInstance<AmbientConfigServer>();
 
         if (servCfg.newSplashSounds)
             ManagePlayerSplashes();
-
-        #region ShowReverbTiles
-
-        if (GeneralHelpers.KeyPress(Microsoft.Xna.Framework.Input.Keys.RightAlt))
-            _showReverbTiles = !_showReverbTiles;
-
-        if (_showReverbTiles) {
-            if (genCfg.debugInterface && aaCfg.advancedReverbCalculation && aaCfg.isReverbEnabled) {
-                var tilePosList = RoomDetectionPlayer.PlayerRoom.Tiles;
-
-                bool playerSurfaceOrHell = Main.LocalPlayer.Center.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
-                bool playerUnderground = !playerSurfaceOrHell;
-                var colorNoReverb = Color.Red;
-                var colorLowReverb = Color.Lerp(Color.Lime, Color.Red, 0.5f);
-                var colorHighReverb = Color.Lime;
-
-                foreach (var tilePos in tilePosList) {
-                    var tile = Framing.GetTileSafely(tilePos);
-                    Vector2 worldCoords = tilePos.ToVector2() * 16;
-
-                    var wall = tile.WallType;
-                    var ttype = tile.TileType;
-                    if (ttype > 0) {
-                        var isHighReverb = !SoundFilterSystem.lowReverbTiles.Contains(ttype) && !SoundFilterSystem.noReverbTiles.Contains(ttype);
-                        if (isHighReverb) {
-                            TileVisualizationHelpers.TryAdd(worldCoords, colorHighReverb);
-                        }
-                        else if (SoundFilterSystem.lowReverbTiles.Contains(ttype)) {
-                            TileVisualizationHelpers.TryAdd(worldCoords, colorLowReverb);
-                        }
-                        else {
-                            TileVisualizationHelpers.TryAdd(worldCoords, colorNoReverb);
-                        }
-                    }
-                    else if (wall > 0) {
-                        var isHighReverb = !SoundFilterSystem.lowReverbWalls.Contains(wall) && !SoundFilterSystem.noReverbWalls.Contains(wall);
-                        if (isHighReverb) {
-                            TileVisualizationHelpers.TryAdd(worldCoords, colorHighReverb);
-                        }
-                        else if (SoundFilterSystem.lowReverbTiles.Contains(ttype)) {
-                            TileVisualizationHelpers.TryAdd(worldCoords, colorLowReverb);
-                        }
-                        else {
-                            TileVisualizationHelpers.TryAdd(worldCoords, colorNoReverb);
-                        }
-                    }
-                    // if we're underground the background is present and it can "count" as a surface
-                    else if (wall == 0 && ttype == 0) {
-                        if (playerUnderground) {
-                            // dirt "underground" layer
-                            // low reverb since it's partially rock and mostly dirt
-                            if (tilePos.Y > Main.worldSurface && tilePos.Y < Main.rockLayer) {
-                                TileVisualizationHelpers.TryAdd(worldCoords, colorLowReverb);
-                            }
-                            // cavern to top of underworld
-                            // this is because it's primarily rock in the background
-                            else if (tilePos.Y > Main.rockLayer && tilePos.Y < Main.maxTilesY - 200) {
-                                TileVisualizationHelpers.TryAdd(worldCoords, colorHighReverb);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        #endregion
         #region Step/Sound handling
 
         if (genCfg.wetStepsEnabled)
