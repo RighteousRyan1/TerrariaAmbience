@@ -174,7 +174,7 @@ Configs: {
 
 		showInfoAndWarnings: {
 			Label: Show Info/Warnings
-			Tooltip: 
+			Tooltip:
 				'''
 				Whether or not to display important information and warnings to the chat when problematic errors occur.
 				Having this disabled can remove small annoyances, but can make it hard to identify what is destroying your game's performance.

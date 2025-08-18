@@ -366,6 +366,9 @@ public class AmbientHandler {
         
         Hell.MaxVolume = GradientGlobals.Hell * ModContent.GetInstance<AmbientConfig>().hellVolume;
 
+        // maybe
+        // float uncoveredPercentage = RoomDetectionPlayer.PlayerRoom.til
+
         // idk how to avoid looping again
         var pl = Main.LocalPlayer.GetModPlayer<AmbientPlayer>();
         Ambiences.ForEach(x => {

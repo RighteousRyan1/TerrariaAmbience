@@ -22,6 +22,7 @@ public class TileVisualizationHelpers : ModSystem {
     static Color _colorNoReverb = Color.Red;
     static Color _colorLowReverb = Color.DarkOrange;
     static Color _colorHighReverb = Color.Lime;
+    static Color _colorMedReverb = Color.DarkSeaGreen;
     public override void PostDrawTiles() {
         if (_visVis == 0) return;
 
@@ -49,7 +50,7 @@ public class TileVisualizationHelpers : ModSystem {
 
         if (Main.keyState.IsKeyDown(Keys.RightShift) && Main.oldKeyState.IsKeyUp(Keys.RightShift)) {
             MethodDetours.viewMode++;
-            if (MethodDetours.viewMode >= 5)
+            if (MethodDetours.viewMode >= 6)
                 MethodDetours.viewMode = 0;
         }
 
@@ -80,7 +81,7 @@ public class TileVisualizationHelpers : ModSystem {
             if (isRaycastEnabled) {
                 var numTiles = 0;
 
-                var lpc = Main.LocalPlayer.Center.ToTileCoordinates();
+                var lpc = SoundFilterSystem.ScreenListeningPosition.ToTileCoordinates();
 
                 SoundFilterSystem.TileLine(tilePos, lpc,
                     (x, y, t) => {
@@ -100,6 +101,9 @@ public class TileVisualizationHelpers : ModSystem {
                     break;
                 case Reflectivity.High:
                     TryAdd(worldCoords, _colorHighReverb);
+                    break;
+                case Reflectivity.Medium:
+                    TryAdd(worldCoords, _colorMedReverb);
                     break;
                 case Reflectivity.None:
                     // don't display empty tiles on parts of the world without a cavern background

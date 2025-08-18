@@ -242,7 +242,7 @@ internal class MethodDetours {
 
                 var str = $"{wallName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[1];
+               if (viewMode == 5) str = str.Split('/')[^1];
                 txt += str;
             }
             txt += "\n\n";
@@ -258,7 +258,7 @@ internal class MethodDetours {
                 
                 var str = $"{tileName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[1];
+                if (viewMode == 5) str = str.Split('/')[^1];
                 txt += str;
             }
             txt += "\n\n";
@@ -273,7 +273,7 @@ internal class MethodDetours {
 
                 var str = $"{wallName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[1];
+                if (viewMode == 5) str = str.Split('/')[^1];
                 txt += str;
             }
             txt += "\n\n";
@@ -288,7 +288,7 @@ internal class MethodDetours {
 
                 var str = $"{tileName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[1];
+                if (viewMode == 5) str = str.Split('/')[^1];
                 txt += str;
             }
 

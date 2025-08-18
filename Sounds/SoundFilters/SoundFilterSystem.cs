@@ -18,6 +18,7 @@ namespace TerrariaAmbience.Sounds.SoundFilters;
 public enum Reflectivity {
     None,
     Low,
+    Medium,
     High
 }
 public enum WorldLayer {
@@ -34,6 +35,8 @@ public class SoundFilterSystem : ModSystem {
     internal static HashSet<int> lowReverbTiles = [];
     internal static HashSet<int> noReverbWalls = [];
     internal static HashSet<int> noReverbTiles = [];
+    internal static HashSet<int> medReverbTiles = [];
+    internal static HashSet<int> medReverbWalls = [];
 
     // no reverb set is prioritized over the low reverb set
     // so that if something like BambooFence exists, it will be considered as to compute no reverb
@@ -43,10 +46,13 @@ public class SoundFilterSystem : ModSystem {
         "snow", "ash", "fence", "hive"
     ];
     static HashSet<string> _lowReverbNames = [
-        "dirt", "sand", "slush", "glass", "plank", "mud",
+        "dirt", "sand", "slush", "glass", "mud",
 
         "sand", "silt", "dirt", "plank", "bamboo", "glass",
-        "ice", "tin", "wood", "door", "shingles"
+        "ice", "tin", "wood", "door"
+    ];
+    static HashSet<string> _medReverbNames = [
+        "plank", "shingle"
     ];
     // support mods soon too...
     public static void PrecomputeReverbProperties() {
@@ -60,7 +66,8 @@ public class SoundFilterSystem : ModSystem {
 
             if (_noReverbNames.Any(name.Contains))
                 noReverbWalls.Add(i);
-
+            else if (_medReverbNames.Any(name.Contains))
+                medReverbWalls.Add(i);
             // only runs if it doesn't exist in the no reverb set to go in-hand with the comment left above _noReverbNames
             else if (_lowReverbNames.Any(name.Contains))
                 lowReverbWalls.Add(i);
@@ -78,7 +85,8 @@ public class SoundFilterSystem : ModSystem {
 
             if (_noReverbNames.Any(name.Contains))
                 noReverbTiles.Add(i);
-
+            else if (_medReverbNames.Any(name.Contains))
+                medReverbTiles.Add(i);
             // same here as well
             else if (_lowReverbNames.Any(name.Contains))
                 lowReverbTiles.Add(i);
@@ -92,11 +100,11 @@ public class SoundFilterSystem : ModSystem {
         if (Main.gameMenu)
             return fParam;
 
-        bool playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
-        bool playerSurfaceOrHell = Main.LocalPlayer.Center.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
-        bool playerUnderground = !playerSurfaceOrHell;
+        var pos = ScreenListeningPosition;
 
-        var pos = Main.LocalPlayer.Center;
+        bool playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
+        bool playerSurfaceOrHell = pos.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
+        bool playerUnderground = !playerSurfaceOrHell;
 
         if (!aaCfg.isReverbEnabled) {
             fParam.ReverbGain = 0f;
@@ -122,7 +130,7 @@ public class SoundFilterSystem : ModSystem {
 
         var tilePosList = room.Tiles;
 
-        int highReverbSurfaces = 0, lowReverbSurfaces = 0;
+        int highReverbSurfaces = 0, lowReverbSurfaces = 0, medReverbSurfaces = 0;
 
         var isRaycastEnabled = aaCfg.reverbUsingRaycasting;
 
@@ -136,7 +144,7 @@ public class SoundFilterSystem : ModSystem {
             if (isRaycastEnabled) {
                 var numTiles = 0;
 
-                var lpc = Main.LocalPlayer.Center.ToTileCoordinates();
+                var lpc = pos.ToTileCoordinates();
 
                 TileLine(tilePos, lpc,
                     (x, y, t) => {
@@ -154,24 +162,26 @@ public class SoundFilterSystem : ModSystem {
                 case Reflectivity.Low:
                     lowReverbSurfaces++;
                     break;
+                case Reflectivity.Medium:
+                    medReverbSurfaces++;
+                    break;
                 case Reflectivity.High:
                     highReverbSurfaces++;
                     break;
             }
         }
 
-
-
         // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
 
-        reverbActual += highReverbSurfaces * 0.0025f;
-        reverbActual += lowReverbSurfaces * 0.00075f;
+        reverbActual += highReverbSurfaces * 0.00250f;
+        reverbActual += medReverbSurfaces  * 0.00100f;
+        reverbActual += lowReverbSurfaces  * 0.00050f;
 
-        fParam.Reverb.DecayTime = (numWallsCounts + numTilesCounts) * 0.004f;
+        fParam.Reverb.DecayTime = (numWallsCounts + numTilesCounts) * reverbActual * 0.003f;
         fParam.Reverb.ReflectionsDelay = (uint)(numWallsCounts + numTilesCounts) / 8;
         fParam.Reverb.EarlyDiffusion = (byte)MathHelper.Lerp(0, 15, (float)(numTilesCounts + numWallsCounts) / 1000);
         // a tile equals 2 "feet".. but maybe not.
-        fParam.Reverb.RoomSize = numWallsCounts + numTilesCounts;
+        fParam.Reverb.RoomSize = (numWallsCounts + numTilesCounts) * reverbActual;
         // RoomFilterMain seems to create a "distant" echo?
         // fParam.Reverb.RoomFilterHF = 0f;
 
@@ -179,9 +189,9 @@ public class SoundFilterSystem : ModSystem {
         fParam.ReverbGain = MathF.Min(reverbActual, 1f);
 
         // doesn't really save on the computation of said things...
-        if (!ModContent.GetInstance<AudioConfig>().isSoundOcclusionEnabled)
+        if (!aaCfg.isSoundOcclusionEnabled)
             fParam.LowPassEnabled = false;
-        if (!ModContent.GetInstance<AudioConfig>().isSoundDampeningEnabled)
+        if (!aaCfg.isSoundDampeningEnabled)
             fParam.BandPassEnabled = false;
 
         return fParam;
@@ -237,7 +247,9 @@ public class SoundFilterSystem : ModSystem {
         var wlRef = CalculateReverbForWorldLayer(tilePos, out wl);
 
         if (tile > 0) {
-            var isHighReverb = !lowReverbTiles.Contains(tile) && !noReverbTiles.Contains(tile);
+            var isLowReverb = lowReverbTiles.Contains(tile);
+            var isMedReverb = medReverbTiles.Contains(tile);
+            var isHighReverb = !isLowReverb && !isMedReverb && !noReverbTiles.Contains(tile);
             var isInvalidTile = !Main.tileSolid[tile] || Main.tileSolidTop[tile];
 
             if (isInvalidTile && wall > 0) {
@@ -247,11 +259,12 @@ public class SoundFilterSystem : ModSystem {
 
             wasTile = true;
 
-            if (isInvalidTile) {
+            if (isInvalidTile)
                 return wlRef;
-            }
             if (isHighReverb)
                 return Reflectivity.High;
+            else if (isMedReverb)
+                return Reflectivity.Medium;
             else if (lowReverbTiles.Contains(tile))
                 return Reflectivity.Low;
             else
@@ -287,10 +300,13 @@ public class SoundFilterSystem : ModSystem {
     }
     public static Reflectivity CalculateWall(int wall) {
         var isLowReverb = lowReverbWalls.Contains(wall);
-        var isHighReverb = !isLowReverb && !noReverbWalls.Contains(wall);
+        var isMedReverb = medReverbWalls.Contains(wall);
+        var isHighReverb = !isLowReverb && !isMedReverb && !noReverbWalls.Contains(wall);
 
         if (isHighReverb)
             return Reflectivity.High;
+        else if (isMedReverb)
+            return Reflectivity.Medium;
         else if (isLowReverb)
             return Reflectivity.Low;
         else
