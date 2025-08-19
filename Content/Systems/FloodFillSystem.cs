@@ -12,7 +12,7 @@ public class FloodFillSystem : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
     internal static int MaxRoomWidth = 50;
     internal static int MaxRoomHeight = 50;
-    internal static int MaxRoomArea = 2250;
+    internal static int MaxRoomArea = 3000; // 2250;
 
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!

@@ -1,9 +1,6 @@
-﻿using Microsoft.Build.Tasks;
-using Microsoft.Win32;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Terraria;
 using Terraria.ID;
