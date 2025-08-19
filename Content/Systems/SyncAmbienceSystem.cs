@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria.ID;
 using Terraria;
 using Terraria.ModLoader;
 using TerrariaAmbience.Helpers;
+using TerrariaAmbience.Content.AmbientAndMore;
 
-namespace TerrariaAmbience.Content.AmbientAndMore;
+namespace TerrariaAmbience.Content.Systems;
 
 public class SyncAmbienceSystem : ModSystem {
     // doesnt belong here but whatever jit

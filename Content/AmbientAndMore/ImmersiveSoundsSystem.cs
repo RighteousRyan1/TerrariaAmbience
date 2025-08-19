@@ -1,6 +1,5 @@
 ﻿using Terraria.Audio;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content.Players;
 using TerrariaAmbience.Helpers;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -9,6 +8,7 @@ using TerrariaAmbience.Sounds.SoundFilters;
 using Terraria.ID;
 using System.Collections.Generic;
 using System;
+using TerrariaAmbience.Content.Systems;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -111,7 +111,7 @@ public class ImmersiveSoundsSystem : ModSystem {
             inst.Volume = Main.ambientVolume * (pos.Y > Main.worldSurface * 16 ? 0.35f : 0.9f);
             inst.Pitch = pitch;
 
-            if (RoomDetectionPlayer.IsInRoom) {
+            if (FloodFillSystem.IsInRoom) {
                 inst.ApplyLowPassFilter(0.02f);
             }
         }

@@ -7,7 +7,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content.Players;
+using TerrariaAmbience.Content.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Sounds.SoundFilters;
 
@@ -37,8 +37,9 @@ public class TileVisualizationHelpers : ModSystem {
             var pos = elem.Key - Main.screenPosition;
             var color = elem.Value;
             // Draw a rectangle at the tile position with the specified color
-            var light = _visVis == 1 ? Lighting.GetSubLight(elem.Key).X : 1f;
-            DrawBox(Main.spriteBatch, pos, pos + new Vector2(16, 16f), color * light);
+            var light = _visVis % 2 == 1 ? Lighting.GetSubLight(elem.Key).X : 1f;
+            DrawBox(Main.spriteBatch, pos, pos + new Vector2(16, 16f), color * light, _visVis == 3 || _visVis == 4);
+
         }
         Main.spriteBatch.End();
         TileVisualizations.Clear();
@@ -56,19 +57,23 @@ public class TileVisualizationHelpers : ModSystem {
 
         if (Main.keyState.IsKeyDown(Keys.RightAlt) && Main.oldKeyState.IsKeyUp(Keys.RightAlt)) {
             _visVis++;
-            if (_visVis >= 3)
+            if (_visVis >= 5)
                 _visVis = 0;
         }
 
         var genCfg = ModContent.GetInstance<AmbientConfig>();
         var aaCfg = ModContent.GetInstance<AudioConfig>();
 
+        if (Main.keyState.IsKeyDown(Keys.F5) && Main.oldKeyState.IsKeyUp(Keys.F5))
+            genCfg.debugInterface = !genCfg.debugInterface;
+
         if (!genCfg.debugInterface || !aaCfg.advancedReverbCalculation || !aaCfg.isReverbEnabled) return;
 
-        var tilePosList = RoomDetectionPlayer.PlayerRoom.Tiles;
+        var tilePosList = FloodFillSystem.PlayerRoom.Tiles;
 
-        bool playerSurfaceOrHell = Main.LocalPlayer.Center.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
-        bool playerUnderground = !playerSurfaceOrHell;
+        var scrPos = SoundFilterSystem.ScreenListeningPosition;
+        bool surfaceOrHell = scrPos.Y < Main.worldSurface * 16 || scrPos.Y > (Main.maxTilesY - 200) * 16;
+        bool playerUnderground = !surfaceOrHell;
 
         bool isRaycastEnabled = aaCfg.reverbUsingRaycasting;
 
@@ -87,10 +92,21 @@ public class TileVisualizationHelpers : ModSystem {
                     (x, y, t) => {
                         var ts = Main.tileSolid[t.TileType];
                         var tst = Main.tileSolidTop[t.TileType];
-                        if (t.HasTile && ts && !tst)
+                        if (t.HasTile && !t.IsActuated && ts && !tst)
                             if (x != tilePos.X || y != tilePos.Y)
                                 numTiles++;
                     });
+
+                /*foreach (var point in new BresenhamLine(lpc, tilePos)) {
+                    var t = Main.tile[point.X, point.Y];
+                    int x = point.X, y = point.Y;
+
+                    var ts = Main.tileSolid[t.TileType];
+                    var tst = Main.tileSolidTop[t.TileType];
+                    if (t.HasTile && !t.IsActuated && ts && !tst)
+                        if (x != tilePos.X || y != tilePos.Y)
+                            numTiles++;
+                }*/
                 if (numTiles > 0)
                     continue;
             }
@@ -118,11 +134,13 @@ public class TileVisualizationHelpers : ModSystem {
         TileVisualizations.TryAdd(pos, color);
     }
 
-    static void DrawBox(SpriteBatch sb, Vector2 start, Vector2 end, Color boxColor, Vector2 origin = default) {
+    static void DrawBox(SpriteBatch sb, Vector2 start, Vector2 end, Color boxColor, bool fill = false, Vector2 origin = default) {
         var tex = DebugPixel;
         start -= origin;
         end -= origin;
 
+        if (fill)
+            sb.Draw(tex, start, null, boxColor * 0.5f, 0f, Vector2.Zero, new Vector2(end.X - start.X, end.Y - start.Y), default, 0);
         // top line
         sb.Draw(tex, start, null, boxColor, 0f, Vector2.Zero, new Vector2(end.X - start.X, 1), default, 0);
         // bottom line

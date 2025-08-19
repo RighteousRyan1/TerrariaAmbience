@@ -16,6 +16,7 @@ using Terraria.UI.Chat;
 using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Content.Players;
+using TerrariaAmbience.Content.Systems;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbienceAPI.Common;
@@ -185,7 +186,7 @@ internal class MethodDetours {
                 $"\nAllDayPartNight: {GradientGlobals.AllDayPartNight}" +
                 $"\nBehindWallMultiplier: {ambPlayer.InRoomAmbientMultiplier}" +
                 $"\nSkyToUnderground: {GradientGlobals.SkyToUnderground}" +
-                $"\nIsInRoom: {RoomDetectionPlayer.IsInRoom}" +
+                $"\nIsInRoom: {FloodFillSystem.IsInRoom}" +
                 $"\nModBiome(s): {(b.Count > 0 ? string.Join(", ", b.Select(x => x.Name)) : "N/A")}";
 
             drawPos.X -= 300;

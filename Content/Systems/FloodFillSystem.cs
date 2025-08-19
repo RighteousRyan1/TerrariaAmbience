@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
 using Terraria.ID;
-using System.Diagnostics;
 using TerrariaAmbience.Core;
+using TerrariaAmbience.Sounds.SoundFilters;
 
-namespace TerrariaAmbience.Content.Players;
+namespace TerrariaAmbience.Content.Systems;
 
-public class RoomDetectionPlayer : ModSystem {
+public class FloodFillSystem : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
-    static int MAX_ROOM_WIDTH = 50;
-    static int MAX_ROOM_HEIGHT = 50;
-    static int MAX_ROOM_AREA = 1250;
+    internal static int MaxRoomWidth = 50;
+    internal static int MaxRoomHeight = 50;
+    internal static int MaxRoomArea = 2250;
 
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!
@@ -40,21 +36,21 @@ public class RoomDetectionPlayer : ModSystem {
     /// <param name="room">If not null, will be filled with room size and other details</param>
     /// <param name="requireWalls">Whether to require player-placed walls in the enclosed space</param>
     /// <returns>True if in enclosed space with walls, false otherwise</returns>
-    public static bool IsPlayerInRoom(Player player, Room room, bool requireWalls = true) {
+    public static bool IsWithinRoom(Vector2 position, Room room, bool requireWalls = true) {
         room.Tiles.Clear();
-        int originX = (int)(player.Center.X / 16);
-        int originY = (int)(player.Center.Y / 16);
+        int originX = (int)(position.X / 16);
+        int originY = (int)(position.Y / 16);
 
         if (!WorldGen.InWorld(originX, originY))
             return false;
 
         // visited is a window around the player
-        bool[,] visited = new bool[MAX_ROOM_WIDTH * 2, MAX_ROOM_HEIGHT * 2];
+        bool[,] visited = new bool[MaxRoomWidth * 2, MaxRoomHeight * 2];
         Queue<Point> queue = new();
 
         // seed
         queue.Enqueue(new Point(originX, originY));
-        visited[MAX_ROOM_WIDTH, MAX_ROOM_HEIGHT] = true;
+        visited[MaxRoomWidth, MaxRoomHeight] = true;
 
         int minX = originX, maxX = originX;
         int minY = originY, maxY = originY;
@@ -86,13 +82,12 @@ public class RoomDetectionPlayer : ModSystem {
             if (requireWalls && !curSolid && !curHasWall) {
                 foundMissingWall = true;
                 // break to save processing time if i want to lol
-                
             }
 
             // bounds/area limits
-            if (areaCount > MAX_ROOM_AREA ||
-                (maxX - minX) > MAX_ROOM_WIDTH ||
-                (maxY - minY) > MAX_ROOM_HEIGHT) {
+            if (areaCount > MaxRoomArea ||
+                maxX - minX > MaxRoomWidth ||
+                maxY - minY > MaxRoomHeight) {
                 reachedEdge = true;
                 break;
             }
@@ -142,10 +137,10 @@ public class RoomDetectionPlayer : ModSystem {
         if (isSolid)
             return;
 
-        int relX = x - originX + MAX_ROOM_WIDTH;
-        int relY = y - originY + MAX_ROOM_HEIGHT;
+        int relX = x - originX + MaxRoomWidth;
+        int relY = y - originY + MaxRoomHeight;
 
-        if (relX < 0 || relX >= MAX_ROOM_WIDTH * 2 || relY < 0 || relY >= MAX_ROOM_HEIGHT * 2)
+        if (relX < 0 || relX >= MaxRoomWidth * 2 || relY < 0 || relY >= MaxRoomHeight * 2)
             return;
 
         if (visited[relX, relY])
@@ -168,7 +163,8 @@ public class RoomDetectionPlayer : ModSystem {
         MAX_ROOM_HEIGHT = t;
 
         MAX_ROOM_AREA = 5000;*/
-        IsInRoom = IsPlayerInRoom(Main.LocalPlayer, PlayerRoom);
+
+        IsInRoom = IsWithinRoom(SoundFilterSystem.ScreenListeningPosition, PlayerRoom);
 
         /*if (IsInRoom && !_wasInRoom) {
             Main.NewText($"Entered room! Size: {_currentRoom.Width}x{_currentRoom.Height}, Area: {_currentRoom.Area}");

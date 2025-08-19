@@ -356,6 +356,7 @@ public class FootstepHandler {
         TileID.AncientHellstoneBrick,
         TileID.AncientMythrilBrick,
         TileID.AncientCobaltBrick,
+        TileID.AdamantiteBeam,
     ];
     public static List<int> Marbles { get; private set; } =
     [

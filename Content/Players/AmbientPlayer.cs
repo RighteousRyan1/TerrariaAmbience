@@ -11,8 +11,8 @@ using Terraria.Audio;
 using TerrariaAmbience.Common.Enums;
 using System.Linq;
 using TerrariaAmbience.Sounds.SoundFilters;
-using TerrariaAmbience.Content.AmbientAndMore;
 using System.Diagnostics;
+using TerrariaAmbience.Content.Systems;
 
 namespace TerrariaAmbience.Content.Players;
 
@@ -70,7 +70,6 @@ public class AmbientPlayer : ModPlayer
 
         if (audioCfg.newSplashSounds)
             ManagePlayerSplashes();
-        #region Step/Sound handling
 
         if (genCfg.wetStepsEnabled)
             HandleWetSteps();
@@ -78,11 +77,7 @@ public class AmbientPlayer : ModPlayer
             // this essentially just works as a way to not have wet sounds play. no need to do extra magic.
             HasTilesAbove = true;
 
-        UpdateReverbParams(ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime);
-
-        // this is left in because my reverb system thinks that the sound originates from within a tile.
-        #endregion
-        // HandleContainerOpenings(ContainerContext.Chest, out var opened);
+        UpdateReverbParams((uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime);
         
         ManageChestSounds();
 
@@ -132,13 +127,13 @@ public class AmbientPlayer : ModPlayer
     void UpdateReverbParams(uint time) {
         if (Main.GameUpdateCount % time != 0) return;
 
-        SoundFilterSystem.LatestParams = SoundFilterSystem.CreateAudioFX(RoomDetectionPlayer.PlayerRoom); // SoundFilterSystem.CreateAudioFX(Player.Center);
+        SoundFilterSystem.LatestParams = SoundFilterSystem.CreateAudioFX(FloodFillSystem.PlayerRoom); // SoundFilterSystem.CreateAudioFX(Player.Center);
     }
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)
             return;
 
-        if (RoomDetectionPlayer.IsInRoom)
+        if (FloodFillSystem.IsInRoom)
             _multInternal -= 0.05f;
         else
             _multInternal += 0.05f;

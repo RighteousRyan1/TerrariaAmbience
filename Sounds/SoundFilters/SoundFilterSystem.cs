@@ -8,7 +8,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content.Players;
+using TerrariaAmbience.Content.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
@@ -43,10 +43,10 @@ public class SoundFilterSystem : ModSystem {
     static HashSet<string> _noReverbNames = [
         "silt", "slush", "grass", "mud", "clay",
         "grass", "leaf", "leaves", "flower", "vine", "moss",
-        "snow", "ash", "fence", "hive"
+        "snow", "ash", "fence", "hive", "mushroom", "dirt"
     ];
     static HashSet<string> _lowReverbNames = [
-        "dirt", "sand", "slush", "glass", "mud",
+        "sand", "slush", "glass", "mud",
 
         "sand", "silt", "dirt", "plank", "bamboo", "glass",
         "ice", "tin", "wood", "door"
@@ -146,11 +146,21 @@ public class SoundFilterSystem : ModSystem {
 
                 var lpc = pos.ToTileCoordinates();
 
+                /*foreach (var point in new BresenhamLine(lpc, tilePos)) {
+                    var t = Main.tile[point.X, point.Y];
+                    int x = point.X, y = point.Y;
+
+                    var ts = Main.tileSolid[t.TileType];
+                    var tst = Main.tileSolidTop[t.TileType];
+                    if (t.HasTile && !t.IsActuated && ts && !tst)
+                        if (x != tilePos.X || y != tilePos.Y)
+                            numTiles++;
+                }*/
                 TileLine(tilePos, lpc,
                     (x, y, t) => {
                         var ts = Main.tileSolid[t.TileType];
                         var tst = Main.tileSolidTop[t.TileType];
-                        if (t.HasTile && ts && !tst)
+                        if (t.HasTile && !t.IsActuated && ts && !tst)
                             if (x != tilePos.X || y != tilePos.Y)
                                 numTiles++;
                     });
@@ -177,16 +187,18 @@ public class SoundFilterSystem : ModSystem {
         reverbActual += medReverbSurfaces  * 0.00100f;
         reverbActual += lowReverbSurfaces  * 0.00050f;
 
-        fParam.Reverb.DecayTime = (numWallsCounts + numTilesCounts) * reverbActual * 0.003f;
+        var clampedRv = MathF.Min(reverbActual, 1f);
+
+        fParam.Reverb.DecayTime = (numWallsCounts + numTilesCounts) * clampedRv * 0.003f;
         fParam.Reverb.ReflectionsDelay = (uint)(numWallsCounts + numTilesCounts) / 8;
         fParam.Reverb.EarlyDiffusion = (byte)MathHelper.Lerp(0, 15, (float)(numTilesCounts + numWallsCounts) / 1000);
         // a tile equals 2 "feet".. but maybe not.
-        fParam.Reverb.RoomSize = (numWallsCounts + numTilesCounts) * reverbActual;
+        fParam.Reverb.RoomSize = (numWallsCounts + numTilesCounts) * clampedRv;
         // RoomFilterMain seems to create a "distant" echo?
         // fParam.Reverb.RoomFilterHF = 0f;
 
         SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
-        fParam.ReverbGain = MathF.Min(reverbActual, 1f);
+        fParam.ReverbGain = clampedRv;
 
         // doesn't really save on the computation of said things...
         if (!aaCfg.isSoundOcclusionEnabled)
@@ -201,7 +213,6 @@ public class SoundFilterSystem : ModSystem {
         fParam.LowPassIntensity = CalculateLowPass(position, offset, out fParam.LowPassEnabled);
         fParam.BandPassIntensity = CalculateBandPass(position, playerUnderwater, out fParam.BandPassEnabled);
     }
-
     public static float CalculateBandPass(Vector2 position, bool playerUnderwater, out bool enableBand) {
         bool underWater = Collision.DrownCollision(position, 1, 1);
         enableBand = underWater || playerUnderwater;
@@ -217,10 +228,20 @@ public class SoundFilterSystem : ModSystem {
         TileLine(goalPos.ToTileCoordinates(),
             (position + offset).ToTileCoordinates(),
             (x, y, t) => {
-                if (t.HasTile && Main.tileSolid[t.TileType])
+                var ts = Main.tileSolid[t.TileType];
+                var tst = Main.tileSolidTop[t.TileType];
+                if (t.HasTile && !t.IsActuated && ts && !tst)
                     numBlockingTiles++;
             });
-            // t => t.HasTile && Main.tileSolid[t.TileType]);
+
+        /*foreach (var point in new BresenhamLine(goalPos.ToTileCoordinates(), (position + offset).ToTileCoordinates())) {
+            var t = Main.tile[point.X, point.Y];
+
+            var ts = Main.tileSolid[t.TileType];
+            var tst = Main.tileSolidTop[t.TileType];
+            if (t.HasTile && !t.IsActuated && ts && !tst)
+                numBlockingTiles++;
+        }*/
 
         float curve = 1f;
 
@@ -261,14 +282,19 @@ public class SoundFilterSystem : ModSystem {
 
             if (isInvalidTile)
                 return wlRef;
+
+            var rev = Reflectivity.None;
+
             if (isHighReverb)
-                return Reflectivity.High;
+                rev = Reflectivity.High;
             else if (isMedReverb)
-                return Reflectivity.Medium;
+                rev = Reflectivity.Medium;
             else if (lowReverbTiles.Contains(tile))
-                return Reflectivity.Low;
-            else
-                return Reflectivity.None;
+                rev = Reflectivity.Low;
+
+            if (thisTile.IsActuated)
+                rev = (Reflectivity)Math.Max((int)(rev - 1), 0);
+            return rev;
         }
         else if (wall > 0) {
             wasWall = true;
@@ -354,4 +380,58 @@ public class SoundFilterSystem : ModSystem {
     }
 
     public delegate void TileTouchCallback(int tilePosX, int tilePosY, Tile tile);
+
+}
+public ref struct BresenhamLine {
+    private readonly int shortest;
+    private readonly int longest;
+    private readonly Point stepA;
+    private readonly Point stepB;
+    private int i;
+    private int numerator;
+
+    public Point Current { get; private set; }
+
+    public BresenhamLine(Point start, Point end) {
+        int width = end.X - start.X;
+        int height = end.Y - start.Y;
+
+        stepA = new Point(Math.Sign(width), Math.Sign(height));
+        stepB = new Point(Math.Sign(width), 0);
+        longest = Math.Abs(width);
+        shortest = Math.Abs(height);
+
+        if (longest <= shortest) {
+            longest = Math.Abs(height);
+            shortest = Math.Abs(width);
+
+            stepB.X = 0;
+            stepB.Y = Math.Sign(height);
+        }
+
+        i = -1;
+        numerator = longest >> 1;
+        Current = start;
+    }
+
+    public bool MoveNext() {
+        if (i++ > longest) {
+            return false;
+        }
+
+        numerator += shortest;
+
+        if (!(numerator < longest)) {
+            numerator -= longest;
+            Current += stepA;
+        }
+        else {
+            Current += stepB;
+        }
+
+        return true;
+    }
+
+    public readonly BresenhamLine GetEnumerator()
+        => this;
 }

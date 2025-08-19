@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using Terraria;
 using Terraria.ModLoader.Config;
+using TerrariaAmbience.Content.Systems;
 
 namespace TerrariaAmbience.Core;
 
@@ -107,11 +109,17 @@ public class AudioConfig : ModConfig {
 
     [DefaultValue(true)]
     public bool isReverbEnabled;
+
     [DefaultValue(true)]
     public bool reverbUsingRaycasting;
+
+    [DefaultValue(50)]
+    [Range(25, 150)]
+    public int reverbMaxDistance;
+
     [DefaultValue(10)]
     [Range(1, 60)]
-    public uint audioFiltersRefreshTime;
+    public int audioFiltersRefreshTime;
 
     [DefaultValue(true)]
     public bool advancedReverbCalculation;
@@ -121,4 +129,9 @@ public class AudioConfig : ModConfig {
 
     [DefaultValue(true)]
     public bool isSoundOcclusionEnabled;
+
+    public override void OnChanged() {
+        FloodFillSystem.MaxRoomHeight = reverbMaxDistance;
+        FloodFillSystem.MaxRoomWidth = reverbMaxDistance;
+    }
 }

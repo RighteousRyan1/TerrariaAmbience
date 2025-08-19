@@ -125,6 +125,18 @@ Configs: {
 			Label: Sound Occlusion
 			Tooltip: Makes sounds muffled when the Line-of-Sight to the player is blocked, depending on distance and density of the blockage.
 		}
+
+		reverbMaxDistance: {
+			Label: Reverb Max Distance
+			Tooltip:
+				'''
+				The distance (in tiles/blocks) the reverb/rooms system checks outwards from the player.
+				You can set this value higher for a more realistic sound feel for larger rooms, but also comes with an increasingly larger computational cost.
+				If "Reverb Using Raycasting" is enabled, this setting becomes highly more computationally expensive, and should be kept at a reasonable value.
+				If "Advanced Reverb" is disabled, this setting does nothing.
+				A value of 50 is good for most computers.
+				'''
+		}
 	}
 
 	FootstepsConfig: {
