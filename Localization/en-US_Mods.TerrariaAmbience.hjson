@@ -64,7 +64,7 @@ Configs: {
 		}
 
 		chestSounds: {
-			Label: Container sounds
+			Label: Container Sounds
 			Tooltip:
 				'''
 				If enabled, certain containers will play sounds when opened/closed.
