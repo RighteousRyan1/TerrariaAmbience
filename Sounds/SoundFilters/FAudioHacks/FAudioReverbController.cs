@@ -6,7 +6,7 @@ namespace TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
 
 public class FAudioReverbController {
 
-    public static readonly FAudio.FAudioFXReverbParameters DefaultFNAReverb = new() {
+    public static readonly FAudio.FAudioFXReverbParameters DefaultFAudioReverb = new() {
         WetDryMix = 100f,
         ReflectionsDelay = 7,
         ReverbDelay = 11,

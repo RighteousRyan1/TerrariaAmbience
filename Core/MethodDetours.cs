@@ -16,7 +16,6 @@ using Terraria.UI.Chat;
 using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Content.Players;
-using TerrariaAmbience.Content.Systems;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbienceAPI.Common;
@@ -229,8 +228,17 @@ internal class MethodDetours {
         if (viewMode >= 3) {
             int numPerRow = 5;
             // draw reverb material registry
-            txt = "Tile absorption" + (viewMode == 3 ? " (Vanilla)" : " (Vanilla + Modded)") +
-                "\n\nWall Insulators (low sound deflection):";
+            string addtxt;
+
+            if (viewMode == 3)
+                addtxt = " (Vanilla)";
+            else if (viewMode == 4)
+                addtxt = " (Vanilla + Modded)";
+            else
+                addtxt = " (Vanilla + Modded + Qualifications)";
+
+                txt = "Tile absorption" + addtxt +
+                    "\n\nWall Insulators (low sound deflection):";
             drawPos.X -= 500;
 
             for (int i = 0; i < SoundFilterSystem.lowReverbWalls.Count; i++) {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Terraria;
 using Terraria.ModLoader.Config;
-using TerrariaAmbience.Content.Systems;
+using TerrariaAmbience.Common.Systems;
 
 namespace TerrariaAmbience.Core;
 

@@ -19,7 +19,6 @@ using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Sounds.SoundFilters;
 using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Content.AddedNPCSounds;
-using TerrariaAmbience.Content.Systems;
 
 namespace TerrariaAmbience;
 

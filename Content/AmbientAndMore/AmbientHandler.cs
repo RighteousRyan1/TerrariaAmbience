@@ -11,7 +11,6 @@ using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
 using Terraria.ID;
 using TerrariaAmbience.Sounds;
-using TerrariaAmbience.Content.Systems;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -274,8 +273,12 @@ public class AmbientHandler {
         bool isHarshOk = float.TryParse(ModContent.GetInstance<AmbientConfig>().transitionHarshness, out var harshness);
 
         foreach (var amb in Ambiences) {
-            if (Main.gameMenu)
+            if (Main.gameMenu) {
+                amb.PlayInMenu = true;
                 amb.MaxVolume = 0f; // no ambience in the main menu.
+            }
+
+            amb.SoundInstance.Pitch = 0f;
 
             if (!isHarshOk) continue;
             TransitionHarshness = harshness;
@@ -320,7 +323,7 @@ public class AmbientHandler {
         if (Desert.SoundInstance != null) {
             Desert.SoundInstance.Pitch = 
                 (Main.dayTime ? 0f : -0.1f) - 
-                (InACrimson || InACorruption ? -0.5f : 0f);
+                (InACrimson || InACorruption ? 0.5f : 0f);
         }
         if (!Underwater.AreConditionsMet) Underwater.VolumeStep = TransitionHarshness * 2.5f;
         else Underwater.VolumeStep = TransitionHarshness;
@@ -375,6 +378,10 @@ public class AmbientHandler {
         Ambiences.ForEach(x => {
             x.MaxVolume *= pl.InRoomAmbientMultiplier;
             x.MaxVolume *= ModContent.GetInstance<AmbientConfig>().overallVolume;
+            if (Underwater.AreConditionsMet) {
+                x.SoundInstance.Pitch -= -0.05f;
+                x.MaxVolume *= 0.1f;
+            }
         });
     }
 }

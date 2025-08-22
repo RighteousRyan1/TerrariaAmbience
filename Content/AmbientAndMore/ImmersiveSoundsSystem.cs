@@ -8,7 +8,7 @@ using TerrariaAmbience.Sounds.SoundFilters;
 using Terraria.ID;
 using System.Collections.Generic;
 using System;
-using TerrariaAmbience.Content.Systems;
+using TerrariaAmbience.Common.Systems;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 

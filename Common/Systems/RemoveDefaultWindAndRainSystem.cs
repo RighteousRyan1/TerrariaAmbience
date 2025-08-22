@@ -15,19 +15,16 @@ public class RemoveDefaultWindAndRainSystem : ModSystem {
     private static IAudioTrack _audioTrack_28;
     private static IAudioTrack _audioTrack_45;
     public override void Load() {
-        if (!Main.dedServ) {
-            // delete those losers 😈
-            var lAudioSystem = Main.audioSystem as LegacyAudioSystem;
+        if (Main.dedServ) return;
+        // delete those losers 😈
+        var lAudioSystem = Main.audioSystem as LegacyAudioSystem;
 
-            _audioTrack_28 = lAudioSystem.AudioTracks[28];
-            _audioTrack_45 = lAudioSystem.AudioTracks[45];
+        _audioTrack_28 = lAudioSystem.AudioTracks[28];
+        _audioTrack_45 = lAudioSystem.AudioTracks[45];
 
-
-
-            On_Main.Update += RemoveRainAndWind;
-            On_LegacyAudioSystem.UpdateAmbientCueTowardStopping += IgnoreWindAndRain_1;
-            On_LegacyAudioSystem.UpdateAmbientCueState += IgnoreWindAndRain_2;
-        }
+        On_Main.Update += RemoveRainAndWind;
+        On_LegacyAudioSystem.UpdateAmbientCueTowardStopping += IgnoreWindAndRain_1;
+        On_LegacyAudioSystem.UpdateAmbientCueState += IgnoreWindAndRain_2;
     }
     public override void Unload() {
         // replace these losers 💀
@@ -37,7 +34,7 @@ public class RemoveDefaultWindAndRainSystem : ModSystem {
         lAudioSystem.AudioTracks[45] = _audioTrack_45;
     }
 
-    private void IgnoreWindAndRain_1(On_LegacyAudioSystem.orig_UpdateAmbientCueTowardStopping orig, LegacyAudioSystem self, int i, float stoppingSpeed, ref float trackVolume, float systemVolume) {
+    void IgnoreWindAndRain_1(On_LegacyAudioSystem.orig_UpdateAmbientCueTowardStopping orig, LegacyAudioSystem self, int i, float stoppingSpeed, ref float trackVolume, float systemVolume) {
         // to refuse to update rain or wind audio tracks lol.
         if (i == 28 || i == 45) {
             return;
@@ -45,7 +42,7 @@ public class RemoveDefaultWindAndRainSystem : ModSystem {
         orig(self, i, stoppingSpeed, ref trackVolume, systemVolume);
     }
 
-    private void IgnoreWindAndRain_2(On_LegacyAudioSystem.orig_UpdateAmbientCueState orig, LegacyAudioSystem self, int i, bool gameIsActive, ref float trackVolume, float systemVolume) {
+    void IgnoreWindAndRain_2(On_LegacyAudioSystem.orig_UpdateAmbientCueState orig, LegacyAudioSystem self, int i, bool gameIsActive, ref float trackVolume, float systemVolume) {
         // to refuse to update rain or wind audio tracks lol.
         if (i == 28 || i == 45) {
             return;
@@ -53,7 +50,7 @@ public class RemoveDefaultWindAndRainSystem : ModSystem {
         orig(self, i, gameIsActive, ref trackVolume, systemVolume);
     }
 
-    private void RemoveRainAndWind(On_Main.orig_Update orig, Main self, Microsoft.Xna.Framework.GameTime gameTime) {
+    void RemoveRainAndWind(On_Main.orig_Update orig, Main self, Microsoft.Xna.Framework.GameTime gameTime) {
         // is Music_45 windy and Music_28 rainy?
         orig(self, gameTime);
 
@@ -61,7 +58,9 @@ public class RemoveDefaultWindAndRainSystem : ModSystem {
             return;
         var lAudioSystem = Main.audioSystem as LegacyAudioSystem;
 
+        // rain cue
         lAudioSystem.AudioTracks[28] = null;
+        // wind cue
         lAudioSystem.AudioTracks[45] = null;
 
         /*// woind

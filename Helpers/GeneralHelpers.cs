@@ -129,6 +129,24 @@ public class GeneralHelpers
     public static bool KeyPress(Keys key) {
         return Main.keyState.IsKeyDown(key) && Main.oldKeyState.IsKeyUp(key);
     }
+    public static float RoughStep(float value, float goal, float step) {
+        if (value < goal) {
+            value += step;
+
+            if (value > goal) {
+                return goal;
+            }
+        }
+        else if (value > goal) {
+            value -= step;
+
+            if (value < goal) {
+                return goal;
+            }
+        }
+
+        return value;
+    }
     public static GeneralHelpers Instance => ModContent.GetInstance<GeneralHelpers>();
     public enum AudioFileExtension {
         MP3,

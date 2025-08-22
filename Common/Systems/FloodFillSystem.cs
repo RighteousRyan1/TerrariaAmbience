@@ -6,13 +6,13 @@ using Terraria.ID;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Sounds.SoundFilters;
 
-namespace TerrariaAmbience.Content.Systems;
+namespace TerrariaAmbience.Common.Systems;
 
 public class FloodFillSystem : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
     internal static int MaxRoomWidth = 50;
     internal static int MaxRoomHeight = 50;
-    internal static int MaxRoomArea = 3000; // 2250;
+    internal static int MaxRoomArea = 5000; // 2250;
 
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!
@@ -37,6 +37,7 @@ public class FloodFillSystem : ModSystem {
     /// <param name="requireWalls">Whether to require player-placed walls in the enclosed space</param>
     /// <returns>True if in enclosed space with walls, false otherwise</returns>
     public static bool IsWithinRoom(Vector2 position, Room room, bool requireWalls = true) {
+        room.NumWalls = room.NumSolidTiles = room.NumEmpty = 0;
         room.Tiles.Clear();
         int originX = (int)(position.X / 16);
         int originY = (int)(position.Y / 16);
@@ -85,9 +86,11 @@ public class FloodFillSystem : ModSystem {
             }
 
             // bounds/area limits
-            if (areaCount > MaxRoomArea ||
+            // only consider the edge being reached if there was a missing wall found
+            if ((areaCount > MaxRoomArea ||
                 maxX - minX > MaxRoomWidth ||
-                maxY - minY > MaxRoomHeight) {
+                maxY - minY > MaxRoomHeight) &&
+                foundMissingWall) {
                 reachedEdge = true;
                 break;
             }
@@ -115,8 +118,12 @@ public class FloodFillSystem : ModSystem {
             room.MinY = minY;
             room.MaxX = maxX;
             room.MaxY = maxY;
+
             room.WallsSatisfied = !foundMissingWall;
         }
+
+        room.PercentEnclosed = MathHelper.Clamp(1f - (room.NumEmpty / (float)(room.NumSolidTiles + room.NumWalls)), 0, 1);
+        // Main.NewText(room.PercentEnclosed);
 
         return isEnclosed;
     }
@@ -127,11 +134,21 @@ public class FloodFillSystem : ModSystem {
 
         Tile tile = Main.tile[x, y];
 
+        var isSolid = IsTileSolid(tile);
+
         var pt = new Point(x, y);
-        if (!room.Tiles.Contains(pt))
+        if (!room.Tiles.Contains(pt)) {
             room.Tiles.Add(pt);
 
-        var isSolid = IsTileSolid(tile);
+            if (isSolid)
+                room.NumSolidTiles++;
+            else {
+                if (tile.WallType > 0)
+                    room.NumWalls++;
+                else
+                    room.NumEmpty++;
+            }
+        }
 
         // stop flood at solid tiles
         if (isSolid)
@@ -184,7 +201,11 @@ public class Room {
     public int MinY { get; set; }
     public int MaxX { get; set; }
     public int MaxY { get; set; }
-    public bool WallsSatisfied { get; set; } // = true..?
+    public int NumSolidTiles { get; set; }
+    public int NumWalls { get; set; }
+    public int NumEmpty { get; set; }
 
+    public bool WallsSatisfied { get; set; } // = true..?
+    public float PercentEnclosed { get; set; }
     public List<Point> Tiles = [];
 }

@@ -12,7 +12,7 @@ using TerrariaAmbience.Common.Enums;
 using System.Linq;
 using TerrariaAmbience.Sounds.SoundFilters;
 using System.Diagnostics;
-using TerrariaAmbience.Content.Systems;
+using TerrariaAmbience.Common.Systems;
 
 namespace TerrariaAmbience.Content.Players;
 
@@ -20,17 +20,17 @@ public class AmbientPlayer : ModPlayer
 {
     // This class serves the purpose of playing sounds and/or playing footsteps.
     // public int WallsAround => ReverbAudioSystem.WallsAround(Player.Center, new(4, 4), out var coords);
-    private float _multInternal;
-    public float InRoomAmbientMultiplier => MathHelper.Clamp(_multInternal, 0.2f, 1f);
+    float _multInternal;
+    public float InRoomAmbientMultiplier => MathHelper.Clamp(_multInternal, 0, 1f);
 
     public static SoundEffectInstance soundSlippyRoughInst;
     public static SoundEffectInstance soundSlippySmoothInst;
-    private bool _areSoundsInitialized;
+    bool _areSoundsInitialized;
 
     internal int timerUntilValidChestStateChange;
 
-    private int chestStateNew;
-    private int chestStateOld; // Same as above.
+    int chestStateNew;
+    int chestStateOld; // Same as above.
 
     public static HashSet<int> NonArmoryArmors = [];
 
@@ -127,18 +127,16 @@ public class AmbientPlayer : ModPlayer
     void UpdateReverbParams(uint time) {
         if (Main.GameUpdateCount % time != 0) return;
 
-        SoundFilterSystem.LatestParams = SoundFilterSystem.CreateAudioFX(FloodFillSystem.PlayerRoom); // SoundFilterSystem.CreateAudioFX(Player.Center);
+        SoundFilterSystem.LatestParams = SoundFilterSystem.GenerateAudioFilters(FloodFillSystem.PlayerRoom);
     }
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)
             return;
 
-        if (FloodFillSystem.IsInRoom)
-            _multInternal -= 0.05f;
-        else
-            _multInternal += 0.05f;
+        // 1f - the final value is the lowest value this can achieve, i.e: 0.8f maps to 0.2f lowest
+        float desired = 1f - FloodFillSystem.PlayerRoom.PercentEnclosed * 0.85f;
 
-        _multInternal = MathHelper.Clamp(_multInternal, 0, 1);
+        _multInternal = GeneralHelpers.RoughStep(_multInternal, desired, 0.02f);
 
         HandleIceScraping();
 

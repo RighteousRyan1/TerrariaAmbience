@@ -5,7 +5,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content.Systems;
+using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SoundFilters.FAudioHacks;
@@ -89,7 +89,7 @@ public class SoundFilterSystem : ModSystem {
                 lowReverbTiles.Add(i);
         }
     }
-    public static FilterParams CreateAudioFX(Room room) {
+    public static FilterParams GenerateAudioFilters(Room room) {
         var aaCfg = ModContent.GetInstance<AudioConfig>();
         var fParam = new FilterParams();
         float reverbActual = 0f;
@@ -100,8 +100,6 @@ public class SoundFilterSystem : ModSystem {
         var pos = ScreenListeningPosition;
 
         bool playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
-        bool playerSurfaceOrHell = pos.Y < Main.worldSurface * 16 || Main.LocalPlayer.Center.Y > (Main.maxTilesY - 200) * 16;
-        bool playerUnderground = !playerSurfaceOrHell;
 
         if (!aaCfg.isReverbEnabled) {
             fParam.ReverbGain = 0f;
@@ -110,60 +108,34 @@ public class SoundFilterSystem : ModSystem {
         }
 
         // base values
-        fParam.Reverb = FAudioReverbController.DefaultFNAReverb;
+        fParam.Reverb = FAudioReverbController.DefaultFAudioReverb;
         if (!aaCfg.advancedReverbCalculation) {
             fParam.ReverbGain = MathUtils.InverseLerp((float)Main.worldSurface * 16, Main.maxTilesY * 16, Main.LocalPlayer.Center.Y, true);
             SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
             return fParam;
         }
 
-        if (room is null || room.Tiles is null) {
-            Main.NewText("bruh");
-            return fParam;
-        }
-
         float numWallsCounts = 0;
         float numTilesCounts = 0;
-
-        var tilePosList = room.Tiles;
 
         int highReverbSurfaces = 0, lowReverbSurfaces = 0, medReverbSurfaces = 0;
 
         var isRaycastEnabled = aaCfg.reverbUsingRaycasting;
 
+        //var ikd = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.L);
+
         // we only get here if advanced reverb calculation is enabled
-        foreach (var tilePos in tilePosList) {
+        var lpc = pos.ToTileCoordinates();
+        foreach (var tilePos in room.Tiles) {
+            // is this better or worse?
             var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
-            if (wasTile) numTilesCounts++;
-            else if (wasWall) numWallsCounts++;
-            else if (!wasTile && !wasWall && wl == WorldLayer.Cavern || wl == WorldLayer.Dirt) numWallsCounts += 0.5f;
-
-            if (isRaycastEnabled) {
-                var numTiles = 0;
-
-                var lpc = pos.ToTileCoordinates();
-
-                /*foreach (var point in new BresenhamLine(lpc, tilePos)) {
-                    var t = Main.tile[point.X, point.Y];
-                    int x = point.X, y = point.Y;
-
-                    var ts = Main.tileSolid[t.TileType];
-                    var tst = Main.tileSolidTop[t.TileType];
-                    if (t.HasTile && !t.IsActuated && ts && !tst)
-                        if (x != tilePos.X || y != tilePos.Y)
-                            numTiles++;
-                }*/
-                TileLine(tilePos, lpc,
-                    (x, y, t) => {
-                        var ts = Main.tileSolid[t.TileType];
-                        var tst = Main.tileSolidTop[t.TileType];
-                        if (t.HasTile && !t.IsActuated && ts && !tst)
-                            if (x != tilePos.X || y != tilePos.Y)
-                                numTiles++;
-                    });
-                if (numTiles > 0)
+            if (isRaycastEnabled && reflectivity != Reflectivity.None) {
+                if (IsPathBlocked(lpc, tilePos))
                     continue;
             }
+            if (wasTile) numTilesCounts++;
+            else if (wasWall) numWallsCounts++;
+            else if (!wasTile && !wasWall && (wl == WorldLayer.Cavern || wl == WorldLayer.Dirt)) numWallsCounts += 0.5f;
 
             switch (reflectivity) {
                 case Reflectivity.Low:
@@ -178,19 +150,39 @@ public class SoundFilterSystem : ModSystem {
             }
         }
 
+        static float compress(float value, float exponent) => 1f - MathF.Exp(-exponent * value);
+
         // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
 
-        reverbActual += highReverbSurfaces * 0.00250f;
-        reverbActual += medReverbSurfaces  * 0.00100f;
-        reverbActual += lowReverbSurfaces  * 0.00050f;
+        reverbActual += compress(highReverbSurfaces * 0.00200f, 0.85f);
+        reverbActual += compress(medReverbSurfaces  * 0.00100f, 0.9f);
+        reverbActual += compress(lowReverbSurfaces  * 0.00050f, 0.95f);
 
         var clampedRv = MathF.Min(reverbActual, 1f);
 
-        fParam.Reverb.DecayTime = (numWallsCounts + numTilesCounts) * clampedRv * 0.003f;
-        fParam.Reverb.ReflectionsDelay = (uint)(numWallsCounts + numTilesCounts) / 8;
-        fParam.Reverb.EarlyDiffusion = (byte)MathHelper.Lerp(0, 15, (float)(numTilesCounts + numWallsCounts) / 1000);
+        var decayTime = (numWallsCounts + numTilesCounts) * clampedRv * 0.003f;
+        
+        // required sanity check?
+        if (decayTime >= 300f) {
+            decayTime = 299.9f;
+        }
+        var refDelay = (uint)(numWallsCounts + numTilesCounts) / 16;
+        
+        if (refDelay > 300f) {
+            refDelay = 299;
+        }
+
+        var earlyDiff = (byte)MathHelper.Clamp(
+            MathHelper.Lerp(0, 15, (float)(numTilesCounts + numWallsCounts) / 1000), 
+            0, 15);
+        var roomSize = (numWallsCounts + numTilesCounts) * clampedRv * 0.5f;
+
+        fParam.Reverb.DecayTime = decayTime;
+        fParam.Reverb.ReflectionsDelay = refDelay;
+        // fParam.Reverb.ReflectionsGain = 0;
+        fParam.Reverb.EarlyDiffusion = earlyDiff;
         // a tile equals 2 "feet".. but maybe not.
-        fParam.Reverb.RoomSize = (numWallsCounts + numTilesCounts) * clampedRv;
+        fParam.Reverb.RoomSize = roomSize;
         // RoomFilterMain seems to create a "distant" echo?
         // fParam.Reverb.RoomFilterHF = 0f;
 
@@ -204,6 +196,53 @@ public class SoundFilterSystem : ModSystem {
             fParam.BandPassEnabled = false;
 
         return fParam;
+    }
+
+    public static int NumTilesBresenham(Point lpc, Point tilePos) {
+        int numTiles = 0;
+        foreach (var point in new BresenhamLine(lpc, tilePos)) {
+            var t = Main.tile[point.X, point.Y];
+            int x = point.X, y = point.Y;
+
+            var ts = Main.tileSolid[t.TileType];
+            var tst = Main.tileSolidTop[t.TileType];
+            if (t.HasTile && !t.IsActuated && ts && !tst)
+                if (x != tilePos.X || y != tilePos.Y)
+                    numTiles++;
+        }
+        return numTiles;
+    }
+    public static int NumTilesTouchMethod(Point lpc, Point tilePos) {
+        int numTiles = 0;
+        TileLine(tilePos, lpc,
+            (x, y, t) => {
+                var ts = Main.tileSolid[t.TileType];
+                var tst = Main.tileSolidTop[t.TileType];
+                if (t.HasTile && !t.IsActuated && ts && !tst) {
+                    if (x != tilePos.X || y != tilePos.Y) {
+                        numTiles++;
+                        return true;
+                    }
+                }
+                return false;
+            });
+        return numTiles;
+    }
+    public static bool IsPathBlocked(Point lpc, Point tilePos) {
+        bool blocked = false;
+        TileLine(lpc, tilePos,
+            (x, y, t) => {
+                var ts = Main.tileSolid[t.TileType];
+                var tst = Main.tileSolidTop[t.TileType];
+                if (t.HasTile && !t.IsActuated && ts && !tst) {
+                    if (x != tilePos.X || y != tilePos.Y) {
+                        blocked = true;
+                        return true;
+                    }
+                }
+                return false;
+            });
+        return blocked;
     }
 
     public static void SetFilterValues(Vector2 position, Vector2 offset, ref FilterParams fParam, bool playerUnderwater) {
@@ -229,6 +268,8 @@ public class SoundFilterSystem : ModSystem {
                 var tst = Main.tileSolidTop[t.TileType];
                 if (t.HasTile && !t.IsActuated && ts && !tst)
                     numBlockingTiles++;
+
+                return false;
             });
 
         /*foreach (var point in new BresenhamLine(goalPos.ToTileCoordinates(), (position + offset).ToTileCoordinates())) {
@@ -336,9 +377,11 @@ public class SoundFilterSystem : ModSystem {
             return Reflectivity.None;
     }
 
+    /// <summary>Iterates a line from a start point to an end point.</summary>
+    /// <param name="start">The start point of the line.</param>
+    /// <param name="end">The end point.</param>
+    /// <param name="touchCallback">Return true within the callback to break out of the line.</param>
     public static void TileLine(Point start, Point end, TileTouchCallback touchCallback = null) {
-        // int count = 0;
-
         int x0 = start.X;
         int y0 = start.Y;
         int x1 = end.X;
@@ -370,22 +413,20 @@ public class SoundFilterSystem : ModSystem {
 
             Tile tile = Main.tile[x0, y0];
 
-            touchCallback?.Invoke(x0, y0, tile);
+            bool? cb = touchCallback?.Invoke(x0, y0, tile);
+            if (cb == true) break;
         }
-
-        // return count;
     }
 
-    public delegate void TileTouchCallback(int tilePosX, int tilePosY, Tile tile);
-
+    public delegate bool TileTouchCallback(int tilePosX, int tilePosY, Tile tile);
 }
 public ref struct BresenhamLine {
-    private readonly int shortest;
-    private readonly int longest;
-    private readonly Point stepA;
-    private readonly Point stepB;
-    private int i;
-    private int numerator;
+    readonly int shortest;
+    readonly int longest;
+    readonly Point stepA;
+    readonly Point stepB;
+    int i;
+    int numerator;
 
     public Point Current { get; private set; }
 
@@ -429,6 +470,5 @@ public ref struct BresenhamLine {
         return true;
     }
 
-    public readonly BresenhamLine GetEnumerator()
-        => this;
+    public readonly BresenhamLine GetEnumerator() => this;
 }

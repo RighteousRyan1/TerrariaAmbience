@@ -7,7 +7,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI.Chat;
-using TerrariaAmbience.Content.Systems;
+using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 

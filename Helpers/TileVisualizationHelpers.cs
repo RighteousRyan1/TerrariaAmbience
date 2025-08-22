@@ -7,7 +7,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content.Systems;
+using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Sounds.SoundFilters;
 
@@ -77,37 +77,16 @@ public class TileVisualizationHelpers : ModSystem {
 
         bool isRaycastEnabled = aaCfg.reverbUsingRaycasting;
 
+        // var ikd = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.L);
+        var lpc = SoundFilterSystem.ScreenListeningPosition.ToTileCoordinates();
+
         foreach (var tilePos in tilePosList) {
-            var tile = Framing.GetTileSafely(tilePos);
             Vector2 worldCoords = tilePos.ToVector2() * 16;
 
             var reflectivity = SoundFilterSystem.CalculateAcousticReflectivity(tilePos, out bool wt, out bool ww, out var wl);
 
             if (isRaycastEnabled) {
-                var numTiles = 0;
-
-                var lpc = SoundFilterSystem.ScreenListeningPosition.ToTileCoordinates();
-
-                SoundFilterSystem.TileLine(tilePos, lpc,
-                    (x, y, t) => {
-                        var ts = Main.tileSolid[t.TileType];
-                        var tst = Main.tileSolidTop[t.TileType];
-                        if (t.HasTile && !t.IsActuated && ts && !tst)
-                            if (x != tilePos.X || y != tilePos.Y)
-                                numTiles++;
-                    });
-
-                /*foreach (var point in new BresenhamLine(lpc, tilePos)) {
-                    var t = Main.tile[point.X, point.Y];
-                    int x = point.X, y = point.Y;
-
-                    var ts = Main.tileSolid[t.TileType];
-                    var tst = Main.tileSolidTop[t.TileType];
-                    if (t.HasTile && !t.IsActuated && ts && !tst)
-                        if (x != tilePos.X || y != tilePos.Y)
-                            numTiles++;
-                }*/
-                if (numTiles > 0)
+                if (SoundFilterSystem.IsPathBlocked(lpc, tilePos))
                     continue;
             }
 

@@ -12,7 +12,7 @@ public class InventorySoundsGlobalItem : GlobalItem {
         if (Main.dedServ) return;
         if (player.whoAmI != Main.myPlayer) return;
         if (Config.volumeMultiplier == 0 || !Config.enabledDynamicSoundsSystem) return;
-
+        
         var mouseItem = Main.mouseItem;
         var heldItem = player.HeldItem;
 

@@ -4,8 +4,9 @@ using Terraria;
 using Terraria.ModLoader;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Content.AmbientAndMore;
+using TerrariaAmbience.Content;
 
-namespace TerrariaAmbience.Content.Systems;
+namespace TerrariaAmbience.Common.Systems;
 
 public class SyncAmbienceSystem : ModSystem {
     // doesnt belong here but whatever jit
@@ -32,14 +33,10 @@ public class SyncAmbienceSystem : ModSystem {
                 }
             }
             else {
-                //if (Main.dayTime) {
-                    CreateEveningNight(out var e, out var n);
-                    SendPM(e, n);
-                //}
-                //else {
-                    CreateMorningDay(out var m, out var d);
-                    SendAM(m, d);
-                //}
+                CreateEveningNight(out var e, out var n);
+                SendPM(e, n);
+                CreateMorningDay(out var m, out var d);
+                SendAM(m, d);
             }
         }
         _didInitNextLoop = !Main.gameMenu;

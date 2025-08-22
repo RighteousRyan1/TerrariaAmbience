@@ -119,7 +119,7 @@ public class FilterHooks : ModSystem
 		SoundID.MenuTick,
 		SoundID.Chat,
 		SoundID.Research,
-		SoundID.ResearchComplete
+		SoundID.ResearchComplete,
 	];
 }
 public struct FilterParams {
