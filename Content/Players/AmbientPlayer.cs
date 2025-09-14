@@ -77,8 +77,6 @@ public class AmbientPlayer : ModPlayer
             // this essentially just works as a way to not have wet sounds play. no need to do extra magic.
             HasTilesAbove = true;
 
-        UpdateReverbParams((uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime);
-        
         ManageChestSounds();
 
         Player.runSoundDelay = 100;
@@ -123,11 +121,6 @@ public class AmbientPlayer : ModPlayer
 
             HasTilesAbove = true;
         }
-    }
-    void UpdateReverbParams(uint time) {
-        if (Main.GameUpdateCount % time != 0) return;
-
-        SoundFilterSystem.LatestParams = SoundFilterSystem.GenerateAudioFilters(FloodFillSystem.PlayerRoom);
     }
     public override void PostUpdate() {
         if (Player.whoAmI != Main.myPlayer)

@@ -173,8 +173,6 @@ public partial class TerrariaAmbience : Mod {
         var campfireCrackle = Assets.Request<SoundEffect>("Sounds/Custom/ambient/environment/campfire_crackle", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
         DefaultAmbientHandler.CampfireCrackleInstance = campfireCrackle.CreateInstance(); // what's crashing?
         DefaultAmbientHandler.CampfireCrackleInstance.IsLooped = true;
-
-        SoundFilterSystem.PrecomputeReverbProperties();
     }
 
     public override void Unload() {

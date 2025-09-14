@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -28,30 +31,67 @@ public class SoundFilterSystem : ModSystem {
     public static Vector2 ScreenListeningPosition => Main.screenPosition + Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
     public static FilterParams LatestParams { get; set; }
 
-    internal static HashSet<int> lowReverbWalls = [];
-    internal static HashSet<int> lowReverbTiles = [];
-    internal static HashSet<int> noReverbWalls = [];
-    internal static HashSet<int> noReverbTiles = [];
-    internal static HashSet<int> medReverbTiles = [];
-    internal static HashSet<int> medReverbWalls = [];
+    internal readonly static HashSet<int> lowReverbWalls = [];
+    internal readonly static HashSet<int> lowReverbTiles = [];
+    internal readonly static HashSet<int> noReverbWalls = [];
+    internal readonly static HashSet<int> noReverbTiles = [];
+    internal readonly static HashSet<int> medReverbTiles = [];
+    internal readonly static HashSet<int> medReverbWalls = [];
 
     // no reverb set is prioritized over the low reverb set
     // so that if something like BambooFence exists, it will be considered as to compute no reverb
-    static HashSet<string> _noReverbNames = [
+    readonly static HashSet<string> _noReverbNames = [
         "silt", "slush", "grass", "mud", "clay",
         "grass", "leaf", "leaves", "flower", "vine", "moss",
         "snow", "ash", "fence", "hive", "mushroom", "dirt"
     ];
-    static HashSet<string> _lowReverbNames = [
+    readonly static HashSet<string> _lowReverbNames = [
         "sand", "slush", "glass", "mud",
 
         "sand", "silt", "dirt", "plank", "bamboo", "glass",
         "ice", "tin", "wood", "door"
     ];
-    static HashSet<string> _medReverbNames = [
+    readonly static HashSet<string> _medReverbNames = [
         "plank", "shingle"
     ];
-    // support mods soon too...
+
+    /*public static Thread FiltersThread { get; } = new Thread(UpdateReverbParams) {
+        Name = "Filter Update Thread",
+        IsBackground = true,
+        Priority = ThreadPriority.AboveNormal
+    };*/
+    public override void PostUpdateEverything() {
+        if (Main.soundVolume == 0) return;
+
+        var time = ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
+
+        if (Main.GameUpdateCount % time != 0) return;
+        // UpdateReverbParams();
+        LatestParams = GenerateAudioFilters(FloodFillSystem.PlayerRoom);
+    }
+    public static void UpdateReverbParams() {
+        /*while (true) {
+            Thread.Sleep((int)Main.instance.gameTime.ElapsedGameTime.TotalMilliseconds);
+
+            if (Main.gameMenu) continue;
+
+            var time = (uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
+            if (Main.GameUpdateCount % time != 0) continue;
+
+            LatestParams = GenerateAudioFilters(FloodFillSystem.PlayerRoom);
+        }*/
+
+        /*var time = (uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
+        if (Main.GameUpdateCount % time != 0) return;*/
+
+        LatestParams = GenerateAudioFilters(FloodFillSystem.PlayerRoom);
+    }
+
+    // compute reverb properties after all mods have loaded their content
+    public override void PostAddRecipes() {
+        PrecomputeReverbProperties();
+        // FiltersThread.Start();
+    }
     public static void PrecomputeReverbProperties() {
         noReverbTiles.Clear();
         noReverbWalls.Clear();
@@ -89,16 +129,31 @@ public class SoundFilterSystem : ModSystem {
                 lowReverbTiles.Add(i);
         }
     }
+
+    public const float HIGH_REVERB_MULTIPLIER = 0.00200f;
+    public const float MED_REVERB_MULTIPLIER = 0.00100f;
+    public const float LOW_REVERB_MULTIPLIER = 0.00050f;
+    public const float HIGH_REVERB_EXPONENT = 0.85f;
+    public const float MED_REVERB_EXPONENT = 0.9f;
+    public const float LOW_REVERB_EXPONENT = 0.95f;
+
+    public const float DECAY_MULTIPLIER = 0.003f;
+    public const float ROOM_SIZE_MULTIPLIER = 0.5f;
+    public const float WALLS_PARTIAL_COUNT = 0.5f;
+    public const float EARLY_DIFF_SCALE = 15f / 1000f;
+
+    // Make compress method static and inline for better performance
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float Compress(float value, float exponent) => 1f - MathF.Exp(-exponent * value);
+
     public static FilterParams GenerateAudioFilters(Room room) {
         var aaCfg = ModContent.GetInstance<AudioConfig>();
         var fParam = new FilterParams();
-        float reverbActual = 0f;
 
         if (Main.gameMenu)
             return fParam;
 
         var pos = ScreenListeningPosition;
-
         bool playerUnderwater = Main.LocalPlayer.IsWaterSuffocating();
 
         if (!aaCfg.isReverbEnabled) {
@@ -115,8 +170,7 @@ public class SoundFilterSystem : ModSystem {
             return fParam;
         }
 
-        float numWallsCounts = 0;
-        float numTilesCounts = 0;
+        float numWallsCounts = 0, numTilesCounts = 0;
 
         int highReverbSurfaces = 0, lowReverbSurfaces = 0, medReverbSurfaces = 0;
 
@@ -126,10 +180,48 @@ public class SoundFilterSystem : ModSystem {
 
         // we only get here if advanced reverb calculation is enabled
         var lpc = pos.ToTileCoordinates();
-        foreach (var tilePos in room.Tiles) {
+
+        var tiles = room.Tiles;
+
+        Parallel.For(0, tiles.Count, (i) => {
+            var tilePos = tiles[i];
             // is this better or worse?
             var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
-            if (isRaycastEnabled && reflectivity != Reflectivity.None) {
+
+            var reflectsAny = reflectivity != Reflectivity.None;
+            // dont bother performing anything on these tiles
+            if (!reflectsAny) return;
+
+            if (isRaycastEnabled) {
+                if (IsPathBlocked(lpc, tilePos))
+                    return;
+            }
+            if (wasTile) numTilesCounts++;
+            else if (wasWall) numWallsCounts++;
+            else if (!wasTile && !wasWall && (wl == WorldLayer.Cavern || wl == WorldLayer.Dirt)) numWallsCounts += 0.5f;
+
+            switch (reflectivity) {
+                case Reflectivity.Low:
+                    lowReverbSurfaces++;
+                    break;
+                case Reflectivity.Medium:
+                    medReverbSurfaces++;
+                    break;
+                case Reflectivity.High:
+                    highReverbSurfaces++;
+                    break;
+            }
+        });
+        /*for (int i = 0; i < tiles.Count; i++) {
+            var tilePos = tiles[i];
+            // is this better or worse?
+            var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
+
+            var reflectsAny = reflectivity != Reflectivity.None;
+            // dont bother performing anything on these tiles
+            if (!reflectsAny) continue;
+
+            if (isRaycastEnabled) {
                 if (IsPathBlocked(lpc, tilePos))
                     continue;
             }
@@ -148,34 +240,24 @@ public class SoundFilterSystem : ModSystem {
                     highReverbSurfaces++;
                     break;
             }
-        }
-
-        static float compress(float value, float exponent) => 1f - MathF.Exp(-exponent * value);
+        }*/
 
         // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
 
-        reverbActual += compress(highReverbSurfaces * 0.00200f, 0.85f);
-        reverbActual += compress(medReverbSurfaces  * 0.00100f, 0.9f);
-        reverbActual += compress(lowReverbSurfaces  * 0.00050f, 0.95f);
+        float reverbActual = 0f;
+        reverbActual += Compress(highReverbSurfaces * HIGH_REVERB_MULTIPLIER, HIGH_REVERB_EXPONENT);
+        reverbActual += Compress(medReverbSurfaces * MED_REVERB_MULTIPLIER, MED_REVERB_EXPONENT);
+        reverbActual += Compress(lowReverbSurfaces * LOW_REVERB_MULTIPLIER, LOW_REVERB_EXPONENT);
 
-        var clampedRv = MathF.Min(reverbActual, 1f);
+        var gain = MathF.Min(reverbActual, 1f);
 
-        var decayTime = (numWallsCounts + numTilesCounts) * clampedRv * 0.003f;
-        
-        // required sanity check?
-        if (decayTime >= 300f) {
-            decayTime = 299.9f;
-        }
-        var refDelay = (uint)(numWallsCounts + numTilesCounts) / 16;
-        
-        if (refDelay > 300f) {
-            refDelay = 299;
-        }
+        var totalSurfaces = numWallsCounts + numTilesCounts;
 
-        var earlyDiff = (byte)MathHelper.Clamp(
-            MathHelper.Lerp(0, 15, (float)(numTilesCounts + numWallsCounts) / 1000), 
-            0, 15);
-        var roomSize = (numWallsCounts + numTilesCounts) * clampedRv * 0.5f;
+        // reverb parameters
+        var decayTime = Math.Min(totalSurfaces * gain * 0.003f, 299.9f);
+        var refDelay = Math.Min((uint)totalSurfaces / 16, 299u);
+        var earlyDiff = (byte)Math.Min(totalSurfaces * EARLY_DIFF_SCALE, 15f);
+        var roomSize = (numWallsCounts + numTilesCounts) * gain * 0.5f;
 
         fParam.Reverb.DecayTime = decayTime;
         fParam.Reverb.ReflectionsDelay = refDelay;
@@ -187,7 +269,7 @@ public class SoundFilterSystem : ModSystem {
         // fParam.Reverb.RoomFilterHF = 0f;
 
         SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
-        fParam.ReverbGain = clampedRv;
+        fParam.ReverbGain = gain;
 
         // doesn't really save on the computation of said things...
         if (!aaCfg.isSoundOcclusionEnabled)

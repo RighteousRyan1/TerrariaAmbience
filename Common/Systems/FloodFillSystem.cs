@@ -12,7 +12,7 @@ public class FloodFillSystem : ModSystem {
     // parameters to prevent checking the entire world or checking excessively
     internal static int MaxRoomWidth = 50;
     internal static int MaxRoomHeight = 50;
-    internal static int MaxRoomArea = 5000; // 2250;
+    internal static int MaxRoomArea = 3000; // 2250;
 
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!
@@ -87,10 +87,9 @@ public class FloodFillSystem : ModSystem {
 
             // bounds/area limits
             // only consider the edge being reached if there was a missing wall found
-            if ((areaCount > MaxRoomArea ||
-                maxX - minX > MaxRoomWidth ||
-                maxY - minY > MaxRoomHeight) &&
-                foundMissingWall) {
+            if (areaCount >= MaxRoomArea ||
+                maxX - minX >= MaxRoomWidth ||
+                maxY - minY >= MaxRoomHeight) {
                 reachedEdge = true;
                 break;
             }
@@ -110,7 +109,7 @@ public class FloodFillSystem : ModSystem {
 
         bool isEnclosed = !reachedEdge && (!requireWalls || !foundMissingWall);
 
-        if (isEnclosed) {
+        if (!foundMissingWall) {
             room.Width = maxX - minX + 1;
             room.Height = maxY - minY + 1;
             room.Area = areaCount;
@@ -122,7 +121,9 @@ public class FloodFillSystem : ModSystem {
             room.WallsSatisfied = !foundMissingWall;
         }
 
-        room.PercentEnclosed = MathHelper.Clamp(1f - (room.NumEmpty / (float)(room.NumSolidTiles + room.NumWalls)), 0, 1);
+        var calculuation = 1f - (room.NumEmpty / (float)(room.NumSolidTiles + room.NumWalls));
+        room.PercentEnclosed = MathHelper.Clamp(calculuation, 0, 1);
+        // Main.NewText($"{room.NumEmpty} / ({room.NumSolidTiles} + {room.NumWalls}) = {calculuation}");
         // Main.NewText(room.PercentEnclosed);
 
         return isEnclosed;
@@ -173,6 +174,7 @@ public class FloodFillSystem : ModSystem {
     public static bool IsInRoom { get; private set; }
 
     public override void PostUpdateEverything() {
+        if (Main.dedServ) return;
         if (Main.GameUpdateCount % ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime != 0) return;
 
         /*var t = (int)(Main.MouseScreen.X / Main.screenWidth * 100);
@@ -180,8 +182,9 @@ public class FloodFillSystem : ModSystem {
         MAX_ROOM_HEIGHT = t;
 
         MAX_ROOM_AREA = 5000;*/
-
         IsInRoom = IsWithinRoom(SoundFilterSystem.ScreenListeningPosition, PlayerRoom);
+
+        // Main.NewText(PlayerRoom.Area);
 
         /*if (IsInRoom && !_wasInRoom) {
             Main.NewText($"Entered room! Size: {_currentRoom.Width}x{_currentRoom.Height}, Area: {_currentRoom.Area}");

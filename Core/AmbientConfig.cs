@@ -113,9 +113,10 @@ public class AudioConfig : ModConfig {
     [DefaultValue(true)]
     public bool reverbUsingRaycasting;
 
-    [DefaultValue(50)]
-    [Range(25, 150)]
-    public int reverbMaxDistance;
+    [DefaultValue(2500)]
+    [Range(1500, 5000)]
+    // area, in reality
+    public int reverbMaxArea;
 
     [DefaultValue(10)]
     [Range(1, 60)]
@@ -131,7 +132,7 @@ public class AudioConfig : ModConfig {
     public bool isSoundOcclusionEnabled;
 
     public override void OnChanged() {
-        FloodFillSystem.MaxRoomHeight = reverbMaxDistance;
-        FloodFillSystem.MaxRoomWidth = reverbMaxDistance;
+        FloodFillSystem.MaxRoomHeight = reverbMaxArea;
+        FloodFillSystem.MaxRoomWidth = reverbMaxArea;
     }
 }

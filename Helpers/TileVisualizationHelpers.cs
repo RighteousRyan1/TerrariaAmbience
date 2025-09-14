@@ -67,13 +67,9 @@ public class TileVisualizationHelpers : ModSystem {
         if (Main.keyState.IsKeyDown(Keys.F5) && Main.oldKeyState.IsKeyUp(Keys.F5))
             genCfg.debugInterface = !genCfg.debugInterface;
 
-        if (!genCfg.debugInterface || !aaCfg.advancedReverbCalculation || !aaCfg.isReverbEnabled) return;
+        if (!genCfg.debugInterface || !aaCfg.advancedReverbCalculation || !aaCfg.isReverbEnabled && _visVis > 0) return;
 
         var tilePosList = FloodFillSystem.PlayerRoom.Tiles;
-
-        var scrPos = SoundFilterSystem.ScreenListeningPosition;
-        bool surfaceOrHell = scrPos.Y < Main.worldSurface * 16 || scrPos.Y > (Main.maxTilesY - 200) * 16;
-        bool playerUnderground = !surfaceOrHell;
 
         bool isRaycastEnabled = aaCfg.reverbUsingRaycasting;
 
