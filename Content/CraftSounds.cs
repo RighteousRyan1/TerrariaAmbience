@@ -167,10 +167,3 @@ public class CraftSounds : GlobalItem {
             stationType.Add(station);
     }
 }
-// why did i make this again
-public struct CraftSoundInfo {
-    public const int WORK_BENCH = 0;
-    public const int ANVIL = 1;
-    public const int BOOKCASE = 2;
-    public int Context;
-}
