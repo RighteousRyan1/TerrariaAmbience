@@ -24,7 +24,7 @@ public class CampfireDetection : GlobalTile
         CampfirePos.X = i * 16;
         CampfirePos.Y = j * 16;
 
-        Player player = Main.player[Main.myPlayer].GetModPlayer<AmbientPlayer>().Player;
+        var player = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().Player;
 
         if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire)) {
             /*var t = Main.tile[i, j];

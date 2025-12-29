@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Terraria.ID;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Sounds.SoundFilters;
+using System;
 
 namespace TerrariaAmbience.Common.Systems;
 
@@ -14,6 +15,8 @@ public class FloodFillSystem : ModSystem {
     internal static int MaxRoomHeight = 50;
     internal static int MaxRoomArea = 3000; // 2250;
 
+    static readonly bool[,] _visitedCache = new bool[MaxRoomWidth * 2 + 1, MaxRoomHeight * 2 + 1];
+    static readonly Queue<Point> _queueCache = new(MaxRoomArea);
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!
         // tile is solid and unactuated
@@ -32,26 +35,27 @@ public class FloodFillSystem : ModSystem {
     /// <summary>
     /// Checks if a player is in an enclosed space with proper walls.
     /// </summary>
-    /// <param name="player">The player to check</param>
     /// <param name="room">If not null, will be filled with room size and other details</param>
     /// <param name="requireWalls">Whether to require player-placed walls in the enclosed space</param>
     /// <returns>True if in enclosed space with walls, false otherwise</returns>
     public static bool IsWithinRoom(Vector2 position, Room room, bool requireWalls = true) {
         room.NumWalls = room.NumSolidTiles = room.NumEmpty = 0;
         room.Tiles.Clear();
+
+        Array.Clear(_visitedCache, 0, _visitedCache.Length);
+        _queueCache.Clear();
+
         int originX = (int)(position.X / 16);
         int originY = (int)(position.Y / 16);
 
         if (!WorldGen.InWorld(originX, originY))
             return false;
 
-        // visited is a window around the player
-        bool[,] visited = new bool[MaxRoomWidth * 2, MaxRoomHeight * 2];
-        Queue<Point> queue = new();
+        _queueCache.Enqueue(new Point(originX, originY));
 
-        // seed
-        queue.Enqueue(new Point(originX, originY));
-        visited[MaxRoomWidth, MaxRoomHeight] = true;
+        int cacheCenterX = MaxRoomWidth;
+        int cacheCenterY = MaxRoomHeight;
+        _visitedCache[cacheCenterX, cacheCenterY] = true;
 
         int minX = originX, maxX = originX;
         int minY = originY, maxY = originY;
@@ -59,34 +63,37 @@ public class FloodFillSystem : ModSystem {
         bool reachedEdge = false;
         bool foundMissingWall = false;
 
-        while (queue.Count > 0) {
-            var dq = queue.Dequeue();
-            int x = dq.X, y = dq.Y;
-            areaCount++;
+        // process each point
+        while (_queueCache.Count > 0) {
+            Point p = _queueCache.Dequeue();
+            int x = p.X;
+            int y = p.Y;
 
-            // update bounds
+            Tile cur = Main.tile[x, y];
+            bool curSolid = IsTileSolid(cur);
+            bool curHasWall = cur.WallType > 0;
+
+            room.Tiles.Add(p);
+
+            if (curSolid) room.NumSolidTiles++;
+            else if (curHasWall) room.NumWalls++;
+            else room.NumEmpty++;
+
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;
             if (y < minY) minY = y;
             if (y > maxY) maxY = y;
 
-            if (!WorldGen.InWorld(x, y)) {
-                reachedEdge = true;
-                break;
-            }
+            if (curSolid) continue;
 
-            // current tile & properties
-            Tile cur = Main.tile[x, y];
-            bool curSolid = IsTileSolid(cur);
-            bool curHasWall = cur.WallType > 0;
+            areaCount++;
 
-            if (requireWalls && !curSolid && !curHasWall) {
+            if (requireWalls && !curHasWall) {
                 foundMissingWall = true;
-                // break to save processing time if i want to lol
+                // again, i could break here, but then we wouldn't get accurate area/size data
             }
 
-            // bounds/area limits
-            // only consider the edge being reached if there was a missing wall found
+            // limits of the "room"
             if (areaCount >= MaxRoomArea ||
                 maxX - minX >= MaxRoomWidth ||
                 maxY - minY >= MaxRoomHeight) {
@@ -94,21 +101,20 @@ public class FloodFillSystem : ModSystem {
                 break;
             }
 
-            // proximity to world edge
+            // edge of world counts as a wall
             if (x <= 5 || x >= Main.maxTilesX - 5 || y <= 5 || y >= Main.maxTilesY - 5) {
                 reachedEdge = true;
                 break;
             }
 
-            // enqueue neighbors (we pass origin to compute visited indices correctly)
-            CheckAndEnqueue(x + 1, y, originX, originY, queue, room, visited);
-            CheckAndEnqueue(x - 1, y, originX, originY, queue, room, visited);
-            CheckAndEnqueue(x, y + 1, originX, originY, queue, room, visited);
-            CheckAndEnqueue(x, y - 1, originX, originY, queue, room, visited);
+            // check neighbors
+            EnqueueNeighbor(x + 1, y, originX, originY, cacheCenterX, cacheCenterY);
+            EnqueueNeighbor(x - 1, y, originX, originY, cacheCenterX, cacheCenterY);
+            EnqueueNeighbor(x, y + 1, originX, originY, cacheCenterX, cacheCenterY);
+            EnqueueNeighbor(x, y - 1, originX, originY, cacheCenterX, cacheCenterY);
         }
 
-        bool isEnclosed = !reachedEdge && (!requireWalls || !foundMissingWall);
-
+        // 4. Final Calculations
         if (!foundMissingWall) {
             room.Width = maxX - minX + 1;
             room.Height = maxY - minY + 1;
@@ -117,55 +123,41 @@ public class FloodFillSystem : ModSystem {
             room.MinY = minY;
             room.MaxX = maxX;
             room.MaxY = maxY;
-
-            room.WallsSatisfied = !foundMissingWall;
+            room.WallsSatisfied = true;
+        }
+        else {
+            room.WallsSatisfied = false;
         }
 
-        var calculuation = 1f - (room.NumEmpty / (float)(room.NumSolidTiles + room.NumWalls));
-        room.PercentEnclosed = MathHelper.Clamp(calculuation, 0, 1);
-        // Main.NewText($"{room.NumEmpty} / ({room.NumSolidTiles} + {room.NumWalls}) = {calculuation}");
-        // Main.NewText(room.PercentEnclosed);
+        bool isEnclosed = !reachedEdge && (!requireWalls || !foundMissingWall);
+
+        // DivideByZeroException my beloved
+        float denominator = room.NumSolidTiles + room.NumWalls;
+        if (denominator == 0) room.PercentEnclosed = 0;
+        else {
+            float calculation = 1f - (room.NumEmpty / denominator);
+            room.PercentEnclosed = MathHelper.Clamp(calculation, 0, 1);
+        }
 
         return isEnclosed;
     }
 
-    static void CheckAndEnqueue(int x, int y, int originX, int originY, Queue<Point> queue, Room room, bool[,] visited) {
-        if (!WorldGen.InWorld(x, y))
-            return;
+    static void EnqueueNeighbor(int x, int y, int originX, int originY, int cacheCenterX, int cacheCenterY) {
+        if (!WorldGen.InWorld(x, y)) return;
 
-        Tile tile = Main.tile[x, y];
+        // check relative to the origin
+        int relX = x - originX + cacheCenterX;
+        int relY = y - originY + cacheCenterY;
 
-        var isSolid = IsTileSolid(tile);
+        if (relX < 0 || relX >= _visitedCache.GetLength(0) ||
+            relY < 0 || relY >= _visitedCache.GetLength(1)) return;
 
-        var pt = new Point(x, y);
-        if (!room.Tiles.Contains(pt)) {
-            room.Tiles.Add(pt);
+        // exit if visited
+        if (_visitedCache[relX, relY]) return;
 
-            if (isSolid)
-                room.NumSolidTiles++;
-            else {
-                if (tile.WallType > 0)
-                    room.NumWalls++;
-                else
-                    room.NumEmpty++;
-            }
-        }
-
-        // stop flood at solid tiles
-        if (isSolid)
-            return;
-
-        int relX = x - originX + MaxRoomWidth;
-        int relY = y - originY + MaxRoomHeight;
-
-        if (relX < 0 || relX >= MaxRoomWidth * 2 || relY < 0 || relY >= MaxRoomHeight * 2)
-            return;
-
-        if (visited[relX, relY])
-            return;
-
-        visited[relX, relY] = true;
-        queue.Enqueue(pt);
+        // done
+        _visitedCache[relX, relY] = true;
+        _queueCache.Enqueue(new Point(x, y));
     }
 
     // bool _wasInRoom = false;
@@ -208,7 +200,7 @@ public class Room {
     public int NumWalls { get; set; }
     public int NumEmpty { get; set; }
 
-    public bool WallsSatisfied { get; set; } // = true..?
+    public bool WallsSatisfied { get; set; }
     public float PercentEnclosed { get; set; }
-    public List<Point> Tiles = [];
+    public List<Point> Tiles = new(1000);
 }

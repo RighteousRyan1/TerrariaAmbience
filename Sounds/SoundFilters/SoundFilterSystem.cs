@@ -55,11 +55,22 @@ public class SoundFilterSystem : ModSystem {
         "plank", "shingle"
     ];
 
-    /*public static Thread FiltersThread { get; } = new Thread(UpdateReverbParams) {
-        Name = "Filter Update Thread",
-        IsBackground = true,
-        Priority = ThreadPriority.AboveNormal
-    };*/
+    // so like, whatever. optimizing includes improving readability right?
+    struct ReverbCounts {
+        public float Walls;
+        public float Tiles;
+        public int HighReverb;
+        public int MedReverb;
+        public int LowReverb;
+
+        public void Add(ReverbCounts other) {
+            Walls += other.Walls;
+            Tiles += other.Tiles;
+            HighReverb += other.HighReverb;
+            MedReverb += other.MedReverb;
+            LowReverb += other.LowReverb;
+        }
+    }
     public override void PostUpdateEverything() {
         if (Main.soundVolume == 0) return;
 
@@ -162,122 +173,118 @@ public class SoundFilterSystem : ModSystem {
             return fParam;
         }
 
-        // base values
+        // base values for reverb :)
         fParam.Reverb = FAudioReverbController.DefaultFAudioReverb;
+
         if (!aaCfg.advancedReverbCalculation) {
             fParam.ReverbGain = MathUtils.InverseLerp((float)Main.worldSurface * 16, Main.maxTilesY * 16, Main.LocalPlayer.Center.Y, true);
             SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
             return fParam;
         }
 
-        float numWallsCounts = 0, numTilesCounts = 0;
-
-        int highReverbSurfaces = 0, lowReverbSurfaces = 0, medReverbSurfaces = 0;
-
-        var isRaycastEnabled = aaCfg.reverbUsingRaycasting;
-
-        //var ikd = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.L);
-
-        // we only get here if advanced reverb calculation is enabled
-        var lpc = pos.ToTileCoordinates();
+        // tracks tile stuff
+        var counts = new ReverbCounts();
 
         var tiles = room.Tiles;
+        bool isRaycastEnabled = aaCfg.reverbUsingRaycasting;
+        Point listenerTileCoords = pos.ToTileCoordinates();
 
-        Parallel.For(0, tiles.Count, (i) => {
-            var tilePos = tiles[i];
-            // is this better or worse?
-            var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
-
-            var reflectsAny = reflectivity != Reflectivity.None;
-            // dont bother performing anything on these tiles
-            if (!reflectsAny) return;
-
-            if (isRaycastEnabled) {
-                if (IsPathBlocked(lpc, tilePos))
-                    return;
+        // only parallelize if we have a large number of tiles to process now
+        const int PARALLEL_THRESHOLD = 2000;
+        if (!isRaycastEnabled) {
+            foreach (var tilePos in tiles) {
+                ProcessTile(tilePos, listenerTileCoords, false, ref counts);
             }
-            if (wasTile) numTilesCounts++;
-            else if (wasWall) numWallsCounts++;
-            else if (!wasTile && !wasWall && (wl == WorldLayer.Cavern || wl == WorldLayer.Dirt)) numWallsCounts += 0.5f;
-
-            switch (reflectivity) {
-                case Reflectivity.Low:
-                    lowReverbSurfaces++;
-                    break;
-                case Reflectivity.Medium:
-                    medReverbSurfaces++;
-                    break;
-                case Reflectivity.High:
-                    highReverbSurfaces++;
-                    break;
+        }
+        else {
+            if (tiles.Count > PARALLEL_THRESHOLD) {
+                object lockObj = new();
+                Parallel.ForEach(tiles,
+                    () => new ReverbCounts(),
+                    (tilePos, loopState, localCounts) => {
+                        ProcessTile(tilePos, listenerTileCoords, true, ref localCounts);
+                        return localCounts;
+                    },
+                    (finalLocalCounts) => {
+                        lock (lockObj) counts.Add(finalLocalCounts);
+                    });
             }
-        });
-        /*for (int i = 0; i < tiles.Count; i++) {
-            var tilePos = tiles[i];
-            // is this better or worse?
-            var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
-
-            var reflectsAny = reflectivity != Reflectivity.None;
-            // dont bother performing anything on these tiles
-            if (!reflectsAny) continue;
-
-            if (isRaycastEnabled) {
-                if (IsPathBlocked(lpc, tilePos))
-                    continue;
+            else {
+                // sequential is better for smaller sets
+                foreach (var tilePos in tiles) {
+                    ProcessTile(tilePos, listenerTileCoords, true, ref counts);
+                }
             }
-            if (wasTile) numTilesCounts++;
-            else if (wasWall) numWallsCounts++;
-            else if (!wasTile && !wasWall && (wl == WorldLayer.Cavern || wl == WorldLayer.Dirt)) numWallsCounts += 0.5f;
-
-            switch (reflectivity) {
-                case Reflectivity.Low:
-                    lowReverbSurfaces++;
-                    break;
-                case Reflectivity.Medium:
-                    medReverbSurfaces++;
-                    break;
-                case Reflectivity.High:
-                    highReverbSurfaces++;
-                    break;
+        }
+        /*if (!isRaycastEnabled) {
+            foreach (var tilePos in tiles) {
+                ProcessTile(tilePos, listenerTileCoords, false, ref counts);
             }
+        }
+        else {
+            // should this be a member or a variable...?
+            object lockObj = new();
+
+            Parallel.ForEach(tiles,
+                () => new ReverbCounts(), // Init local storage
+                (tilePos, loopState, localCounts) => {
+                    // Process tile and update LOCAL counts
+                    ProcessTile(tilePos, listenerTileCoords, true, ref localCounts);
+                    return localCounts;
+                },
+                (finalLocalCounts) => {
+                    // safely merge local counts into the main 'counts' variable
+                    lock (lockObj) {
+                        counts.Add(finalLocalCounts);
+                    }
+                }
+            );
         }*/
 
-        // in the future maybe open areas with no background walls (valleys or things of that nature) should have audio echoing (not reverb)
-
+        // final reverb
         float reverbActual = 0f;
-        reverbActual += Compress(highReverbSurfaces * HIGH_REVERB_MULTIPLIER, HIGH_REVERB_EXPONENT);
-        reverbActual += Compress(medReverbSurfaces * MED_REVERB_MULTIPLIER, MED_REVERB_EXPONENT);
-        reverbActual += Compress(lowReverbSurfaces * LOW_REVERB_MULTIPLIER, LOW_REVERB_EXPONENT);
+        reverbActual += Compress(counts.HighReverb * HIGH_REVERB_MULTIPLIER, HIGH_REVERB_EXPONENT);
+        reverbActual += Compress(counts.MedReverb * MED_REVERB_MULTIPLIER, MED_REVERB_EXPONENT);
+        reverbActual += Compress(counts.LowReverb * LOW_REVERB_MULTIPLIER, LOW_REVERB_EXPONENT);
 
         var gain = MathF.Min(reverbActual, 1f);
+        var totalSurfaces = counts.Walls + counts.Tiles;
 
-        var totalSurfaces = numWallsCounts + numTilesCounts;
-
-        // reverb parameters
-        var decayTime = Math.Min(totalSurfaces * gain * 0.003f, 299.9f);
-        var refDelay = Math.Min((uint)totalSurfaces / 16, 299u);
-        var earlyDiff = (byte)Math.Min(totalSurfaces * EARLY_DIFF_SCALE, 15f);
-        var roomSize = (numWallsCounts + numTilesCounts) * gain * 0.5f;
-
-        fParam.Reverb.DecayTime = decayTime;
-        fParam.Reverb.ReflectionsDelay = refDelay;
-        // fParam.Reverb.ReflectionsGain = 0;
-        fParam.Reverb.EarlyDiffusion = earlyDiff;
-        // a tile equals 2 "feet".. but maybe not.
-        fParam.Reverb.RoomSize = roomSize;
-        // RoomFilterMain seems to create a "distant" echo?
-        // fParam.Reverb.RoomFilterHF = 0f;
+        // params
+        fParam.Reverb.DecayTime = Math.Min(totalSurfaces * gain * 0.003f, 299.9f);
+        fParam.Reverb.ReflectionsDelay = Math.Min((uint)totalSurfaces / 16, 299u);
+        fParam.Reverb.EarlyDiffusion = (byte)Math.Min(totalSurfaces * EARLY_DIFF_SCALE, 15f);
+        fParam.Reverb.RoomSize = totalSurfaces * gain * 0.5f;
 
         SetFilterValues(pos, Vector2.Zero, ref fParam, playerUnderwater);
         fParam.ReverbGain = gain;
 
-        // doesn't really save on the computation of said things...
-        if (!aaCfg.isSoundOcclusionEnabled)
-            fParam.LowPassEnabled = false;
-        if (!aaCfg.isSoundDampeningEnabled)
-            fParam.BandPassEnabled = false;
+        fParam.LowPassEnabled = aaCfg.isSoundOcclusionEnabled;
+        fParam.BandPassEnabled = aaCfg.isSoundDampeningEnabled;
 
         return fParam;
+    }
+
+    static void ProcessTile(Point tilePos, Point listenerCoords, bool doRaycast, ref ReverbCounts counts) {
+        var reflectivity = CalculateAcousticReflectivity(tilePos, out bool wasTile, out bool wasWall, out var wl);
+
+        if (reflectivity == Reflectivity.None) return;
+
+        if (doRaycast) {
+            // expensive so use sparingly
+            if (IsPathBlocked(listenerCoords, tilePos)) return;
+        }
+
+        // Update Counts
+        if (wasTile) counts.Tiles++;
+        else if (wasWall) counts.Walls++;
+        else if (wl == WorldLayer.Cavern || wl == WorldLayer.Dirt) counts.Walls += 0.5f;
+
+        switch (reflectivity) {
+            case Reflectivity.Low: counts.LowReverb++; break;
+            case Reflectivity.Medium: counts.MedReverb++; break;
+            case Reflectivity.High: counts.HighReverb++; break;
+        }
     }
 
     public static int NumTilesBresenham(Point lpc, Point tilePos) {
@@ -310,8 +317,10 @@ public class SoundFilterSystem : ModSystem {
             });
         return numTiles;
     }
+
+    // bresenham might have some inaccuracies that regular delegates don't?
     public static bool IsPathBlocked(Point lpc, Point tilePos) {
-        bool blocked = false;
+        /*bool blocked = false;
         TileLine(lpc, tilePos,
             (x, y, t) => {
                 var ts = Main.tileSolid[t.TileType];
@@ -324,7 +333,23 @@ public class SoundFilterSystem : ModSystem {
                 }
                 return false;
             });
-        return blocked;
+        return blocked;*/
+
+        // bresenham line impl
+        if (!WorldGen.InWorld(lpc.X, lpc.Y) || !WorldGen.InWorld(tilePos.X, tilePos.Y)) return true;
+
+        foreach (var point in new BresenhamLine(lpc, tilePos)) {
+            // skip the target tile itself
+            if (point.X == tilePos.X && point.Y == tilePos.Y) continue;
+
+            var t = Main.tile[point.X, point.Y];
+            var ts = Main.tileSolid[t.TileType];
+            var tst = Main.tileSolidTop[t.TileType];
+            if (t.HasTile && !t.IsActuated && ts && !tst) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void SetFilterValues(Vector2 position, Vector2 offset, ref FilterParams fParam, bool playerUnderwater) {
@@ -339,10 +364,41 @@ public class SoundFilterSystem : ModSystem {
     public static float CalculateLowPass(Vector2 position, Vector2 offset, out bool enabled) {
         var goalPos = ScreenListeningPosition;
 
-        // Dust.NewDustPerfect(goalPos, DustID.SpelunkerGlowstickSparkle);
-
-        // mult by 2 since 2 feet per block
         int numBlockingTiles = 0;
+        var start = goalPos.ToTileCoordinates();
+        var end = (position + offset).ToTileCoordinates();
+
+        if (!WorldGen.InWorld(start.X, start.Y) || !WorldGen.InWorld(end.X, end.Y)) {
+            enabled = true;
+            return 0f;
+        }
+
+        foreach (var point in new BresenhamLine(start, end)) {
+            var t = Main.tile[point.X, point.Y];
+            var ts = Main.tileSolid[t.TileType];
+            var tst = Main.tileSolidTop[t.TileType];
+            if (t.HasTile && !t.IsActuated && ts && !tst) {
+                numBlockingTiles++;
+            }
+        }
+
+        float curve = 1f;
+
+        if (numBlockingTiles > 0) {
+            float dist = Vector2.Distance(goalPos, position + offset);
+            float normalized = Math.Clamp(dist / 2000f, 0f, 1f);
+            float p = 0.25f;
+            curve = 1f - MathF.Pow(normalized, p);
+        }
+
+        enabled = true;
+        var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
+
+        return occlusion * curve;
+
+        // old non-bresenham impl
+        // mult by 2 since 2 feet per block
+        /*int numBlockingTiles = 0;
         TileLine(goalPos.ToTileCoordinates(),
             (position + offset).ToTileCoordinates(),
             (x, y, t) => {
@@ -353,15 +409,6 @@ public class SoundFilterSystem : ModSystem {
 
                 return false;
             });
-
-        /*foreach (var point in new BresenhamLine(goalPos.ToTileCoordinates(), (position + offset).ToTileCoordinates())) {
-            var t = Main.tile[point.X, point.Y];
-
-            var ts = Main.tileSolid[t.TileType];
-            var tst = Main.tileSolidTop[t.TileType];
-            if (t.HasTile && !t.IsActuated && ts && !tst)
-                numBlockingTiles++;
-        }*/
 
         float curve = 1f;
 
@@ -377,7 +424,7 @@ public class SoundFilterSystem : ModSystem {
         var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
         // Debug.WriteLine($"{numBlockingTiles} - {occlusion}, {curve}");
 
-        return occlusion * curve;
+        return occlusion * curve;*/
     }
 
     public static Reflectivity CalculateAcousticReflectivity(Point tilePos, out bool wasTile, out bool wasWall, out WorldLayer wl) {
@@ -502,6 +549,7 @@ public class SoundFilterSystem : ModSystem {
 
     public delegate bool TileTouchCallback(int tilePosX, int tilePosY, Tile tile);
 }
+// Bresenham Line impl by Mirsario
 public ref struct BresenhamLine {
     readonly int shortest;
     readonly int longest;

@@ -132,7 +132,6 @@ public class AudioConfig : ModConfig {
     public bool isSoundOcclusionEnabled;
 
     public override void OnChanged() {
-        FloodFillSystem.MaxRoomHeight = reverbMaxArea;
-        FloodFillSystem.MaxRoomWidth = reverbMaxArea;
+        FloodFillSystem.MaxRoomArea = reverbMaxArea;
     }
 }

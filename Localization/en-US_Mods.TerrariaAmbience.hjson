@@ -110,7 +110,7 @@ Configs: {
 			Label: Advanced Reverb
 			Tooltip:
 				'''
-				Toggle advanced audio reverb calculation algorithms. This setting does nothing if 
+				Toggle advanced audio reverb calculation algorithms. This setting does nothing if "Reverb" is disabled.
 				Disabling this will increase your reverb factor by how deep you are into the world.
 				Having this disabled will make reverb apply as a scalar and not dynamically, such as sounding more spacious in bigger rooms.
 				'''
