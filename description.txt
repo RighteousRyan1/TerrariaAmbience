@@ -8,11 +8,21 @@ Developers:
 
 Most Recent Update:
 
+- Improved performance of 'Campfire Sounds' and 'Wood Creaks', essentially removing most FPS loss
+	- I'm fairly certain this was the cause of most FPS loss, but some other issues are possible due to OS differences?
+	- There could be more and I'm open to listening, send a message on my Discord server.
+- Added new config for "Running Sounds"
+	- If enabled, the default Terraria running sound will play, instead of being absent
+- Made Max Reverb Area actually work properly
+	- Previously it was bugged and didn't do anything
+
+### LAST UPDATE ###
+
 - Fixed ambiences persisting in the main menu
 - Made evil deserts even more creepy
 - Improved reverb semantics again
 
-### PREVIOUS PREVIOUS UPDATE ###
+### 2 UPDATES AGO ###
 - Tons of bug fixes on top of the previous updates
 - Tons of optimizations to improve performance all around the board
 - Re-organized the entirety of the mod's config

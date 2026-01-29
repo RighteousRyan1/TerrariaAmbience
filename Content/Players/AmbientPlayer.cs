@@ -16,8 +16,7 @@ using TerrariaAmbience.Common.Systems;
 
 namespace TerrariaAmbience.Content.Players;
 
-public class AmbientPlayer : ModPlayer
-{
+public class AmbientPlayer : ModPlayer {
     // This class serves the purpose of playing sounds and/or playing footsteps.
     // public int WallsAround => ReverbAudioSystem.WallsAround(Player.Center, new(4, 4), out var coords);
     float _multInternal;
@@ -39,7 +38,7 @@ public class AmbientPlayer : ModPlayer
             var item = ItemID.Search.GetName(i);
 
             if (!item.Contains("wood", StringComparison.InvariantCultureIgnoreCase)) continue;
-            
+
             NonArmoryArmors.Add(i);
         }
     }
@@ -63,7 +62,7 @@ public class AmbientPlayer : ModPlayer
         SyncAmbienceSystem.AskForAmbiences();
     }
     public override void PreUpdate() {
-        if (Main.soundVolume == 0) return; 
+        if (Main.soundVolume == 0) return;
 
         var genCfg = ModContent.GetInstance<FootstepsConfig>();
         var audioCfg = ModContent.GetInstance<AudioConfig>();
@@ -79,7 +78,9 @@ public class AmbientPlayer : ModPlayer
 
         ManageChestSounds();
 
-        Player.runSoundDelay = 100;
+        // now configurable!
+        if (!audioCfg.runSoundsEnabled)
+            Player.runSoundDelay = 100;
     }
     void ManageChestSounds() {
         var audioCfg = ModContent.GetInstance<AudioConfig>();
@@ -126,6 +127,8 @@ public class AmbientPlayer : ModPlayer
         if (Player.whoAmI != Main.myPlayer)
             return;
 
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
+
         // 1f - the final value is the lowest value this can achieve, i.e: 0.8f maps to 0.2f lowest
         float desired = 1f - FloodFillSystem.PlayerRoom.PercentEnclosed * 0.85f;
 
@@ -136,22 +139,44 @@ public class AmbientPlayer : ModPlayer
         // why is this shit here
         if (!TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.IsPlaying())
             TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
-        float maxDist = 780f;
-        float campfireVolumeScalar = 0.75f;
-
-        var audioCfg = ModContent.GetInstance<AudioConfig>();
 
         crackleVolume = 0f;
 
-        if (audioCfg.campfireSounds && CampfireDetection.IsNearCampfire) {
-            cracklePan = CampfireDetection.CampfireDistance / maxDist * (CampfireDetection.IsCampfireOnTheRight ? -1 : 1) / 2;
-            crackleVolume = 1f - CampfireDetection.CampfireDistance / maxDist * campfireVolumeScalar;
-        }
+        // this is my fix
+        if (audioCfg.campfireSounds) {
+            var campfires = CampfireDetection.GetNearbyCampfires(Player.Center, 50);
+            float closestDist = float.MaxValue;
+            var closest = Vector2.Zero;
 
-        crackleVolume = MathHelper.Clamp(crackleVolume, 0f, 1f);
-        cracklePan = MathHelper.Clamp(cracklePan, -1f, 1f);
-        TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = crackleVolume;
-        TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Pan = cracklePan;
+            foreach (var campfire in campfires) {
+                var i = campfire.X;
+                var j = campfire.Y;
+                var campfireCenter = new Vector2(i, j) * 16 + new Vector2(24, 16);
+
+                var dist = Vector2.Distance(Player.Center, campfireCenter);
+                if (dist < closestDist) {
+                    closest = campfireCenter;
+                    closestDist = dist;
+                }
+            }
+
+            // Dust.NewDustPerfect(closest, DustID.XenonMoss, Vector2.Zero);
+            var campDist = Vector2.Distance(Player.Center, closest);
+            var useLeftPan = Player.Center.X - closest.X < 0;
+
+            float maxDist = 780f;
+            float campfireVolumeScalar = 0.75f;
+
+            // is pan not working due to it being stereo sound?
+            cracklePan = MathHelper.Clamp(campDist / maxDist * (useLeftPan ? -1 : 1) / 2, -1, 1);
+            crackleVolume = MathHelper.Clamp(1f - campDist / maxDist * campfireVolumeScalar, 0, 1);
+
+            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = crackleVolume;
+            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Pan = cracklePan;
+        }
+        else {
+            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
+        }
     }
     public static float crackleVolume;
     public static float cracklePan;

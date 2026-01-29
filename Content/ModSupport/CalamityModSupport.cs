@@ -6,6 +6,8 @@ using TerrariaAmbience.Content.AmbientAndMore;
 using TerrariaAmbience.Core;
 
 namespace TerrariaAmbience.Content.ModSupport; 
+
+// maybe move all into one system, separate methods? or create partials
 public class CalamityModSupport : ModSystem {
 
     public static IEnumerable<ModBiome> Biomes;

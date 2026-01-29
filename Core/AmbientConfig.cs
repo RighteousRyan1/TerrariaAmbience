@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Terraria;
 using Terraria.ModLoader.Config;
 using TerrariaAmbience.Common.Systems;
@@ -32,6 +33,16 @@ public class FootstepsConfig : ModConfig {
 }
 public class AmbientConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
+    [Header("RealTimeTweaks")]
+
+    [DefaultValue(false)]
+    public bool bossFightMusicAdjust;
+
+    [DefaultValue(0.8f)]
+    public float bossFightMusicVolume;
+    [DefaultValue(0.2f)]
+    public float bossFightMusicMin;
+
     [Header("Debugging")]
 
     [DefaultValue(false)]
@@ -101,6 +112,9 @@ public class AudioConfig : ModConfig {
     [DefaultValue(true)]
     public bool chestSounds;
 
+    [DefaultValue(false)]
+    public bool runSoundsEnabled;
+
     [ReloadRequired]
     [DefaultValue(true)]
     public bool newSplashSounds;
@@ -132,6 +146,8 @@ public class AudioConfig : ModConfig {
     public bool isSoundOcclusionEnabled;
 
     public override void OnChanged() {
+        // idea: ditch this value and just use height/width
         FloodFillSystem.MaxRoomArea = reverbMaxArea;
+        FloodFillSystem.MaxRoomHeight = FloodFillSystem.MaxRoomWidth = (int)Math.Sqrt(reverbMaxArea);
     }
 }

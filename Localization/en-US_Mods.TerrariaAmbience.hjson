@@ -26,8 +26,8 @@ Configs: {
 		DisplayName: Audio Config
 
 		Headers: {
-			SoundEffects: Sound Effects Header
-			SoundFilters: Sound Filters Header
+			SoundEffects: Sound Additions
+			SoundFilters: Sound Filters
 		}
 
 		campfireSounds: {
@@ -132,10 +132,15 @@ Configs: {
 				'''
 				The maximum area (in tiles/blocks) the reverb/rooms system can occupy, centering at the player's head.
 				You can set this value higher for a more realistic sound feel for larger rooms, but also comes with an increasingly larger computational cost.
-				If "Reverb Using Raycasting" is enabled, this setting becomes more computationally expensive, and should be kept at a reasonable value.
+				If "Reverb Raycasting" is enabled, this setting becomes more computationally expensive, and should be kept at a reasonable value.
 				If "Advanced Reverb" is disabled, this setting does nothing.
-				A value of 2500 is good for most computers, but can be a little small. 5000 can cause major framerate issues on many computers.
+				A value of 2500 is good for most computers, but can be a little small. 5000 is large and can cause framerate issues on weaker systems.
 				'''
+		}
+
+		runSoundsEnabled: {
+			Label: Running Sounnds
+			Tooltip: The toggle for the Vanilla "Running" sound when using boots (i.e: Hermes)
 		}
 	}
 
@@ -177,6 +182,7 @@ Configs: {
 		Headers: {
 			Debugging: Debugging
 			AmbienceTrackVolumes: Fine-Tuning
+			RealTimeTweaks: Real-Time Tweaks
 		}
 
 		debugInterface: {
@@ -281,6 +287,21 @@ Configs: {
 		underwaterVolume: {
 			Label: Submerged
 			Tooltip: ""
+		}
+
+		bossFightMusicAdjust: {
+			Label: Bossfight Music Adjust
+			Tooltip: If enabled, the mod will increase the music volume (gradually) to the 'Bossfight Music Adjust On' when a boss is active, and 'Bossfight Music Adjust Off' otherwise.
+		}
+
+		bossFightMusicVolume: {
+			Label: Bossfight Music Adjust On
+			Tooltip: If 'Bossfight Music Adjust' is enabled, the music volume will slowly go up to this value if a boss is active.
+		}
+
+		bossFightMusicMin: {
+			Label: Bossfight Music Adjust Off
+			Tooltip: If 'Bossfight Music Adjust' is enabled, the music volume will slowly go down to this value if no boss is active
 		}
 	}
 

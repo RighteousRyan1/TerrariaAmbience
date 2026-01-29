@@ -148,6 +148,26 @@ public partial class TerrariaAmbience : Mod {
 
         GradientGlobals.Update();
 
+        var ambCfg = ModContent.GetInstance<AmbientConfig>();
+        if (ambCfg.bossFightMusicAdjust) {
+            bool foundBoss = false;
+            foreach (var npc in Main.ActiveNPCs) {
+                if (!npc.boss) continue;
+
+                foundBoss = true;
+                break;
+            }
+            const float epsilon = 0.002f;
+            var max = MathF.Round(ambCfg.bossFightMusicVolume, 2);
+            var min = MathF.Round(ambCfg.bossFightMusicMin, 2);
+            Main.musicVolume = MathHelper.Lerp(Main.musicVolume, foundBoss ? max : min, 0.02f * WorkaroundDeltaTime);
+
+            if (Main.musicVolume - min < epsilon)
+                Main.musicVolume = 0;
+            else if (max - Main.musicVolume < epsilon)
+                Main.musicVolume = max;
+        }
+
         if (Main.gameMenu)
             return;
 

@@ -52,7 +52,9 @@ public class SoundFilterSystem : ModSystem {
         "ice", "tin", "wood", "door"
     ];
     readonly static HashSet<string> _medReverbNames = [
-        "plank", "shingle"
+        "plank", "shingle", 
+        // overrides the "sand" query from the above set
+        "sandstone"
     ];
 
     // so like, whatever. optimizing includes improving readability right?
@@ -63,13 +65,24 @@ public class SoundFilterSystem : ModSystem {
         public int MedReverb;
         public int LowReverb;
 
-        public void Add(ReverbCounts other) {
+        public static ReverbCounts operator +(ReverbCounts left, ReverbCounts right) {
+            ReverbCounts total = new() {
+                Walls = left.Walls + right.Walls,
+                Tiles = left.Tiles + right.Tiles,
+                HighReverb = left.HighReverb + right.HighReverb,
+                MedReverb = left.MedReverb + right.MedReverb,
+                LowReverb = left.LowReverb + right.LowReverb
+            };
+
+            return total;
+        }
+        /*public void Add(ReverbCounts other) {
             Walls += other.Walls;
             Tiles += other.Tiles;
             HighReverb += other.HighReverb;
             MedReverb += other.MedReverb;
             LowReverb += other.LowReverb;
-        }
+        }*/
     }
     public override void PostUpdateEverything() {
         if (Main.soundVolume == 0) return;
@@ -153,7 +166,6 @@ public class SoundFilterSystem : ModSystem {
     public const float WALLS_PARTIAL_COUNT = 0.5f;
     public const float EARLY_DIFF_SCALE = 15f / 1000f;
 
-    // Make compress method static and inline for better performance
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float Compress(float value, float exponent) => 1f - MathF.Exp(-exponent * value);
 
@@ -206,7 +218,7 @@ public class SoundFilterSystem : ModSystem {
                         return localCounts;
                     },
                     (finalLocalCounts) => {
-                        lock (lockObj) counts.Add(finalLocalCounts);
+                        lock (lockObj) counts += finalLocalCounts;
                     });
             }
             else {
@@ -287,56 +299,25 @@ public class SoundFilterSystem : ModSystem {
         }
     }
 
-    public static int NumTilesBresenham(Point lpc, Point tilePos) {
-        int numTiles = 0;
-        foreach (var point in new BresenhamLine(lpc, tilePos)) {
-            var t = Main.tile[point.X, point.Y];
-            int x = point.X, y = point.Y;
-
-            var ts = Main.tileSolid[t.TileType];
-            var tst = Main.tileSolidTop[t.TileType];
-            if (t.HasTile && !t.IsActuated && ts && !tst)
-                if (x != tilePos.X || y != tilePos.Y)
-                    numTiles++;
-        }
-        return numTiles;
-    }
-    public static int NumTilesTouchMethod(Point lpc, Point tilePos) {
-        int numTiles = 0;
-        TileLine(tilePos, lpc,
-            (x, y, t) => {
-                var ts = Main.tileSolid[t.TileType];
-                var tst = Main.tileSolidTop[t.TileType];
-                if (t.HasTile && !t.IsActuated && ts && !tst) {
-                    if (x != tilePos.X || y != tilePos.Y) {
-                        numTiles++;
-                        return true;
-                    }
-                }
-                return false;
-            });
-        return numTiles;
-    }
-
     // bresenham might have some inaccuracies that regular delegates don't?
     public static bool IsPathBlocked(Point lpc, Point tilePos) {
-        /*bool blocked = false;
+        bool isBlocked = false;
         TileLine(lpc, tilePos,
             (x, y, t) => {
                 var ts = Main.tileSolid[t.TileType];
                 var tst = Main.tileSolidTop[t.TileType];
                 if (t.HasTile && !t.IsActuated && ts && !tst) {
                     if (x != tilePos.X || y != tilePos.Y) {
-                        blocked = true;
+                        isBlocked = true;
                         return true;
                     }
                 }
                 return false;
             });
-        return blocked;*/
-
+        return isBlocked;
         // bresenham line impl
-        if (!WorldGen.InWorld(lpc.X, lpc.Y) || !WorldGen.InWorld(tilePos.X, tilePos.Y)) return true;
+        // something about this impl is just... wrong
+        /*if (!WorldGen.InWorld(lpc.X, lpc.Y) || !WorldGen.InWorld(tilePos.X, tilePos.Y)) return true;
 
         foreach (var point in new BresenhamLine(lpc, tilePos)) {
             // skip the target tile itself
@@ -349,7 +330,7 @@ public class SoundFilterSystem : ModSystem {
                 return true;
             }
         }
-        return false;
+        return false;*/
     }
 
     public static void SetFilterValues(Vector2 position, Vector2 offset, ref FilterParams fParam, bool playerUnderwater) {
@@ -364,7 +345,7 @@ public class SoundFilterSystem : ModSystem {
     public static float CalculateLowPass(Vector2 position, Vector2 offset, out bool enabled) {
         var goalPos = ScreenListeningPosition;
 
-        int numBlockingTiles = 0;
+        /*int numBlockingTiles = 0;
         var start = goalPos.ToTileCoordinates();
         var end = (position + offset).ToTileCoordinates();
 
@@ -394,11 +375,11 @@ public class SoundFilterSystem : ModSystem {
         enabled = true;
         var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
 
-        return occlusion * curve;
+        return occlusion * curve;*/
 
         // old non-bresenham impl
         // mult by 2 since 2 feet per block
-        /*int numBlockingTiles = 0;
+        int numBlockingTiles = 0;
         TileLine(goalPos.ToTileCoordinates(),
             (position + offset).ToTileCoordinates(),
             (x, y, t) => {
@@ -424,7 +405,7 @@ public class SoundFilterSystem : ModSystem {
         var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
         // Debug.WriteLine($"{numBlockingTiles} - {occlusion}, {curve}");
 
-        return occlusion * curve;*/
+        return occlusion * curve;
     }
 
     public static Reflectivity CalculateAcousticReflectivity(Point tilePos, out bool wasTile, out bool wasWall, out WorldLayer wl) {
@@ -511,6 +492,21 @@ public class SoundFilterSystem : ModSystem {
     /// <param name="end">The end point.</param>
     /// <param name="touchCallback">Return true within the callback to break out of the line.</param>
     public static void TileLine(Point start, Point end, TileTouchCallback touchCallback = null) {
+        // bresenham just sucks balls?
+        /*if (!WorldGen.InWorld(start.X, start.Y) || !WorldGen.InWorld(end.X, end.Y)) return;
+
+        for (BresenhamLine line = new BresenhamLine(start, end); line.MoveNext();) {
+            var p = line.Current;
+
+            // guard again in-case Bresenham produced out-of-world (defensive)
+            if (!WorldGen.InWorld(p.X, p.Y)) break;
+
+            Tile tile = Main.tile[p.X, p.Y];
+            bool? shouldBreak = touchCallback?.Invoke(p.X, p.Y, tile);
+            if (shouldBreak == true) break;
+        }
+        return;*/
+
         int x0 = start.X;
         int y0 = start.Y;
         int x1 = end.X;

@@ -1,53 +1,29 @@
 ﻿using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria;
-using TerrariaAmbience.Content.Players;
-using TerrariaAmbience.Core;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using Terraria;
 
 namespace TerrariaAmbience.Content;
 
-public class CampfireDetection : GlobalTile
-{
-    public static Vector2 CampfirePos;
+public class CampfireDetection {
+    static readonly HashSet<Point> _tileBuffer = [];
+    public static HashSet<Point> GetNearbyCampfires(Vector2 position, int radius = 30) {
+        var pos = position.ToTileCoordinates();
+        _tileBuffer.Clear();
+        for (int i = pos.X - radius; i < pos.X + radius; i++) {
+            for (int j = pos.Y - radius; j < pos.Y + radius; j++) {
+                if (!WorldGen.InWorld(i, j)) continue;
 
-    public static float CampfireDistance;
-    public static bool IsCampfireOnTheRight;
+                var tile = Main.tile[i, j];
+                if (tile.TileType != TileID.Campfire) continue;
 
-    public static bool IsNearCampfire;
-    public override void NearbyEffects(int i, int j, int type, bool closer) {
-        if (Main.dedServ) return;
-
-        var audioCfg = ModContent.GetInstance<AudioConfig>();
-        if (!audioCfg.campfireSounds) return;
-
-        CampfirePos.X = i * 16;
-        CampfirePos.Y = j * 16;
-
-        var player = Main.LocalPlayer.GetModPlayer<AmbientPlayer>().Player;
-
-        if (type == TileID.Campfire && closer && player.HasBuff(BuffID.Campfire)) {
-            /*var t = Main.tile[i, j];
-            var orig = new Vector2(i * 16, j * 16);
-            Main.NewText(t.frameY);*/
-            //if (t.frameY <= 18 && t.frameY >= 0)
-            {
-                CampfireDistance = Vector2.Distance(CampfirePos, player.Center);
-                IsCampfireOnTheRight = CampfirePos.X < player.Center.X;
-                IsNearCampfire = true;
+                if (tile.TileFrameY % 72 < 36) {
+                    int originX = i - tile.TileFrameX % 54 / 18;
+                    int originY = j - tile.TileFrameY % 36 / 18;
+                    _tileBuffer.Add(new(originX, originY));
+                }
             }
         }
-        // hacky ahh...
-        if ((type == TileID.Campfire && !closer) || !player.HasBuff(BuffID.Campfire)) {
-            /*var t = Main.tile[i, j];
-            var orig = new Vector2(i * 16, j * 16);
-            Main.NewText(t.frameY);*/
-            //if (t.frameY <= 54 && t.frameY >= 36)
-            {
-                //if (TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance is not null)
-                //TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
-                IsNearCampfire = false;
-            }
-        }
+        return _tileBuffer;
     }
 }

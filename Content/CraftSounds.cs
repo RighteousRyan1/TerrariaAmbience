@@ -121,7 +121,7 @@ public class CraftSounds : GlobalItem {
         if (context is not RecipeItemCreationContext recipeContext)
             return;
         var recipe = recipeContext.Recipe;
-        var player = Main.player[Main.myPlayer];
+        var player = Main.LocalPlayer;
         var aPlayer = player.GetModPlayer<AmbientPlayer>();
         // var pket = mod.GetPacket();
         var wasValidStation = AllCategories.Any(x => x.Intersect(recipe.requiredTile).Any());
@@ -143,7 +143,9 @@ public class CraftSounds : GlobalItem {
 
                 // no need to send unnecessary packets
                 if (!string.IsNullOrEmpty(dir)) {
-                    SoundEngine.PlaySound(new SoundStyle(dir).WithVolumeScale(UniversalSoundScale * volScale), player.Center);
+                    var craftSound = new SoundStyle(dir);
+
+                    SoundEngine.PlaySound(craftSound.WithVolumeScale(UniversalSoundScale * volScale), player.Center);
 
                     if (Main.netMode == NetmodeID.MultiplayerClient) {
                         var p = Mod.GetPacket();
@@ -155,7 +157,7 @@ public class CraftSounds : GlobalItem {
                 }
             }
         }
-        if (item.createTile >= 0 || item.createWall >= 0 || item.consumable)
+        if (item.createTile >= TileID.Dirt || item.createWall >= 0 || item.consumable)
             LastCraftedConsumable = item.type;
         // i think this is what i need? not too sure.
         //if (recipe.Conditions.Contains(Condition.NearWater) || recipe.Conditions.Contains(Condition.NearHoney)) {

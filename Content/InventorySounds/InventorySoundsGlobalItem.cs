@@ -17,9 +17,8 @@ public class InventorySoundsGlobalItem : GlobalItem {
         var heldItem = player.HeldItem;
 
         bool useHeldItemSounds = Config.useItemSwapSounds && !Main.playerInventory;
-        bool useInventorySounds = true;
 
-        if (_tracker.HasMouseItemChanged(mouseItem.type) && useInventorySounds) {
+        if (_tracker.HasMouseItemChanged(mouseItem.type)) {
             HandleItemChange(mouseItem, Actions.PickingUp);
             HandleItemChange(_prevItem, Actions.PuttingDown);
         }
@@ -28,11 +27,11 @@ public class InventorySoundsGlobalItem : GlobalItem {
             HandleItemChange(heldItem, Actions.PickingUp);
         }
 
-        // quick trash or switch
+        // quick trash or quick container place
         if (Main.mouseLeft && Main.mouseLeftRelease) {
             if (Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl) ||
                 Main.keyState.IsKeyDown(Keys.LeftShift) ||Main.keyState.IsKeyDown(Keys.RightShift)) {
-                HandleItemChange(Main.HoverItem, Actions.PuttingDown, 0.05f);
+                HandleItemChange(Main.HoverItem, Actions.PuttingDown, 0.1f);
             }
         }
 
@@ -42,7 +41,7 @@ public class InventorySoundsGlobalItem : GlobalItem {
         if (!Config.enabledDynamicSoundsSystem) return true;
         if (player.whoAmI != Main.myPlayer) return true;
 
-        HandleItemChange(item, Actions.PickingUp, 0.1f);
+        HandleItemChange(item, Actions.PickingUp, 0.2f);
 
         return true;
     }
