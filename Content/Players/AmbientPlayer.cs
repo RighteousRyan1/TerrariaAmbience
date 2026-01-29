@@ -86,11 +86,14 @@ public class AmbientPlayer : ModPlayer {
         var audioCfg = ModContent.GetInstance<AudioConfig>();
         if (!audioCfg.chestSounds) return;
 
-        timerUntilValidChestStateChange++;
-        if (timerUntilValidChestStateChange < 60) return;
-        if (chestStateNew < -1) return;
-
         chestStateNew = Player.chest;
+
+        timerUntilValidChestStateChange++;
+        if (timerUntilValidChestStateChange < 60) {
+            chestStateOld = chestStateNew;
+            return;
+        }
+        if (chestStateNew < -1) return;
 
         var chestOpen = (chestStateNew != chestStateOld) && chestStateNew > -1;
         var chestClose = (chestStateNew != chestStateOld) && chestStateNew == -1;
