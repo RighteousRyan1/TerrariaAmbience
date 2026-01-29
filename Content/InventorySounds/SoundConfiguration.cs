@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TerrariaAmbience.Content.InventorySounds;
 public static class SoundConfiguration {
-    private static readonly Dictionary<HoldableSoundType, SoundConfig> _soundConfigs = new()
+    static readonly Dictionary<HoldableSoundType, SoundConfig> _soundConfigs = new()
     {
             { HoldableSoundType.Generic, new SoundConfig(HoldableType.Item, 3, 2) },
             { HoldableSoundType.Sword, new SoundConfig(HoldableType.Weapon, 2, 1) },

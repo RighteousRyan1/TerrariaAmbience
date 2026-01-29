@@ -2,6 +2,7 @@
 using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;
+using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content.InventorySounds;
 public static class InventorySoundsHelpers {
@@ -26,8 +27,11 @@ public static class InventorySoundsHelpers {
 
     static SlotId PlaySound(string path, float volume) {
         var config = ModContent.GetInstance<InventorySoundsConfig>();
+        var style = new SoundStyle(path, SoundType.Sound)
+            .WithVolumeScale(volume * config.volumeMultiplier)
+            .WithPitchOffset(GeneralHelpers.NaturalPitchVariance);
         return SoundEngine.PlaySound(
-            new SoundStyle(path, SoundType.Sound).WithVolumeScale(volume * config.volumeMultiplier),
+            style,
             Main.LocalPlayer.Center
         );
     }

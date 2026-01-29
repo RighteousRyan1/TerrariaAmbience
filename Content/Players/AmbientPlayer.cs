@@ -92,12 +92,32 @@ public class AmbientPlayer : ModPlayer {
 
         chestStateNew = Player.chest;
 
-        if ((chestStateNew != chestStateOld) && chestStateNew > -1)
-            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open") { Volume = 0.25f }, Player.Center);
-        else if ((chestStateNew != chestStateOld) && chestStateNew == -1 && chestStateOld > -1)
-            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
-        else if ((chestStateNew != chestStateOld) && chestStateOld > -1)
-            GeneralHelpers.PlaySound(new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close") { Volume = 0.55f }, Player.Center);
+        var chestOpen = (chestStateNew != chestStateOld) && chestStateNew > -1;
+        var chestClose = (chestStateNew != chestStateOld) && chestStateNew == -1;
+        var chestChange = (chestStateNew != chestStateOld) && chestStateOld > -1;
+
+        const float vol_scale_open = 0.15f;
+        const float vol_scale_close = 0.3f;
+        if (chestOpen) {
+            var chest = Main.chest[chestStateNew];
+            // + 1 because that's the center of the container. i dont think any chests have any different dimensions
+            var pos = new Vector2(chest.x + 1, chest.y + 1) * 16;
+            var ss = new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_open").WithVolumeScale(vol_scale_open).WithPitchOffset(GeneralHelpers.NaturalPitchVarianceLesser);
+            GeneralHelpers.PlaySound(ss, pos);
+        }
+        else if (chestClose) {
+            var chest = Main.chest[chestStateOld];
+            var pos = new Vector2(chest.x + 1, chest.y + 1) * 16;
+            var ss = new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close").WithVolumeScale(vol_scale_close).WithPitchOffset(GeneralHelpers.NaturalPitchVarianceLesser);
+            GeneralHelpers.PlaySound(ss, pos);
+        }
+
+        if (chestChange) {
+            var chest = Main.chest[chestStateOld];
+            var pos = new Vector2(chest.x + 1, chest.y + 1) * 16;
+            var ss = new SoundStyle("TerrariaAmbience/Sounds/Custom/ambient/player/chest_close").WithVolumeScale(vol_scale_close).WithPitchOffset(GeneralHelpers.NaturalPitchVarianceLesser);
+            GeneralHelpers.PlaySound(ss, pos);
+        }
 
         chestStateOld = chestStateNew;
     }
@@ -199,13 +219,15 @@ public class AmbientPlayer : ModPlayer {
 
             const float loud_thresh = 10f;
 
-            var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= loud_thresh ? "heavy" : "light")}");
-
-            if (vel < 10f)
-                soundSplash.Volume = vel / loud_thresh / 4;
+            var soundSplash = new SoundStyle($"TerrariaAmbience/Sounds/Custom/ambient/environment/liquid/entity_splash_{(vel >= loud_thresh ? "heavy" : "light")}") {
+                //if (vel < loud_thresh)
+                Volume = vel / loud_thresh / 4,
+                Pitch = GeneralHelpers.NaturalPitchVariance
+            };
+            //else
+            //soundSplash.Volume = vel / 4;
             if (vel == 0)
                 soundSplash.Volume = 0.1f;
-
 
             GeneralHelpers.PlaySound(soundSplash, Player.position);
         }

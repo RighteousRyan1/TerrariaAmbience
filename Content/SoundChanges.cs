@@ -1,16 +1,12 @@
-﻿using Microsoft.Xna.Framework.Audio;
-using ReLogic.Content;
-using Terraria;
+﻿using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 
 namespace TerrariaAmbience.Content;
 
-internal class SoundChanges
-{
+internal class SoundChanges {
     public static void Init() {
         if (!Main.dedServ) {
             var mod = ModContent.GetInstance<TerrariaAmbience>();

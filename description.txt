@@ -8,6 +8,12 @@ Developers:
 
 Most Recent Update:
 
+- Fixed very unusual Russian (and maybe more) localization issue (thank you @tipssi on steam for the idea)
+- Add natural pitch variance to many SFX to make them sound less repetitive
+- Make splashing sounds far less annoying when using grappling hooks
+
+### LAST UPDATE ###
+
 - Improved performance of 'Campfire Sounds' and 'Wood Creaks', essentially removing most FPS loss
 	- I'm fairly certain this was the cause of most FPS loss, but some other issues are possible due to OS differences?
 	- There could be more and I'm open to listening, send a message on my Discord server.
@@ -16,21 +22,7 @@ Most Recent Update:
 - Made Max Reverb Area actually work properly
 	- Previously it was bugged and didn't do anything
 
-### LAST UPDATE ###
-
-- Fixed ambiences persisting in the main menu
-- Made evil deserts even more creepy
-- Improved reverb semantics again
-
-### 2 UPDATES AGO ###
-- Tons of bug fixes on top of the previous updates
-- Tons of optimizations to improve performance all around the board
-- Re-organized the entirety of the mod's config
-	- Localization much needed! Only english is supported on the new config.
-	- Contact me on Discord and I can send the old localizations for Spanish, Polish, and Russian
-	- You will need to re-configure your settings back to your liking, as the new config is much different
-
-### 3 UPDATES AGO ###
+### LAST BIG UPDATE ###
 
 - Improved reverb tenfold! 
 	- There are now room sizes, bounce delays, and more! Check out differently sized rooms and see how it reacts!

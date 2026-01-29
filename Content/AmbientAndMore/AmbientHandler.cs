@@ -11,6 +11,7 @@ using TerrariaAmbience.Content.Players;
 using Microsoft.Xna.Framework.Audio;
 using Terraria.ID;
 using TerrariaAmbience.Sounds;
+using System.Globalization;
 
 namespace TerrariaAmbience.Content.AmbientAndMore;
 
@@ -269,8 +270,12 @@ public class AmbientHandler {
             return;
 
         var player = Main.LocalPlayer;
+        var aCfg = ModContent.GetInstance<AmbientConfig>();
 
-        bool isHarshOk = float.TryParse(ModContent.GetInstance<AmbientConfig>().transitionHarshness, out var harshness);
+        bool isHarshOk = float.TryParse(aCfg.transitionHarshness, 
+            NumberStyles.Float | NumberStyles.AllowThousands,
+            CultureInfo.InvariantCulture,
+            out var harshness);
 
         foreach (var amb in Ambiences) {
             if (Main.gameMenu) {

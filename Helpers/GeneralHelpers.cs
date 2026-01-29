@@ -36,8 +36,24 @@ public static class MenuDetours
             MethodDetours.MenuDetours_On_AddMenuButtons);
     }
 }
-public class GeneralHelpers
-{
+public class GeneralHelpers {
+    /// <summary>Every access generates a new pitch.</summary>
+    public static float NaturalPitchVariance => Main.rand.NextFloat(-0.08f, 0.08f);
+    /// <summary>Every access generates a new pitch.</summary>
+    public static float NaturalPitchVarianceLesser => Main.rand.NextFloat(-0.04f, 0.04f);
+
+    public static bool CanPlayerAcceptItem(Player player, Item item) {
+        for (int i = 0; i < player.inventory.Length; i++) {
+            var invItem = player.inventory[i];
+
+            if (invItem.type != item.type) continue;
+            if (invItem.stack >= invItem.maxStack) continue;
+
+            return true;
+        }
+
+        return false;
+    }
     public static float GetPanFromPosition(Vector2 position) {
         bool onScreen = false;
         float panFromVector = 0f;
@@ -465,8 +481,7 @@ public static class ExtensionMethods
         return index;
     }
 }
-public static class TileUtils
-{
+public static class TileUtils {
     public static float GetWaterPressureFloat(int heightCheck, Vector2 checkPos) {
 
         if (!Collision.DrownCollision(checkPos, 1, 1, -1)) {

@@ -122,7 +122,6 @@ public partial class TerrariaAmbience : Mod {
     internal static List<ModBiome> dbg_modBiomes;
 
     public override void Load() {
-
         _versCache = Main.versionNumber;
         Main.versionNumber += $", Terraria Ambience v{Version}";
 
