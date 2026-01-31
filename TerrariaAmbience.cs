@@ -27,6 +27,8 @@ public partial class TerrariaAmbience : Mod {
 
     public const float DEFAULT_FPS = 60f;
     public static float WorkaroundDeltaTime { get; private set; }
+
+    public static bool WeaponOutLoaded;
     public override object Call(params object[] args) {
         try {
             string message = args[0] as string;
@@ -135,10 +137,23 @@ public partial class TerrariaAmbience : Mod {
 
         MethodDetours.DetourAll();
     }
-    private void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime) {
+    void Main_Update(On_Main.orig_Update orig, Main self, GameTime gameTime) {
         orig(self, gameTime);
 
         if (Main.dedServ) return;
+
+        if (ModContent.GetInstance<AmbientConfig>().debugInterface && !Main.gameMenu) {
+            MethodDetours.mouseWallOrTile = "None";
+
+            var mTile = Main.tile[Main.MouseWorld.ToTileCoordinates()];
+
+            if (mTile.HasTile) {
+                MethodDetours.mouseWallOrTile = "Tile=" + TileID.Search.GetName(mTile.TileType);
+            }
+            else if (mTile.WallType != WallID.None) {
+                MethodDetours.mouseWallOrTile = "Wall=" + WallID.Search.GetName(mTile.WallType);
+            }
+        }
         GeneralHelpers.ClickHandling();
         GeneralHelpers.UpdateButtons();
 
@@ -174,6 +189,8 @@ public partial class TerrariaAmbience : Mod {
     }
     public override void PostSetupContent() {
         DefaultAmbientHandler = new();
+
+        WeaponOutLoaded = ModLoader.HasMod("WeaponOutLite");
 
         dbg_modBiomes = [.. ModContent.GetContent<ModBiome>()];
     }

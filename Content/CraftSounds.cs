@@ -143,9 +143,9 @@ public class CraftSounds : GlobalItem {
 
                 // no need to send unnecessary packets
                 if (!string.IsNullOrEmpty(dir)) {
-                    var craftSound = new SoundStyle(dir);
+                    var craftSound = new SoundStyle(dir).WithVolumeScale(UniversalSoundScale * volScale);
 
-                    SoundEngine.PlaySound(craftSound.WithVolumeScale(UniversalSoundScale * volScale), player.Center);
+                    SoundEngine.PlaySound(craftSound, player.position);
 
                     if (Main.netMode == NetmodeID.MultiplayerClient) {
                         var p = Mod.GetPacket();

@@ -1,22 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using TerrariaAmbience.Content.Players;
 using Terraria.Audio;
 using Microsoft.Xna.Framework;
-using TerrariaAmbience.Sounds;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
 using TerrariaAmbience.Sounds.SoundFilters;
 
 namespace TerrariaAmbience.Content.AddedNPCSounds;
 
-// TODO: fix ass lag
 public class SlimeSounds : GlobalNPC {
     public override bool InstancePerEntity => true;
 
@@ -48,15 +42,15 @@ public class SlimeSounds : GlobalNPC {
         if (vel.Y == 0 && oldVelocity.Y != 0) {
             int oneOrTwo = Main.rand.Next(1, 3);
             soundStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimeland{oneOrTwo}") {
-                Volume = MathHelper.Clamp(oldVelocity.Y / 10f, 0f, 1f),
-                PitchVariance = 0.1f,
+                Volume = MathHelper.Clamp(oldVelocity.Y / 2.5f, 0f, 1f),
+                Pitch = GeneralHelpers.NaturalPitchVariance
             };
             soundStyleGiven = true;
         }
         else if (vel.Y != 0 && oldVelocity.Y == 0f) {
             soundStyle = new SoundStyle($"TerrariaAmbience/Sounds/Custom/npcs/slimejump") {
                 Volume = 0.5f,
-                PitchVariance = 0.1f
+                Pitch = GeneralHelpers.NaturalPitchVariance
             };
             soundStyleGiven = true;
         }
@@ -66,30 +60,9 @@ public class SlimeSounds : GlobalNPC {
         if (!soundStyleGiven) return;
 
         var param = SoundFilterSystem.LatestParams;
+        var sfx = GeneralHelpers.PlaySound(soundStyle, npc.position);
 
-        if (param.BandPassEnabled) {
-            var soundWRvb = GeneralHelpers.PlaySound(soundStyle, npc.position);
-
-            if (soundWRvb != null) {
-                soundWRvb.ApplyReverb(param.ReverbGain, param);
-                soundWRvb.ApplyLowPassFilter(param.LowPassIntensity);
-                soundWRvb.ApplyBandPassFilter(param.BandPassIntensity);
-            }
-        }
-        else if (param.LowPassEnabled) {
-            var soundWRvb = GeneralHelpers.PlaySound(soundStyle, npc.position);
-
-            if (soundWRvb != null) {
-                soundWRvb.ApplyReverb(param.ReverbGain, param);
-                soundWRvb.ApplyLowPassFilter(param.LowPassIntensity);
-            }
-        }
-
-        /*if (param.BandPassEnabled)
-            GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity).ApplyBandPassFilter(param.BandPassIntensity);
-        else
-            GeneralHelpers.PlaySound(soundStyle, npc.position).ApplyReverb(param.ReverbGain, param).ApplyLowPassFilter(param.LowPassIntensity);*/
-
+        sfx?.ApplyFiltersQuick(param);
     }
 }
 public class SplashingSounds : GlobalNPC {

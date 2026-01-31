@@ -13,9 +13,12 @@ public class SpiritModSupport : ModSystem {
         if (ModLoader.TryGetMod("SpiritMod", out var mod)) {
             Biomes = mod.GetContent<ModBiome>();
             TileDetection.AddTilesToList(mod, FootstepHandler.StoneBlocks,
-                "BlastStone");
+                "BlastStone", "Asteroid");
             TileDetection.AddTilesToList(mod, FootstepHandler.GrassBlocks,
                 "BriarGrass");
+
+            TileDetection.AddTilesToList(mod, FootstepHandler.SmoothStones,
+                "SepulchreBrick", "SepulchreBrickTwo");
 
             Console.WriteLine($"{mod.Name}: {string.Join("\n", Biomes.Select(x => x.Name))}");
             Console.WriteLine();

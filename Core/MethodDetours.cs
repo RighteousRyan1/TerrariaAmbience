@@ -1,9 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using ReLogic.Graphics;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
@@ -38,6 +36,7 @@ internal class MethodDetours {
         // GeneralHelpers.AddMainMenuButton("Ambience Menu", delegate { Main.menuMode = 999; }, selectedMenu, buttonNames, ref buttonIndex, ref numButtons);
         orig(main, selectedMenu, buttonNames, buttonScales, ref offY, ref spacing, ref buttonIndex, ref numButtons);
     }
+    public static string mouseWallOrTile;
     static bool oldHover;
     static bool hovering;
     // disposing sounds in draw code?
@@ -177,6 +176,7 @@ internal class MethodDetours {
 
             txt = $"Press RightAlt to toggle reverb info" +
                 $"\n\nMouseWorld: ({(int)Main.MouseWorld.X}, {(int)Main.MouseWorld.Y})" +
+                $"\nMouseWall/Tile: {mouseWallOrTile}" +
                 $"\nL: Play sound at mouse" +
                 "\nK: Spawn Positional Audio Sound at mouse" +
                 "\nOemOpenBrackets: Play CurTile footstep sound" +
@@ -237,8 +237,8 @@ internal class MethodDetours {
             else
                 addtxt = " (Vanilla + Modded + Qualifications)";
 
-                txt = "Tile absorption" + addtxt +
-                    "\n\nWall Insulators (low sound deflection):";
+            txt = "Tile absorption" + addtxt +
+                "\n\nWall Insulators (low sound deflection):";
             drawPos.X -= 500;
 
             for (int i = 0; i < SoundFilterSystem.lowReverbWalls.Count; i++) {
@@ -251,7 +251,7 @@ internal class MethodDetours {
 
                 var str = $"{wallName}, ";
 
-               if (viewMode == 5) str = str.Split('/')[^1];
+                if (viewMode == 4) str = str.Split('/')[^1];
                 txt += str;
             }
             txt += "\n\n";
@@ -267,7 +267,7 @@ internal class MethodDetours {
                 
                 var str = $"{tileName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[^1];
+                if (viewMode == 4) str = str.Split('/')[^1];
                 txt += str;
             }
             txt += "\n\n";
@@ -282,7 +282,7 @@ internal class MethodDetours {
 
                 var str = $"{wallName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[^1];
+                if (viewMode == 4) str = str.Split('/')[^1];
                 txt += str;
             }
             txt += "\n\n";
@@ -297,7 +297,7 @@ internal class MethodDetours {
 
                 var str = $"{tileName}, ";
 
-                if (viewMode == 5) str = str.Split('/')[^1];
+                if (viewMode == 4) str = str.Split('/')[^1];
                 txt += str;
             }
 

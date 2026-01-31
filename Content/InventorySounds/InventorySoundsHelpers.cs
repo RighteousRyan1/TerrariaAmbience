@@ -9,30 +9,30 @@ public static class InventorySoundsHelpers {
     /// <summary>
     /// Play an item pickup sound without random choice.
     /// </summary>
-    public static SlotId PlayUpOrDownSound(HoldableType type, HoldableSoundType hSoundType, Actions action, float volume = 0.5f) {
+    public static SlotId PlayUpOrDownSound(Player player, HoldableType type, HoldableSoundType hSoundType, Actions action, float volume = 0.5f) {
         var act = action == Actions.PickingUp ? "up" : "down";
         string path = $"{nameof(TerrariaAmbience)}/Sounds/Inventory/{type}/{hSoundType}/{act}";
-        return PlaySound(path, volume);
+        return PlaySound(player, path, volume);
     }
 
     /// <summary>
     /// Play an item pickup sound with random choice.
     /// </summary>
-    public static SlotId PlayUpOrDownSound(HoldableType type, HoldableSoundType hSoundType, Actions action, int variants, float volume = 0.5f) {
+    public static SlotId PlayUpOrDownSound(Player player, HoldableType type, HoldableSoundType hSoundType, Actions action, int variants, float volume = 0.5f) {
         int rand = Main.rand.Next(1, variants + 1);
         var act = action == Actions.PickingUp ? "up" : "down";
         string path = $"{nameof(TerrariaAmbience)}/Sounds/Inventory/{type}/{hSoundType}/{act}{(variants > 1 ? rand : string.Empty)}";
-        return PlaySound(path, volume);
+        return PlaySound(player, path, volume);
     }
 
-    static SlotId PlaySound(string path, float volume) {
+    static SlotId PlaySound(Player player, string path, float volume) {
         var config = ModContent.GetInstance<InventorySoundsConfig>();
         var style = new SoundStyle(path, SoundType.Sound)
             .WithVolumeScale(volume * config.volumeMultiplier)
             .WithPitchOffset(GeneralHelpers.NaturalPitchVariance);
         return SoundEngine.PlaySound(
             style,
-            Main.LocalPlayer.Center
+            player.Center
         );
     }
 }

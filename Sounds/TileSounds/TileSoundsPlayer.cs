@@ -25,7 +25,7 @@ public class TileSoundsPlayer : ModPlayer {
 
         Point playerTilePos = new((int)Player.Center.X / 16, (int)Player.Center.Y / 16);
 
-        var chanceSuccess = Main.rand.NextBool(100);
+        var chanceSuccess = Main.rand.NextBool(150);
 
         // if success, just calculate all once and choose one.
         if (!chanceSuccess) return;
@@ -65,13 +65,11 @@ public class TileSoundsPlayer : ModPlayer {
             Volume = 0.04f,
         };
 
-        Vector2 worldPos = tileCoordChosen.ToVector2().ToWorldCoordinates();
+        var worldPos = tileCoordChosen.ToVector2().ToWorldCoordinates();
+
+        // Dust.NewDustPerfect(worldPos, DustID.TerraBlade, Vector2.Zero);
 
         var soundInstance = GeneralHelpers.PlaySound(WoodCreak, worldPos);
-        if (soundInstance != null) {
-            soundInstance.ApplyReverb(param.ReverbGain, param);
-            if (param.LowPassEnabled) soundInstance.ApplyLowPassFilter(param.LowPassIntensity);
-            if (param.BandPassEnabled) soundInstance.ApplyBandPassFilter(param.BandPassIntensity);
-        }
+        soundInstance?.ApplyFiltersQuick(param);
     }
 }

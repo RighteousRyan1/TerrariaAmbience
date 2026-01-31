@@ -15,7 +15,11 @@ public class FloodFillSystem : ModSystem {
     internal static int MaxRoomHeight = 50;
     internal static int MaxRoomArea = 3000; // 2250;
 
-    static readonly bool[,] _visitedCache = new bool[MaxRoomWidth * 2 + 1, MaxRoomHeight * 2 + 1];
+    static int ExpectedLength => ArrX * ArrY;
+    static int ArrX => MaxRoomWidth * 2 + 1;
+    static int ArrY => MaxRoomHeight * 2 + 1;
+
+    static bool[,] _visitedCache = new bool[ArrX, ArrY];
     static readonly Queue<Point> _queueCache = new(MaxRoomArea);
     public static bool IsTileSolid(Tile tile) {
         // note to self: Main.tileBlockLight to false!
@@ -42,6 +46,10 @@ public class FloodFillSystem : ModSystem {
         room.NumWalls = room.NumSolidTiles = room.NumEmpty = 0;
         room.Tiles.Clear();
 
+        // resize array if mismatched
+        if (_visitedCache.Length != ExpectedLength) {
+            _visitedCache = new bool[ArrX, ArrY];
+        }
         Array.Clear(_visitedCache, 0, _visitedCache.Length);
         _queueCache.Clear();
 

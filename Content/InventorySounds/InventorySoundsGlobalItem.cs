@@ -2,10 +2,11 @@
 using Terraria;
 using Terraria.ModLoader;
 using TerrariaAmbience.Helpers;
+using tModPorter;
 
 namespace TerrariaAmbience.Content.InventorySounds;
-public class InventorySoundsGlobalItem : GlobalItem {
-    static readonly ItemChangeTracker _tracker = new();
+public class InventorySoundsPlayer : ModPlayer {
+    readonly ItemChangeTracker _tracker = new();
     static InventorySoundsConfig Config => ModContent.GetInstance<InventorySoundsConfig>();
 
     const float STCHANGE_VOL = 0.4f;
@@ -13,49 +14,52 @@ public class InventorySoundsGlobalItem : GlobalItem {
     const float MOVE_VOL = 0.1f;
 
     static Item _prevItem;
-    public override void UpdateInventory(Item item, Player player) {
+    public override void PostUpdate() {
         if (Main.dedServ) return;
-        if (player.whoAmI != Main.myPlayer) return;
+        if (!TerrariaAmbience.WeaponOutLoaded)
+            if (Player.whoAmI != Main.myPlayer) return;
         if (Config.volumeMultiplier == 0 || !Config.enabledDynamicSoundsSystem) return;
-        
+
         var mouseItem = Main.mouseItem;
-        var heldItem = player.HeldItem;
+        var heldItem = Player.HeldItem;
 
         bool useHeldItemSounds = Config.useItemSwapSounds && !Main.playerInventory;
 
         if (_tracker.HasMouseItemChanged(mouseItem.type)) {
-            HandleItemChange(mouseItem, Actions.PickingUp, STCHANGE_VOL);
-            HandleItemChange(_prevItem, Actions.PuttingDown, STCHANGE_VOL);
+            HandleItemChange(mouseItem, Player, Actions.PickingUp, STCHANGE_VOL);
+            HandleItemChange(_prevItem, Player, Actions.PuttingDown, STCHANGE_VOL);
         }
 
         if (_tracker.HasHeldItemChanged(heldItem.type) && useHeldItemSounds) {
-            HandleItemChange(heldItem, Actions.PickingUp, STCHANGE_VOL);
+            HandleItemChange(heldItem, Player, Actions.PickingUp, STCHANGE_VOL);
         }
+
+        // regardless of weaponout being loaded, return here because mouse logic is entirely local
+        if (Player.whoAmI != Main.myPlayer) return;
 
         // quick trash or quick container place
         if (Main.mouseLeft && Main.mouseLeftRelease) {
             if (Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl) ||
-                Main.keyState.IsKeyDown(Keys.LeftShift) ||Main.keyState.IsKeyDown(Keys.RightShift)) {
-                HandleItemChange(Main.HoverItem, Actions.PuttingDown, MOVE_VOL);
+                Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift)) {
+                HandleItemChange(Main.HoverItem, Player, Actions.PuttingDown, MOVE_VOL);
             }
         }
 
         _prevItem = Main.mouseItem;
     }
-    public override bool OnPickup(Item item, Player player) {
+    public override bool OnPickup(Item item) {
         if (!Config.enabledDynamicSoundsSystem) return true;
-        if (player.whoAmI != Main.myPlayer) return true;
+        if (Player.whoAmI != Main.myPlayer) return true;
         // literally just an encumbering stone check. whatever. still works i guess
-        if (!player.CanAcceptItemIntoInventory(item)) return true;
-        // if (!ItemSpace(item, player)) return true;
-        if (!GeneralHelpers.CanPlayerAcceptItem(player, item)) return true;
+        if (!Player.CanAcceptItemIntoInventory(item)) return true;
+        if (!GeneralHelpers.CanPlayerAcceptItem(Player, item)) return true;
 
-        HandleItemChange(item, Actions.PickingUp, PICKUP_VOL);
+        HandleItemChange(item, Player, Actions.PickingUp, PICKUP_VOL);
 
         return true;
     }
 
-    private static void HandleItemChange(Item item, Actions action, float volume = 0.5f) {
+    static void HandleItemChange(Item item, Player player, Actions action, float volume = 0.5f) {
         if (item?.type <= 0) return;
 
         var soundType = ItemClassifier.GetSoundType(item);
@@ -64,6 +68,7 @@ public class InventorySoundsGlobalItem : GlobalItem {
         int variants = action == Actions.PickingUp ? config.PickupVariants : config.PutdownVariants;
 
         InventorySoundsHelpers.PlayUpOrDownSound(
+            player,
             config.Type,
             soundType,
             action,

@@ -56,7 +56,9 @@ public class FootstepHandler {
     public void Initialize() {
         var mod = ModContent.GetInstance<TerrariaAmbience>();
         // natural
-        Grass = new(mod, "Sounds/Custom/steps/grass/step", 8, "Grass", [.. GrassBlocks]);
+        Grass = new(mod, "Sounds/Custom/steps/grass/step", 8, "Grass", [.. GrassBlocks]) {
+            VolumeMultiplier = 0.75f
+        };
         Stone = new(mod, "Sounds/Custom/steps/stone/step", 8, "Stone", [.. StoneBlocks]);
         Snow = new(mod, "Sounds/Custom/steps/snow/step", 11, "Snow", [.. SnowBlocks]);
         Wet = new(mod, "Sounds/Custom/steps/wet/step", 3, "Wet", 0.2f, 0.4f) {
@@ -416,6 +418,7 @@ public class FootstepHandler {
         TileID.Ebonwood,
         TileID.Pearlwood,
         TileID.Shadewood,
+        TileID.RichMahogany,
         TileID.BlueDynastyShingles,
         TileID.RedDynastyShingles
     ];
@@ -423,7 +426,8 @@ public class FootstepHandler {
     [
         // mods can add their tiles here. by default blocks that are not registered will not play a sound now.
         TileID.LivingWood,
-        TileID.DynastyWood
+        TileID.DynastyWood,
+        TileID.LivingMahogany,
     ];
     public static List<int> DeckWood { get; private set; } =
     [

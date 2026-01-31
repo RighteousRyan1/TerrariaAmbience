@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using TerrariaAmbience.Common;
 using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
@@ -28,7 +29,7 @@ public enum WorldLayer {
     Underworld
 }
 public class SoundFilterSystem : ModSystem {
-    public static Vector2 ScreenListeningPosition => Main.screenPosition + Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
+    public static Vector2 ScreenListeningPosition;
     public static FilterParams LatestParams { get; set; }
 
     internal readonly static HashSet<int> lowReverbWalls = [];
@@ -43,13 +44,44 @@ public class SoundFilterSystem : ModSystem {
     readonly static HashSet<string> _noReverbNames = [
         "silt", "slush", "grass", "mud", "clay",
         "grass", "leaf", "leaves", "flower", "vine", "moss",
-        "snow", "ash", "fence", "hive", "mushroom", "dirt"
+        "snow", "ash", "fence", "hive", "mushroom", "dirt", "jungle", "cloud",
+
+        // the depths
+        "shale",
+
+        // calamity
+
+        // thorium
+
+        // spooky
+        "carpet", // but maybe more than just spooky?
+
+        // spirit
+        "reach",
+
+        // confection
+        "cookie", 
+        // why is it "block" and not "snow" or "dirt"? come on
+        "creamblock", "cookieblock", "creamwall",
+        "floss"
     ];
     readonly static HashSet<string> _lowReverbNames = [
         "sand", "slush", "glass", "mud",
 
         "sand", "silt", "dirt", "plank", "bamboo", "glass",
-        "ice", "tin", "wood", "door"
+        "ice", "tin", "wood", "door",
+
+        // the depths
+
+        // calamity
+
+        // thorium
+
+        // spooky
+        "window", // but maybe more than just spooky?
+
+        // spirit
+        "reach"
     ];
     readonly static HashSet<string> _medReverbNames = [
         "plank", "shingle", 
@@ -87,26 +119,13 @@ public class SoundFilterSystem : ModSystem {
     public override void PostUpdateEverything() {
         if (Main.soundVolume == 0) return;
 
-        var time = ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
+        ScreenListeningPosition = Main.screenPosition + Vector2.Transform(new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f - 5f), Main.GameViewMatrix.TransformationMatrix);
 
-        if (Main.GameUpdateCount % time != 0) return;
-        // UpdateReverbParams();
-        LatestParams = GenerateAudioFilters(FloodFillSystem.PlayerRoom);
+        UpdateReverbParams();
     }
     public static void UpdateReverbParams() {
-        /*while (true) {
-            Thread.Sleep((int)Main.instance.gameTime.ElapsedGameTime.TotalMilliseconds);
-
-            if (Main.gameMenu) continue;
-
-            var time = (uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
-            if (Main.GameUpdateCount % time != 0) continue;
-
-            LatestParams = GenerateAudioFilters(FloodFillSystem.PlayerRoom);
-        }*/
-
-        /*var time = (uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
-        if (Main.GameUpdateCount % time != 0) return;*/
+        var time = (uint)ModContent.GetInstance<AudioConfig>().audioFiltersRefreshTime;
+        if (Main.GameUpdateCount % time != 0) return;
 
         LatestParams = GenerateAudioFilters(FloodFillSystem.PlayerRoom);
     }
@@ -114,7 +133,6 @@ public class SoundFilterSystem : ModSystem {
     // compute reverb properties after all mods have loaded their content
     public override void PostAddRecipes() {
         PrecomputeReverbProperties();
-        // FiltersThread.Start();
     }
     public static void PrecomputeReverbProperties() {
         noReverbTiles.Clear();
@@ -287,7 +305,7 @@ public class SoundFilterSystem : ModSystem {
             if (IsPathBlocked(listenerCoords, tilePos)) return;
         }
 
-        // Update Counts
+        // update counts
         if (wasTile) counts.Tiles++;
         else if (wasWall) counts.Walls++;
         else if (wl == WorldLayer.Cavern || wl == WorldLayer.Dirt) counts.Walls += 0.5f;
@@ -345,48 +363,37 @@ public class SoundFilterSystem : ModSystem {
     public static float CalculateLowPass(Vector2 position, Vector2 offset, out bool enabled) {
         var goalPos = ScreenListeningPosition;
 
-        /*int numBlockingTiles = 0;
-        var start = goalPos.ToTileCoordinates();
-        var end = (position + offset).ToTileCoordinates();
+        var occlusionFactor = 50f;
 
-        if (!WorldGen.InWorld(start.X, start.Y) || !WorldGen.InWorld(end.X, end.Y)) {
-            enabled = true;
-            return 0f;
+        // experimental pathfinding approach
+        /*var start = position.ToTileCoordinates();
+        var path = new AStarPath(start, goalPos.ToTileCoordinates());
+
+        foreach (var node in path) {
+            Dust.NewDustPerfect(node.ToWorldCoordinates(), DustID.TerraBlade, Vector2.Zero);
         }
-
-        foreach (var point in new BresenhamLine(start, end)) {
-            var t = Main.tile[point.X, point.Y];
-            var ts = Main.tileSolid[t.TileType];
-            var tst = Main.tileSolidTop[t.TileType];
-            if (t.HasTile && !t.IsActuated && ts && !tst) {
-                numBlockingTiles++;
-            }
-        }
-
-        float curve = 1f;
-
-        if (numBlockingTiles > 0) {
-            float dist = Vector2.Distance(goalPos, position + offset);
-            float normalized = Math.Clamp(dist / 2000f, 0f, 1f);
-            float p = 0.25f;
-            curve = 1f - MathF.Pow(normalized, p);
-        }
-
         enabled = true;
-        var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
+        var inv = Utils.GetLerpValue(0, 2000, path.Distance, true);
+        if (!path.Found) {
+            occlusionFactor = 2;
+            goto tileline;
+        }
 
-        return occlusion * curve;*/
-
-        // old non-bresenham impl
-        // mult by 2 since 2 feet per block
+        if (path.Distance < 32) return inv;
+        Main.NewText(path.Distance + ", " + (1f - inv));
+        return 1f - inv;
+    // old non-bresenham impl
+    // mult by 2 since 2 feet per block
+    tileline:*/
         int numBlockingTiles = 0;
         TileLine(goalPos.ToTileCoordinates(),
             (position + offset).ToTileCoordinates(),
             (x, y, t) => {
                 var ts = Main.tileSolid[t.TileType];
                 var tst = Main.tileSolidTop[t.TileType];
-                if (t.HasTile && !t.IsActuated && ts && !tst)
+                if (t.HasTile && !t.IsActuated && ts && !tst) {
                     numBlockingTiles++;
+                }
 
                 return false;
             });
@@ -402,56 +409,66 @@ public class SoundFilterSystem : ModSystem {
         }
 
         enabled = true;
-        var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / 50f, 0.75f), 0f);
+        var occlusion = Math.Max(1f - MathF.Pow(numBlockingTiles / occlusionFactor, 0.75f), 0f);
         // Debug.WriteLine($"{numBlockingTiles} - {occlusion}, {curve}");
 
         return occlusion * curve;
     }
 
     public static Reflectivity CalculateAcousticReflectivity(Point tilePos, out bool wasTile, out bool wasWall, out WorldLayer wl) {
-        var thisTile = Framing.GetTileSafely(tilePos);
-        int wall = thisTile.WallType, tile = thisTile.TileType;
-        wasTile = wasWall = false;
+        wasTile = false;
+        wasWall = false;
+
+        Tile t = Framing.GetTileSafely(tilePos);
+        int type = t.TileType;
+        int wall = t.WallType;
+        bool hasTile = t.HasTile;
 
         var wlRef = CalculateReverbForWorldLayer(tilePos, out wl);
 
-        if (tile > 0) {
-            var isLowReverb = lowReverbTiles.Contains(tile);
-            var isMedReverb = medReverbTiles.Contains(tile);
-            var isHighReverb = !isLowReverb && !isMedReverb && !noReverbTiles.Contains(tile);
-            var isInvalidTile = !Main.tileSolid[tile] || Main.tileSolidTop[tile];
+        // has a tile, it's solid, and isn't only solid on the top
+        bool isValidSolid = hasTile && Main.tileSolid[type] && !Main.tileSolidTop[type];
 
-            if (isInvalidTile && wall > 0) {
-                wasWall = true;
-                return CalculateWall(wall);
-            }
-
+        if (isValidSolid) {
             wasTile = true;
 
-            if (isInvalidTile)
-                return wlRef;
+            // do by priority
+            var refl = Reflectivity.High;
 
-            var rev = Reflectivity.None;
+            if (lowReverbTiles.Contains(type))
+                refl = Reflectivity.Low;
+            else if (medReverbTiles.Contains(type))
+                refl = Reflectivity.Medium;
+            else if (noReverbTiles.Contains(type))
+                refl = Reflectivity.None;
 
-            if (isHighReverb)
-                rev = Reflectivity.High;
-            else if (isMedReverb)
-                rev = Reflectivity.Medium;
-            else if (lowReverbTiles.Contains(tile))
-                rev = Reflectivity.Low;
+            // strange but decent way of reducing reflectivity of actuated tiles
+            if (t.IsActuated) {
+                refl = (Reflectivity)Math.Max((int)refl - 1, 0);
+            }
 
-            if (thisTile.IsActuated)
-                rev = (Reflectivity)Math.Max((int)(rev - 1), 0);
-            return rev;
+            return refl;
         }
-        else if (wall > 0) {
+
+        // check walls if there is no tile
+        if (wall > 0) {
             wasWall = true;
             return CalculateWall(wall);
         }
-        // if we're underground the background is present and it can "count" as a surface
-        else if (wall == 0 && tile == 0) {
+
+        // if not on surface and is an air tile, it's a "tile"
+        // because the background looks like stone!
+        if (hasTile || wl != WorldLayer.Surface) {
+            wasTile = true;
             return wlRef;
         }
+
+        // surface edgecase
+        // even if HasTile is false, TileType might not be 0. relogic why
+        if (type == 0) {
+            return wlRef;
+        }
+
         return Reflectivity.None;
     }
 
@@ -492,21 +509,6 @@ public class SoundFilterSystem : ModSystem {
     /// <param name="end">The end point.</param>
     /// <param name="touchCallback">Return true within the callback to break out of the line.</param>
     public static void TileLine(Point start, Point end, TileTouchCallback touchCallback = null) {
-        // bresenham just sucks balls?
-        /*if (!WorldGen.InWorld(start.X, start.Y) || !WorldGen.InWorld(end.X, end.Y)) return;
-
-        for (BresenhamLine line = new BresenhamLine(start, end); line.MoveNext();) {
-            var p = line.Current;
-
-            // guard again in-case Bresenham produced out-of-world (defensive)
-            if (!WorldGen.InWorld(p.X, p.Y)) break;
-
-            Tile tile = Main.tile[p.X, p.Y];
-            bool? shouldBreak = touchCallback?.Invoke(p.X, p.Y, tile);
-            if (shouldBreak == true) break;
-        }
-        return;*/
-
         int x0 = start.X;
         int y0 = start.Y;
         int x1 = end.X;
@@ -544,57 +546,4 @@ public class SoundFilterSystem : ModSystem {
     }
 
     public delegate bool TileTouchCallback(int tilePosX, int tilePosY, Tile tile);
-}
-// Bresenham Line impl by Mirsario
-public ref struct BresenhamLine {
-    readonly int shortest;
-    readonly int longest;
-    readonly Point stepA;
-    readonly Point stepB;
-    int i;
-    int numerator;
-
-    public Point Current { get; private set; }
-
-    public BresenhamLine(Point start, Point end) {
-        int width = end.X - start.X;
-        int height = end.Y - start.Y;
-
-        stepA = new Point(Math.Sign(width), Math.Sign(height));
-        stepB = new Point(Math.Sign(width), 0);
-        longest = Math.Abs(width);
-        shortest = Math.Abs(height);
-
-        if (longest <= shortest) {
-            longest = Math.Abs(height);
-            shortest = Math.Abs(width);
-
-            stepB.X = 0;
-            stepB.Y = Math.Sign(height);
-        }
-
-        i = -1;
-        numerator = longest >> 1;
-        Current = start;
-    }
-
-    public bool MoveNext() {
-        if (i++ > longest) {
-            return false;
-        }
-
-        numerator += shortest;
-
-        if (!(numerator < longest)) {
-            numerator -= longest;
-            Current += stepA;
-        }
-        else {
-            Current += stepB;
-        }
-
-        return true;
-    }
-
-    public readonly BresenhamLine GetEnumerator() => this;
 }

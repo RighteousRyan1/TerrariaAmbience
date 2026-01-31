@@ -12,8 +12,8 @@ public static class FilterHelpers {
     static bool showWarnings => ModContent.GetInstance<AmbientConfig>().showInfoAndWarnings;
     public const string FILTER_ISSUE_WARNING = "Error applying sound filter for {0}. Check the pins in the [c/FFFF00:#bug-reports] channel in the [c/5865F2:Discord] server in the top left of the main menu.";
     public const string FILTER_SAVED_GAME = "Recovered from fatal error in {0}. If you are seeing this message, please report this in our [c/5865F2:Discord] server in the top left of the main menu.";
-    public static SoundEffectInstance ApplyReverb(this SoundEffectInstance instance, float gain, FilterParams param = default) {
-        if (gain < 0) {
+    public static SoundEffectInstance ApplyReverb(this SoundEffectInstance instance, FilterParams param = default) {
+        if (param.ReverbGain < 0) {
             if (showWarnings)
                 Main.NewText(string.Format(FILTER_SAVED_GAME, "Reverb"));
             return instance;
@@ -22,7 +22,7 @@ public static class FilterHelpers {
         try {
             FAudioReverbController.RvInit();
 
-            FAudioReverbController.ApplyCustomReverb(instance, gain, param);
+            FAudioReverbController.ApplyCustomReverb(instance, param.ReverbGain, param);
 
             return instance;
         }
@@ -31,6 +31,16 @@ public static class FilterHelpers {
                 Main.NewText(string.Format(FILTER_ISSUE_WARNING, "Reverb"), Color.Red);
             return instance;
         }
+    }
+    public static SoundEffectInstance ApplyFiltersQuick(this SoundEffectInstance instance, FilterParams param) {
+        if (param.ReverbGain > 0)
+            instance.ApplyReverb(param);
+        if (param.LowPassEnabled)
+            instance.ApplyLowPassFilter(param.LowPassIntensity);
+        if (param.BandPassEnabled)
+            instance.ApplyBandPassFilter(param.BandPassIntensity);
+
+        return instance;
     }
     public static SoundEffectInstance ApplyLowPassFilter(this SoundEffectInstance instance, float cutoff) {
         if (cutoff < 0) {

@@ -3,16 +3,14 @@ using Microsoft.Xna.Framework.Audio;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using TerrariaAmbience.Common.Enums;
+using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Core;
 using TerrariaAmbience.Helpers;
-using Terraria.Audio;
-using TerrariaAmbience.Common.Enums;
-using System.Linq;
 using TerrariaAmbience.Sounds.SoundFilters;
-using System.Diagnostics;
-using TerrariaAmbience.Common.Systems;
 
 namespace TerrariaAmbience.Content.Players;
 
