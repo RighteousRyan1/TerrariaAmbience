@@ -60,6 +60,10 @@ public class AmbientPlayer : ModPlayer {
         SyncAmbienceSystem.AskForAmbiences();
     }
     public override void PreUpdate() {
+        //if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.NumPad5) && Main.oldKeyState.IsKeyUp(Microsoft.Xna.Framework.Input.Keys.NumPad5)) {
+        //    NPC.NewNPC(null, (int) Player.position.X - 1000, (int) Player.position.Y, NPCID.DukeFishron);
+        //}
+
         if (Main.soundVolume == 0) return;
 
         var genCfg = ModContent.GetInstance<FootstepsConfig>();
@@ -145,24 +149,21 @@ public class AmbientPlayer : ModPlayer {
         }
     }
     public override void PostUpdate() {
+        HandleIceScraping();
+
+        UpdateLocalPlayer();
+    }
+    public void UpdateLocalPlayer() {
         if (Player.whoAmI != Main.myPlayer)
             return;
 
-        var audioCfg = ModContent.GetInstance<AudioConfig>();
-
         // 1f - the final value is the lowest value this can achieve, i.e: 0.8f maps to 0.2f lowest
         float desired = 1f - FloodFillSystem.PlayerRoom.PercentEnclosed * 0.85f;
-
         _multInternal = GeneralHelpers.RoughStep(_multInternal, desired, 0.02f);
 
-        HandleIceScraping();
+        float crackleVolume, cracklePan = 0f;
 
-        // why is this shit here
-        if (!TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.IsPlaying())
-            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Play();
-
-        crackleVolume = 0f;
-
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
         // this is my fix
         if (audioCfg.campfireSounds) {
             var campfires = CampfireDetection.GetNearbyCampfires(Player.Center, 50);
@@ -193,14 +194,11 @@ public class AmbientPlayer : ModPlayer {
             crackleVolume = MathHelper.Clamp(1f - campDist / maxDist * campfireVolumeScalar, 0, 1);
 
             TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = crackleVolume;
+
+            // pan does not currently work since it's stereo instead of mono
             TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Pan = cracklePan;
         }
-        else {
-            TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
-        }
     }
-    public static float crackleVolume;
-    public static float cracklePan;
     /// <summary>
     /// Gets distance from surface of water to the player.
     /// </summary>
@@ -343,7 +341,7 @@ public class AmbientPlayer : ModPlayer {
     }
 
     public void HandleIceScraping() {
-        if (Player.whoAmI != Main.myPlayer) return;
+        // if (Player.whoAmI != Main.myPlayer) return;
         // ^ eventually add support for hearing other people
         if (!Main.dedServ) {
             if (!_areSoundsInitialized) {
@@ -374,6 +372,11 @@ public class AmbientPlayer : ModPlayer {
                 soundSlippySmoothInst.Volume -= 0.01f;
             soundSlippyRoughInst.Volume = MathHelper.Clamp(soundSlippyRoughInst.Volume, 0f, 0.5f);
             soundSlippySmoothInst.Volume = MathHelper.Clamp(soundSlippySmoothInst.Volume, 0f, 0.5f);
+
+            soundSlippyRoughInst?.ApplyReverb(SoundFilterSystem.LatestParams);
+            //soundSlippyRoughInst.ApplyLowPassFilter(SoundFilterSystem.LatestParams.LowPassIntensity);
+            soundSlippySmoothInst?.ApplyReverb(SoundFilterSystem.LatestParams);
+            //soundSlippySmoothInst.ApplyLowPassFilter(SoundFilterSystem.LatestParams.BandPassIntensity);
         }
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaAmbience.Common.Systems;
 using TerrariaAmbience.Core;
@@ -70,7 +69,6 @@ public class TileVisualizationHelpers : ModSystem {
         if (!genCfg.debugInterface || !aaCfg.advancedReverbCalculation || !aaCfg.isReverbEnabled && _visVis > 0) return;
 
         var tilePosList = FloodFillSystem.PlayerRoom.Tiles;
-
         bool isRaycastEnabled = aaCfg.reverbUsingRaycasting;
 
         // var ikd = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.L);
@@ -80,6 +78,10 @@ public class TileVisualizationHelpers : ModSystem {
             Vector2 worldCoords = tilePos.ToVector2() * 16;
 
             var reflectivity = SoundFilterSystem.CalculateAcousticReflectivity(tilePos, out bool wt, out bool ww, out var wl);
+
+            // works i guess?
+            if (wt && !Main.tileSolid[Main.tile[tilePos].TileType])
+                continue;
 
             if (isRaycastEnabled) {
                 if (SoundFilterSystem.IsPathBlocked(lpc, tilePos))
@@ -99,7 +101,7 @@ public class TileVisualizationHelpers : ModSystem {
                 case Reflectivity.None:
                     // don't display empty tiles on parts of the world without a cavern background
                     if ((ww || wt) && (wl != WorldLayer.Cavern || wl != WorldLayer.Dirt))
-                    TryAdd(worldCoords, _colorNoReverb);
+                        TryAdd(worldCoords, _colorNoReverb);
                     break;
             }
         }

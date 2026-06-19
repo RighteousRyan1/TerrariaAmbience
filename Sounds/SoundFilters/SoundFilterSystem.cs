@@ -44,7 +44,8 @@ public class SoundFilterSystem : ModSystem {
     readonly static HashSet<string> _noReverbNames = [
         "silt", "slush", "grass", "mud", "clay",
         "grass", "leaf", "leaves", "flower", "vine", "moss",
-        "snow", "ash", "fence", "hive", "mushroom", "dirt", "jungle", "cloud",
+        "snow", "ash", "fence", "hive", "mushroom", "dirt", 
+        "jungle", "cloud", "paper", "sail",
 
         // the depths
         "shale",
@@ -523,7 +524,7 @@ public class SoundFilterSystem : ModSystem {
         int err = dx - dy;
 
         while (true) {
-            if (!WorldGen.InWorld(x0, y0)) continue;
+            if (!WorldGen.InWorld(x0, y0)) break;
 
             if (x0 == x1 && y0 == y1)
                 break;

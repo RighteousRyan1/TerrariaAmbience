@@ -142,6 +142,17 @@ public partial class TerrariaAmbience : Mod {
 
         if (Main.dedServ) return;
 
+        var audioCfg = ModContent.GetInstance<AudioConfig>();
+        // why is this shit here
+        if (audioCfg.campfireSounds && !Main.gameMenu) {
+            if (!DefaultAmbientHandler?.CampfireCrackleInstance?.IsPlaying() == true)
+                DefaultAmbientHandler.CampfireCrackleInstance.Play();
+        }
+        else {
+            if (DefaultAmbientHandler?.CampfireCrackleInstance != null)
+                DefaultAmbientHandler.CampfireCrackleInstance.Volume = 0f;
+        }
+
         if (ModContent.GetInstance<AmbientConfig>().debugInterface && !Main.gameMenu) {
             MethodDetours.mouseWallOrTile = "None";
 
@@ -177,7 +188,7 @@ public partial class TerrariaAmbience : Mod {
             Main.musicVolume = MathHelper.Lerp(Main.musicVolume, foundBoss ? max : min, 0.02f * WorkaroundDeltaTime);
 
             if (Main.musicVolume - min < epsilon)
-                Main.musicVolume = 0;
+                Main.musicVolume = min;
             else if (max - Main.musicVolume < epsilon)
                 Main.musicVolume = max;
         }

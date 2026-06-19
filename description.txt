@@ -8,6 +8,8 @@ Developers:
 
 Most Recent Update:
 
+- You can now hear other players slipping and sliding on ice
+- Add WeaponOut support (if WeaponOut is enabled, you can hear other players switch items)
 - Support for 'The Depths' and 'The Confection'
 - Some performance optimizations
 - Fixed very unusual Russian (and maybe more) localization issue (thank you @tipssi on steam for the idea)
