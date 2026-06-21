@@ -539,7 +539,7 @@ public class SoundFilterSystem : ModSystem {
                 y0 += sy;
             }
 
-            Tile tile = Main.tile[x0, y0];
+            Tile tile = Framing.GetTileSafely(x0, y0);
 
             bool? cb = touchCallback?.Invoke(x0, y0, tile);
             if (cb == true) break;
