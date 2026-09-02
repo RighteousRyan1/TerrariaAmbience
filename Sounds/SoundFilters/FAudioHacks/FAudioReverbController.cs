@@ -15,19 +15,19 @@ public class FAudioReverbController {
         PositionRight = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION,
         PositionMatrixLeft = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION_MATRIX,
         PositionMatrixRight = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION_MATRIX,
-        EarlyDiffusion = 15,
-        LateDiffusion = 15,
-        LowEQGain = 8,
-        LowEQCutoff = 4,
-        HighEQGain = 8,
-        HighEQCutoff = 6,
-        RoomFilterFreq = 5000f,
-        RoomFilterMain = -10f,
-        RoomFilterHF = -1f,
-        ReflectionsGain = -26.0200005f,
-        ReverbGain = 10.0f,
+        EarlyDiffusion = FAudio.FAUDIOFX_REVERB_DEFAULT_EARLY_DIFFUSION, // 15?
+        LateDiffusion = FAudio.FAUDIOFX_REVERB_DEFAULT_LATE_DIFFUSION, // also 15?
+        LowEQGain = FAudio.FAUDIOFX_REVERB_DEFAULT_LOW_EQ_GAIN,
+        LowEQCutoff = FAudio.FAUDIOFX_REVERB_DEFAULT_LOW_EQ_CUTOFF,
+        HighEQGain = FAudio.FAUDIOFX_REVERB_DEFAULT_HIGH_EQ_GAIN,
+        HighEQCutoff = FAudio.FAUDIOFX_REVERB_DEFAULT_HIGH_EQ_CUTOFF, // 6?
+        RoomFilterFreq = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_FILTER_FREQ,
+        RoomFilterMain = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_FILTER_MAIN, // -10?
+        RoomFilterHF = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_FILTER_HF, // -1?
+        ReflectionsGain = FAudio.FAUDIOFX_REVERB_DEFAULT_REFLECTIONS_GAIN, // -26.02?
+        ReverbGain = 10.0f, // FAudio.FAUDIOFX_REVERB_DEFAULT_REVERB_GAIN,
         DecayTime = 1.49000001f,
-        Density = 100.0f,
+        Density = FAudio.FAUDIOFX_REVERB_DEFAULT_DENSITY,
         RoomSize = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_SIZE
     };
 
@@ -64,8 +64,7 @@ public class FAudioReverbController {
 
         var device = SoundEffect.Device();
 
-        IntPtr reverb;
-        FAudio.FAudioCreateReverb(out reverb, 0);
+        FAudio.FAudioCreateReverb(out nint reverb, 0);
 
         IntPtr chainPtr;
         chainPtr = FNAPlatform.Malloc(MarshalHelper.SizeOf<FAudio.FAudioEffectChain>());
