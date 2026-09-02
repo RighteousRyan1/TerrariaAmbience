@@ -5,8 +5,7 @@ using System;
 namespace TerrariaAmbience.Sounds.SoundFilters.FAudioHacks; 
 
 public class FAudioReverbController {
-
-    public static readonly FAudio.FAudioFXReverbParameters DefaultFAudioReverb = new() {
+    public static FAudio.FAudioFXReverbParameters DefaultFAudioReverb = new() {
         WetDryMix = 100f,
         ReflectionsDelay = 7,
         ReverbDelay = 11,
@@ -15,19 +14,19 @@ public class FAudioReverbController {
         PositionRight = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION,
         PositionMatrixLeft = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION_MATRIX,
         PositionMatrixRight = FAudio.FAUDIOFX_REVERB_DEFAULT_POSITION_MATRIX,
-        EarlyDiffusion = FAudio.FAUDIOFX_REVERB_DEFAULT_EARLY_DIFFUSION, // 15?
-        LateDiffusion = FAudio.FAUDIOFX_REVERB_DEFAULT_LATE_DIFFUSION, // also 15?
-        LowEQGain = FAudio.FAUDIOFX_REVERB_DEFAULT_LOW_EQ_GAIN,
-        LowEQCutoff = FAudio.FAUDIOFX_REVERB_DEFAULT_LOW_EQ_CUTOFF,
-        HighEQGain = FAudio.FAUDIOFX_REVERB_DEFAULT_HIGH_EQ_GAIN,
-        HighEQCutoff = FAudio.FAUDIOFX_REVERB_DEFAULT_HIGH_EQ_CUTOFF, // 6?
-        RoomFilterFreq = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_FILTER_FREQ,
-        RoomFilterMain = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_FILTER_MAIN, // -10?
-        RoomFilterHF = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_FILTER_HF, // -1?
-        ReflectionsGain = FAudio.FAUDIOFX_REVERB_DEFAULT_REFLECTIONS_GAIN, // -26.02?
-        ReverbGain = 10.0f, // FAudio.FAUDIOFX_REVERB_DEFAULT_REVERB_GAIN,
+        EarlyDiffusion = 15,
+        LateDiffusion = 15,
+        LowEQGain = 8,
+        LowEQCutoff = 4,
+        HighEQGain = 8,
+        HighEQCutoff = 6,
+        RoomFilterFreq = 5000f,
+        RoomFilterMain = -10f,
+        RoomFilterHF = -1f,
+        ReflectionsGain = -26.0200005f,
+        ReverbGain = 10.0f,
         DecayTime = 1.49000001f,
-        Density = FAudio.FAUDIOFX_REVERB_DEFAULT_DENSITY,
+        Density = 100.0f,
         RoomSize = FAudio.FAUDIOFX_REVERB_DEFAULT_ROOM_SIZE
     };
 

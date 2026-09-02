@@ -22,17 +22,19 @@ public class FilterHooks : ModSystem
 	public static List<ActiveSound> dynamicSfxActiveSounds = [];
 	// public static List<Vector2> dynamicSfxPrevPos = [];
 
-	static List<float> _oldLowPasses = [];
+	static readonly List<float> _oldLowPasses = [];
 	public override void PreSaveAndQuit() {
 		TerrariaAmbience.DefaultAmbientHandler.CampfireCrackleInstance.Stop();
 	}
 	public override void Load() {
 		On_ActiveSound.Play += ActiveSound_Play;
-        IL_Player.ScrollHotbar += On_Player_ScrollHotbar;
+        // IL_Player.ScrollHotbar += On_Player_ScrollHotbar;
+        // IL_Main.DoScrollingInInventory += IL_Main_DoScrollingInInventory;
+        IL_Player.SelectedItemState.Select += SelectedItemState_Select;
         //IL_ActiveSound.Play += IL_ActiveSound_Play;
 	}
 
-    void On_Player_ScrollHotbar(ILContext il) {
+    private void SelectedItemState_Select(ILContext il) {
         ILCursor c = new(il);
 
         // more than 1 call, so loop

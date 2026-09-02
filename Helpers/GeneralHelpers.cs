@@ -94,7 +94,7 @@ public class GeneralHelpers {
         return volumeFromVector;
     }
 
-    public static bool CanPlayerAcceptItem(Player player, Item item) {
+    public static bool CanPlayerAcceptItem(Player player, WorldItem item) {
         for (int i = 0; i < player.inventory.Length; i++) {
             var invItem = player.inventory[i];
 

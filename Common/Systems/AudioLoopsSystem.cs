@@ -36,8 +36,8 @@ public class AudioLoopsSystem : ModSystem
         owls[3] = new PositionalAudio2D(GeneralHelpers.GetAssetValue<SoundEffect>(Mod, "Sounds/Custom/variousanimals/multipleowls"), (1, 1), 1f).WithName("CooCooOwl");
         owls[3].MaxVolume = 0.25f;
     }
-    private static int _attempts; // make private lol
-    private static string _reason;
+    static int _attempts; // make private lol
+    //static string _reason;
     private static Vector2 RandomPosNearPlayer {
         get {
             var player = Main.LocalPlayer;
@@ -51,20 +51,20 @@ public class AudioLoopsSystem : ModSystem
             }
             if (Collision.SolidCollision(pos, 1, 1))
             {
-                _reason = "TileSolid";
+                //_reason = "TileSolid";
                 goto Retry;
             }
 
             if (!Collision.SolidCollision(pos + new Vector2(0, 16), 1, 1))
             {
-                _reason = "TileUnderNotSolid";
+                //_reason = "TileUnderNotSolid";
                 goto Retry;
             }
 
             var landingTile = Main.tile[(int)pos.X / 16, (int)pos.Y / 16 + 1];
             if (!FootstepHandler.GrassBlocks.Contains(landingTile.TileType) && !FootstepHandler.DirtBlocks.Contains(landingTile.TileType))
             {
-                _reason = "IsNotGrassOrDirt";
+                //_reason = "IsNotGrassOrDirt";
                 goto Retry;
             }
             _attempts = 0;

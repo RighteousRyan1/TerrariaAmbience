@@ -105,7 +105,7 @@ internal class MethodDetours {
                 position: drawPos,
                 Color.LightGray, 0f,
                 origin: Vector2.Zero,
-                baseScale: new Vector2(0.225f), -1, 1);
+                new Vector2(0.225f), -1, 1);
         }
         if (viewMode >= 1) {
             bool isVanillaTile = TileID.Search.TryGetName(PlayerTileChecker.TileId, out string name);
@@ -145,7 +145,7 @@ internal class MethodDetours {
                 Color.LightGray,
                 0f,
                 origin: Vector2.Zero,
-                baseScale: new Vector2(0.225f),
+                new Vector2(0.225f),
                 -1,
                 1);
 
@@ -166,7 +166,7 @@ internal class MethodDetours {
             position: infoPos,
             Color.LightGray, 0f,
             origin: new Vector2(measure.X / 2, 0),
-            baseScale: new Vector2(scale), -1, 1);
+            new Vector2(scale), -1, 1);
         #endregion
 
         #region DrawDebuggingKeybinds
@@ -331,6 +331,9 @@ internal class MethodDetours {
         string viewPost = "Visit the Terraria Ambience";
         string server = $"Discord Server";
 
+        Main.spriteBatch.Begin(default, BlendState.AlphaBlend, SamplerState.LinearClamp,
+            DepthStencilState.Default, RasterizerState.CullNone, null, transformMatrix: Main.UIScaleMatrix);
+
         var click2Activate = new Rectangle((int)posX + 330, (int)posY, 12, 20);
         if (Main.menuMode == 0 && AmbientDisplaySystem.Arrow is not null) {
             Main.spriteBatch.SafeDraw(AmbientDisplaySystem.Arrow,
@@ -393,6 +396,9 @@ internal class MethodDetours {
         }
 
         GeneralHelpers.MSOld = GeneralHelpers.MSNew;
+
+        Main.spriteBatch.End();
+
         orig(self, gameTime);
         //Main.spriteBatch.End();
     }

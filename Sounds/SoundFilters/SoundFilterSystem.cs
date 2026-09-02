@@ -484,7 +484,8 @@ public class SoundFilterSystem : ModSystem {
         // this is because it's primarily rock in the background
         else if (tilePos.Y >= Main.rockLayer && tilePos.Y < Main.maxTilesY - 200) {
             wl = WorldLayer.Cavern;
-            return Reflectivity.High;
+            // medium vs high dilemma
+            return Reflectivity.Medium;
         }
 
         wl = tilePos.Y < Main.worldSurface ? WorldLayer.Surface : WorldLayer.Underworld;

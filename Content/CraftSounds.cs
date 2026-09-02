@@ -124,7 +124,7 @@ public class CraftSounds : GlobalItem {
         var player = Main.LocalPlayer;
         var aPlayer = player.GetModPlayer<AmbientPlayer>();
         // var pket = mod.GetPacket();
-        var wasValidStation = AllCategories.Any(x => x.Intersect(recipe.requiredTile).Any());
+        var wasValidStation = AllCategories.Any(x => x.Contains(recipe.requiredTile));
         TimeSinceLastCraft = 0;
         
         // a second is probably acceptable.
@@ -135,7 +135,7 @@ public class CraftSounds : GlobalItem {
                 var volScale = audioCfg.craftingSoundsVolume;
                 var dir = string.Empty;
 
-                var pair = CategoryToDir.FirstOrDefault(x => x.Key.Intersect(recipe.requiredTile).Any());
+                var pair = CategoryToDir.FirstOrDefault(x => x.Key.Contains(recipe.requiredTile));
 
                 if (CategoryToDir.TryGetValue(pair.Key, out string value)) {
                     dir = value;

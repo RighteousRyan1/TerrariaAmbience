@@ -47,14 +47,14 @@ public class InventorySoundsPlayer : ModPlayer {
 
         _prevItem = Main.mouseItem;
     }
-    public override bool OnPickup(Item item) {
+    public override bool OnPickup(WorldItem item) {
         if (!Config.enabledDynamicSoundsSystem) return true;
         if (Player.whoAmI != Main.myPlayer) return true;
         // literally just an encumbering stone check. whatever. still works i guess
         if (!Player.CanAcceptItemIntoInventory(item)) return true;
         if (!GeneralHelpers.CanPlayerAcceptItem(Player, item)) return true;
 
-        HandleItemChange(item, Player, Actions.PickingUp, PICKUP_VOL);
+        HandleItemChange(item.inner, Player, Actions.PickingUp, PICKUP_VOL);
 
         return true;
     }
